@@ -1,13 +1,12 @@
 import Link from 'next/link'
 import Title from '../components/common/Title'
-import styles from '../styles/pages/shared/404.module.scss'
 
 const Custom404 = () => {
   return (
     <>
       <Title title="Page Stolen 😳" />
       <main>
-        <div className={styles.error_page}>
+        <div className="text-center flex w-full h-screen items-center justify-center">
           <h1>Page not found ¯\(°_o)/¯</h1>
           <Link href={'/'}>
             <button>Back to Home</button>
