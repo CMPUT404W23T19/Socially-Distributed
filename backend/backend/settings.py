@@ -99,6 +99,7 @@ INSTALLED_APPS = [
     # apps
     'app',
     'common',
+    'posts',
 ]
 
 MIDDLEWARE = [
