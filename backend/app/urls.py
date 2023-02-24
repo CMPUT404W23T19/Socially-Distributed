@@ -1,8 +1,10 @@
-from django.urls import path
-
-from . import views
+from django.urls import path, include
+from .views import AuthorListCreateView, AuthorDetailView
 
 app_name = 'app'
+
 urlpatterns = [
-    path('', views.test),
+    # gets all user profiles and create a new profile
+    path("authors",AuthorListCreateView.as_view(),name="authors"),
+    path("authors/<int:pk>",AuthorDetailView.as_view(),name="author"),
 ]
