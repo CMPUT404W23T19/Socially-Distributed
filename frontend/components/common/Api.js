@@ -64,3 +64,20 @@ export const patch = (uri, data) => {
 
   return axios.patch(host + uri, data, { headers })
 }
+
+
+export function getApiData(apiUrl) {
+  return fetch(apiUrl)
+    .then(response => {
+      if (response.ok) {
+        return response.json(); // Parse the response JSON
+      } else {
+        console.log("Error making API request:", response.status);
+        return null;
+      }
+    })
+    .catch(error => {
+      console.log("Error making API request:", error);
+      return null;
+    });
+}
