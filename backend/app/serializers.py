@@ -10,4 +10,5 @@ class FollowerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
         fields = ('followers')
+
         

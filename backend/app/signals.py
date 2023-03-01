@@ -7,4 +7,9 @@ from .models import Author
 @receiver(post_save, sender=User)
 def create_author(sender, instance, created, **kwargs):
     if created:
-        Author.objects.create(user=instance, id="http://127.0.0.1:8000/authors/"+instance.id, url="http://127.0.0.1:8000/authors/"+instance.id, type="author", display_name=instance.username, host="http://127.0.0.1:8000")
+        print("created")
+        id_arg = "http://127.0.0.1:8000/authors/"+str(instance.id)
+        url_arg = "http://127.0.0.1:8000/authors/"+str(instance.id)
+        host_arg = "http://127.0.0.1:8000"
+        Author.objects.create(user=instance, id=id_arg, url=url_arg, display_name=instance.username, host=host_arg)
+

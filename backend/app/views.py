@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from common.logging.logging_service import Logger
 from common.email.email_service import send_email
 from .models import Author
+from posts.models import Post
 # from .permission import IsOwnerProfileOrReadOnly
 from .serializers import AuthorSerializer, FollowerSerializer
 from rest_framework import status
@@ -58,3 +59,4 @@ class FollowerList(ListAPIView):
         author_id=self.kwargs['author_id']
         author=Author.objects.get(id=author_id)
         return author.followers.all()
+
