@@ -88,6 +88,7 @@ INSTALLED_APPS = [
     'debreach',
     "corsheaders",
     'rest_framework',
+    'drf_yasg', # swagger
 
     # apps
     'app',

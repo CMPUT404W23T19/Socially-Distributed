@@ -9,6 +9,6 @@ class AuthorSerializer(serializers.ModelSerializer):
 class FollowerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
-        fields = ('followers')
+        fields = ('followers',)
 
         
