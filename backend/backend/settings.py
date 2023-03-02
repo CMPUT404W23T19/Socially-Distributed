@@ -45,14 +45,7 @@ CORS_ORIGIN_WHITELIST = [
 
 # get db from the other docker container running psql
 DATABASES = {
-    "default": {
-        'ENGINE': os.environ.get('DB_ENGINE'),
-        'NAME': os.environ.get('POSTGRES_NAME'),
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT'),
-    },
+    "default": config("DATABASE_URL", cast=db_url),
 }
 
 SERVER_EMAIL = "hello@example.com"
@@ -95,6 +88,7 @@ INSTALLED_APPS = [
     'debreach',
     "corsheaders",
     'rest_framework',
+    'drf_yasg', # swagger
 
     # apps
     'app',
