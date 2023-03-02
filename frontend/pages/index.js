@@ -78,114 +78,13 @@ export default function LoginForm() {
     }
   }
 
-}
-  export default function SignUpForm() {
-    const [emailId, setEmailId] = useState('')
-    const [password, setPassword] = useState('')
-    const [confirmPassword, setConfirmPassword] = useState('')
-    const [emailError, setEmailError] = useState('')
-    const [passwordError, setPasswordError] = useState('')
-    const [confirmPasswordError, setConfirmPasswordError] = useState('')
-    const router = useRouter()
-    let validCheck = false
-  
-    const handleEmailChange = useCallback((event) => {
-      setEmailError('')
-      setEmailId(event.target.value)
-    }, [])
-  
-    const handlePasswordChange = useCallback((event) => {
-      setPasswordError('')
-      setPassword(event.target.value)
-    }, [])
-  
-    const handleConfirmPasswordChange = useCallback((event) => {
-      setConfirmPasswordError('')
-      setConfirmPassword(event.target.value)
-    }, [])
-  
-    const handleSignUp = useCallback(
-      async (e) => {
-        e.preventDefault()
-        const isEmailEmpty = emailId.length === 0
-        const isPasswordEmpty = password.length === 0
-        const isConfirmPasswordEmpty = confirmPassword.length === 0
-        validCheck = true
-  
-        if (isEmailEmpty) {
-          setEmailError('Email can not be empty.')
-          validCheck = false
-        }
-        if (isPasswordEmpty) {
-          setPasswordError('Password can not be empty.')
-          validCheck = false
-        }
-        if (isConfirmPasswordEmpty) {
-          setConfirmPasswordError('Confirm password can not be empty.')
-          validCheck = false
-        }
-        if (password !== confirmPassword) {
-          setPasswordError('Passwords do not match.')
-          setConfirmPasswordError('Passwords do not match.')
-          validCheck = false
-        }
-        if (password.length < 8){
-          setPasswordError('Password length must be at least 8 characters.')
-          validCheck = false
-        }
-        if (validCheck) {
-          sendData(e)
-        }
-      },
-      [emailId, password, confirmPassword, emailError, passwordError, confirmPasswordError]
-    )
-  
-    function sendData(e) {
-      if (validCheck) {
-        post('auth/users/', e.target)
-          .then((res) => {
-            setAccessToken(res.access)
-            setRefreshToken(res.refresh)
-            router.push('/profile')
-          })
-          .catch((e) => {
-            const errorMessage = e.message
-            setEmailError('Email already exists.')
-            console.error(errorMessage)
-          })
-        validCheck = true
-      }
-    }
-  
-  }
-
   return (
     <div className="bg-grey min-h-screen flex flex-col bg-no-repeat bg-cover">
       <div className="container max-w-sm mx-auto flex-1 flex flex-col items-center justify-center px-2">
         <div className="bg-grey px-6 py-8 rounded-xl shadow-md text-black w-full ">
-          <form onSubmit={isSignup ? handleSignUp : handleLogin}>
-            <h1 className="mb-8 text-3xl text-center">{isSignup ? 'Sign up' : 'Login'}</h1>
-  
-            {isSignup && (
-              <>
-                <FormField
-                  type="text"
-                  name="firstName"
-                  action={handleFirstNameChange}
-                  placeholder="First Name"
-                />
-                <ErrorMessage error={firstNameError} />
-  
-                <FormField
-                  type="text"
-                  name="lastName"
-                  action={handleLastNameChange}
-                  placeholder="Last Name"
-                />
-                <ErrorMessage error={lastNameError} />
-              </>
-            )}
-  
+          <form onSubmit={handleLogin}>
+            <h1 className="mb-8 text-3xl text-center">Login</h1>
+
             <FormField
               type="email"
               name="username"
@@ -193,7 +92,7 @@ export default function LoginForm() {
               placeholder="Email"
             />
             <ErrorMessage error={emailError} />
-  
+
             <FormField
               type="password"
               name="password"
@@ -201,30 +100,12 @@ export default function LoginForm() {
               placeholder="Password"
             />
             <ErrorMessage error={passwordError} />
-  
-            {isSignup && (
-              <>
-                <FormField
-                  type="password"
-                  name="confirmPassword"
-                  action={handleConfirmPasswordChange}
-                  placeholder="Confirm Password"
-                />
-                <ErrorMessage error={confirmPasswordError} />
-              </>
-            )}
-  
-            <Button name={isSignup ? 'Sign up' : 'Login'} />
-  
-            {isSignup ? (
-              <RedirectLink message="Already have an account?" href="/login" />
-            ) : (
-              <>
-                <RedirectLink message="Forgot Password?" href="/request-reset" />
-                <RedirectLink message="New to SkillCity?" href="/signup" />
-              </>
-            )}
-  
+
+            <RedirectLink message="Forgot Password?" href="/request-reset" />
+            <Button name="Login" />
+            <RedirectLink message="New?" href="/signup/signup" />
+            <RedirectLink message="profileTest" href="/profile" />
+
             {/* account created toast */}
             {router?.query?.isNew && (
               <div
@@ -238,5 +119,6 @@ export default function LoginForm() {
         </div>
       </div>
     </div>
-  );
-  
+  )
+}
+
