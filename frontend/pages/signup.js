@@ -1,22 +1,46 @@
 import React, { Component } from 'react'
-import RedirectLink from '../components/common/RedirectLink'
-import signupForm from './signup.module.css'
-// import {Link} from 'next/link'
-// import Button from '../components/common/SubmitButton'
+import FormField from '../components/common/FormField.js'
 export default class signup extends Component {
   render() {
-    const {container, title, input_style} = signupForm;
     return (
-      <div className={container}>
-        <h1 className={title}>Sign up</h1>
-        <input className={input_style} placeholder='Username'/><br/>
-        <input className={input_style} placeholder='Email'/><br/>
-        <input className={input_style} placeholder='Password'/><br/>
-        <input className={input_style} placeholder='Confirm Password'/><br/>
-        {/* <button><Link to="/index">Sign up</Link></button> */}
-        <button><RedirectLink href="/"></RedirectLink></button>
-        {/* <Button name="Sign up"></Button> */}
-        {/* <Link to='/index'>sign up</Link> */}
+      <div className="bg-grey min-h-screen flex flex-col bg-no-repeat bg-cover">
+        <div className="container max-w-sm mx-auto flex-1 flex flex-col items-center justify-center px-2">
+          <div className="bg-grey px-6 py-8 rounded-xl shadow-md text-black w-full ">
+            <form>
+              <h1 className="mb-8 text-3xl text-center">Sign up</h1>
+
+              <FormField
+                type="username"
+                name="username"
+                placeholder="Username"
+              />
+              <FormField
+                type="email"
+                name="email"
+                placeholder="Email"
+              />
+
+              <FormField
+                type="password"
+                name="password"
+                placeholder="Password"
+              />
+
+              <FormField
+                type="confirmPassword"
+                name="confirmPassword"
+                placeholder="Confirm Password"
+              />
+
+              <p className='w-full text-center pt-5'>
+              <a className="inline-block align-baseline font-bold text-sm text-secondary bg-gray-400 text-white px-8 py-1 hover:bg-gray-300" href='/login'>
+                Sign Up
+              </a>
+              </p>
+
+            </form>
+          </div>
+        </div>
       </div>
     )
   }
