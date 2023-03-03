@@ -27,13 +27,13 @@ export default class signup extends Component {
               />
 
               <FormField
-                type="confirmPassword"
+                type="password"
                 name="confirmPassword"
                 placeholder="Confirm Password"
               />
 
               <p className='w-full text-center pt-5'>
-              <a className="inline-block align-baseline font-bold text-sm text-secondary bg-gray-400 text-white px-8 py-1 hover:bg-gray-300" href='/login'>
+              <a className="inline-block align-baseline font-bold text-sm text-secondary bg-gray-400 text-white px-8 py-1 hover:bg-gray-300" href='/home'>
                 Sign Up
               </a>
               </p>
