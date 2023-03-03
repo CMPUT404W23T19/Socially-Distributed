@@ -28,6 +28,12 @@ class AuthorListCreateView(ListCreateAPIView):
         user=self.request.user
         serializer.save(user=user)
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = AuthorSerializer(queryset, many=True)
+        response = {"type": "authors", "items": serializer.data}
+        return Response(response)
+
 
 class AuthorDetailView(RetrieveUpdateDestroyAPIView):
     """
@@ -40,9 +46,31 @@ class AuthorDetailView(RetrieveUpdateDestroyAPIView):
     Non-authenticated users can only view(get).
 
     """
+
     queryset=Author.objects.all()
     serializer_class=AuthorSerializer
     # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+
+    def retrieve(self, request, *args, **kwargs):
+        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        instance = Author.objects.get(id=author_id)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+    
+    def update(self, request, *args, **kwargs):
+        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        instance = Author.objects.get(id=author_id)
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+    
+    def destroy(self, request, *args, **kwargs):
+        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        instance = Author.objects.get(id=author_id)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
 
 class FollowerList(ListAPIView):
     """
