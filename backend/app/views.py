@@ -28,6 +28,12 @@ class AuthorListCreateView(ListCreateAPIView):
         user=self.request.user
         serializer.save(user=user)
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = AuthorSerializer(queryset, many=True)
+        response = {"type": "authors", "items": serializer.data}
+        return Response(response)
+
 
 class AuthorDetailView(RetrieveUpdateDestroyAPIView):
     """
