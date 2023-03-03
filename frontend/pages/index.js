@@ -4,6 +4,7 @@ import ErrorMessage from '../components/common/ErrorMessage'
 import FormField from '../components/common/FormField.js'
 import Button from '../components/common/SubmitButton.js'
 import RedirectLink from '../components/common/RedirectLink'
+// import Home from './home'
 // import { post } from '../components/utils/Api'
 // import { setAccessToken, setRefreshToken } from '../components/utils/CookieStorage'
 
@@ -103,8 +104,9 @@ export default function LoginForm() {
 
             <RedirectLink message="Forgot Password?" href="/request-reset" />
             <Button name="Login" />
-            <RedirectLink message="New?" href="/signup/signup" />
-            <RedirectLink message="profileTest" href="/profile" />
+
+            <RedirectLink message="New?" href="/signup" />
+            <RedirectLink message="home test" href="/home" />
 
             {/* account created toast */}
             {router?.query?.isNew && (
