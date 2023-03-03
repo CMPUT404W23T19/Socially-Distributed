@@ -102,7 +102,7 @@ export default function LoginForm() {
             />
             <ErrorMessage error={passwordError} />
 
-            <RedirectLink message="Forgot Password?" href="/request-reset" />
+            <RedirectLink message="Forgot Password?" href="/forgotPassword" />
             <Button name="Login" />
 
             <RedirectLink message="New?" href="/signup" />
