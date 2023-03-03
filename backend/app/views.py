@@ -6,7 +6,7 @@ from common.email.email_service import send_email
 from .models import Author
 from posts.models import Post
 # from .permission import IsOwnerProfileOrReadOnly
-from .serializers import AuthorSerializer, FollowerSerializer
+from .serializers import AuthorSerializer, FollowerSerializer, PostSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 
@@ -87,4 +87,32 @@ class FollowerList(ListAPIView):
         author_id=self.kwargs['author_id']
         author=Author.objects.get(id=author_id)
         return author.followers.all()
+    
+
+class PostList(ListCreateAPIView):
+    """
+    List all :model: `app.Post`s,
+    or create a new :model: `app.Post`.
+    Authentication required.
+    """
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user.author_profile)
+
+class PostDetailView(RetrieveUpdateDestroyAPIView):
+    """
+    Display an individual :model: `app.Post`, 
+    or update an existing :model: `app.Post`,
+    or partial_update an existing :model: `app.Post`.
+    or delete an existing :model: `app.Post`.
+    Authentication required to update or delete.
+    Non-authenticated users can only view(get).
+    """
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user.author_profile)
 

@@ -1,6 +1,7 @@
 from django.db import models
 from app.models import Author
 
+
 # Create your models here.
 
 class Post(models.Model):
