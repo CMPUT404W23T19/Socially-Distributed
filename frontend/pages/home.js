@@ -7,6 +7,7 @@ export default function home() {
   return (
     <div className='flex flex-row'>
       <Nav></Nav>
+      <h1>Welcome to our app!</h1>
       {/* <div className='ml-5 mt-5'>
         {router.pathname === "/posts" ? (
           <PostsList posts={posts} />
