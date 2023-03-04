@@ -84,7 +84,57 @@ class FollowerList(ListAPIView):
     # permission_classes=[IsAuthenticated] #ignore for now
 
     def get_queryset(self):
-        author_id=self.kwargs['author_id']
+        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
         author=Author.objects.get(id=author_id)
         return author.followers.all()
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = FollowerSerializer(queryset, many=True)
+        response = {"type": "followers", "items": serializer.data}
+        return Response(response)
+    
+class FollowerDetailView(RetrieveUpdateDestroyAPIView):
+    """
+    Display an individual :model: `app.userProfile`, 
+    or update an existing :model: `app.userProfile`,
+    or partial_update an existing :model: `app.userProfile`.
+    or delete an existing :model: `app.userProfile`.
+
+    Authentication required to update or delete.
+    Non-authenticated users can only view(get).
+
+    """
+
+    queryset=Author.objects.all()
+    serializer_class=AuthorSerializer
+    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+
+    def retrieve(self, request, *args, **kwargs):
+        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        author = Author.objects.get(id=author_id)
+        exists = author.followers.filter(id=self.kwargs['friend_id']).exists()
+        if exists:
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+    def update(self, request, *args, **kwargs):
+        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        author = Author.objects.get(id=author_id)
+        friend = Author.objects.get(id=self.kwargs['friend_id'])
+        author.followers.add(friend)
+
+    def destroy(self, request, *args, **kwargs):
+        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        author = Author.objects.get(id=author_id)
+        exists = author.followers.filter(id=self.kwargs['friend_id']).exists()
+        if exists:
+            friend = Author.objects.get(id=self.kwargs['friend_id'])
+            author.followers.remove(friend)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+
 

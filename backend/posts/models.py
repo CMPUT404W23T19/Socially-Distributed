@@ -10,13 +10,14 @@ class Post(models.Model):
     source = models.CharField(max_length=100)
     origin = models.CharField(max_length=100)
     description = models.CharField(max_length=400)
-    contentType = models.CharField(max_length=100)
+    contentType = models.CharField(max_length=100) # probably make this a choice field
     content = models.TextField()
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     categories = models.CharField(max_length=100)
     count = models.IntegerField()
-    published = models.DateTimeField()
-    visibility = models.CharField(max_length=100)
+    comments = models.CharField(max_length=100, blank=True, null=True)
+    published = models.CharField(max_length=100)
+    visibility = models.CharField(max_length=100) # probably make this a choice field
     unlisted = models.BooleanField()
     
     def __str__(self):
