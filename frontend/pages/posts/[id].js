@@ -28,12 +28,12 @@ export default function PostPage() {
         <h1>Post {id}</h1>
         <div className='p-3 bg-blue-50 mt-3'>
           <p>This is the detailed page for post {id}.</p>
-          {/* <img></img> */}
+          { <img></img> }
         </div>
         <div className='text-right mt-1 mb-3'>
           {/* may change to a like icon */}
           <button onClick={likePost} className="text-blue-800 px-3 py-1 mr-3 text-sm">like</button>
-          {/* <button className=' text-blue-700 text-xs'>delete</button> */}
+          { <button className=' text-blue-700 text-xs'>delete</button> }
         </div>
         <div>
           <div>
@@ -42,7 +42,7 @@ export default function PostPage() {
           <button onClick={makeComments} className="px-4 py-1 bg-gray-200 shadow-lg w-1/5 mt-1 mb-4 hover:bg-gray-300 text-sm">send</button>
         </div>
         <ul className='text-xs bg-gray-100 mt-6'>
-          {/* comments.map() */}
+          { comments.map() }
           <li className='border-b-2 py-1 px-3'>comment 1</li>
           <li className='border-b-2 py-1 px-3'>comment 2</li>
           <li className='border-b-2 py-1 px-3'>comment 3</li>
