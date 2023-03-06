@@ -14,9 +14,11 @@ class Author(models.Model):
     id = models.CharField(max_length=100, primary_key=True)
     followers = models.ManyToManyField('self', related_name='following', symmetrical=False, blank=True)
 
-# class Followers(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-
     def __str__(self):
         return self.user.username
-
+    
+class Follow(models.Model):
+    type = 'follow'
+    summary = models.CharField(max_length=100, blank=True, null=True)
+    actor = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='actor')
+    object = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='object')

@@ -13,12 +13,12 @@ class Post(models.Model):
     contentType = models.CharField(max_length=100) # probably make this a choice field
     content = models.TextField()
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
-    categories = models.CharField(max_length=100)
-    count = models.IntegerField()
+    categories = models.CharField(max_length=100, blank=True, null=True)
+    count = models.IntegerField(default=0)
     comments = models.CharField(max_length=100, blank=True, null=True)
     published = models.CharField(max_length=100)
     visibility = models.CharField(max_length=100) # probably make this a choice field
-    unlisted = models.BooleanField()
+    unlisted = models.BooleanField(default=False)
     
     def __str__(self):
         return self.title

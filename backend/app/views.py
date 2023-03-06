@@ -55,7 +55,7 @@ class AuthorDetailView(RetrieveUpdateDestroyAPIView):
         author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
         instance = Author.objects.get(id=author_id)
         serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     def update(self, request, *args, **kwargs):
         author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
@@ -63,7 +63,7 @@ class AuthorDetailView(RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     def destroy(self, request, *args, **kwargs):
         author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
@@ -92,7 +92,7 @@ class FollowerList(ListAPIView):
         queryset = self.get_queryset()
         serializer = FollowerSerializer(queryset, many=True)
         response = {"type": "followers", "items": serializer.data}
-        return Response(response)
+        return Response(response, status=status.HTTP_200_OK)
     
 class FollowerDetailView(RetrieveUpdateDestroyAPIView):
     """
@@ -124,6 +124,7 @@ class FollowerDetailView(RetrieveUpdateDestroyAPIView):
         author = Author.objects.get(id=author_id)
         friend = Author.objects.get(id=self.kwargs['friend_id'])
         author.followers.add(friend)
+        return Response(status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
         author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']

@@ -1,7 +1,7 @@
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from common.logging.logging_service import Logger
+import logging
 from common.email.email_service import send_email
 from app.models import Author
 from .models import Post
@@ -11,6 +11,7 @@ from app.serializers import AuthorSerializer
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from datetime import datetime
+import uuid
 
 # Create your views here.
 
@@ -28,10 +29,10 @@ class PostList(ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        post_id = author_id + "/posts/" + str(uuid.uuid4())
         instance = Author.objects.get(id=author_id)
-        post = Post.objects.create(author=instance, title=request.data['title'], source=request.data['source'], origin=request.data['origin'], description=request.data['description'], contentType=request.data['contentType'], content=request.data['content'], categories=request.data['categories'], count=0, published=datetime.now().isoformat(), visibility=request.data['visibility'], unlisted=request.data['unlisted'])
-        post.id = 'http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+ '/posts/'+str(post.id)
-        post.save()
+        published = datetime.now().isoformat()
+        post = Post.objects.create(id=post_id, author=instance, title=request.data['title'], source=request.data['source'], origin=request.data['origin'], description=request.data['description'], contentType=request.data['contentType'], content=request.data['content'], categories=request.data['categories'], count=0, published=published, visibility=request.data['visibility'], unlisted=request.data['unlisted'])
         return Response(status=status.HTTP_201_CREATED)
     
     def list(self, request, *args, **kwargs):
@@ -42,7 +43,7 @@ class PostList(ListCreateAPIView):
         queryset = self.get_queryset()
         serializer = PostSerializer(queryset, many=True)
         response = {"type": "posts", "items": serializer.data}
-        return Response(response)
+        return Response(response, status=status.HTTP_200_OK)
 
 class PostDetailView(ModelViewSet):
     """
@@ -64,15 +65,18 @@ class PostDetailView(ModelViewSet):
         post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         instance = Post.objects.get(id=post_id)
         serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+        # log request data
+        logger = logging.getLogger("app")
+        logger.info(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
-    def update(self, request, *args, **kwargs): # change according to the spec? maybe...
+    def create(self, request, *args, **kwargs):
         post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         instance = Post.objects.get(id=post_id)
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
         post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
@@ -80,9 +84,12 @@ class PostDetailView(ModelViewSet):
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def create(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
         instance = Author.objects.get(id=author_id)
         post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         Post.objects.create(id=post_id, author=instance, title=request.data['title'], source=request.data['source'], origin=request.data['origin'], description=request.data['description'], contentType=request.data['contentType'], content=request.data['content'], categories=request.data['categories'], count=0, published=datetime.now().isoformat(), visibility=request.data['visibility'], unlisted=request.data['unlisted'])
         return Response(status=status.HTTP_201_CREATED)
+    
+    def list(self, request, *args, **kwargs): #
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
