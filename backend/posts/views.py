@@ -9,7 +9,7 @@ from .models import Post
 from .serializers import PostSerializer
 from app.serializers import AuthorSerializer
 from rest_framework import status
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.views import APIView
 from datetime import datetime
 import uuid
 
@@ -45,7 +45,7 @@ class PostList(ListCreateAPIView):
         response = {"type": "posts", "items": serializer.data}
         return Response(response, status=status.HTTP_200_OK)
 
-class PostDetailView(ModelViewSet):
+class PostDetailView(APIView):
     """
     Display an individual :model: `posts.Post`,
     or update an existing :model: `posts.Post`,
@@ -57,39 +57,35 @@ class PostDetailView(ModelViewSet):
 
     """
 
-    queryset=Post.objects.all()
-    serializer_class=PostSerializer
     # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
 
-    def retrieve(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         instance = Post.objects.get(id=post_id)
-        serializer = self.get_serializer(instance)
+        serializer = PostSerializer(instance)
         # log request data
         logger = logging.getLogger("app")
         logger.info(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    def create(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # post is used for update
         post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         instance = Post.objects.get(id=post_id)
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer = PostSerializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def destroy(self, request, *args, **kwargs):
+    def delete(self, request, *args, **kwargs):
         post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         instance = Post.objects.get(id=post_id)
-        self.perform_destroy(instance)
+        instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def update(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
         instance = Author.objects.get(id=author_id)
         post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         Post.objects.create(id=post_id, author=instance, title=request.data['title'], source=request.data['source'], origin=request.data['origin'], description=request.data['description'], contentType=request.data['contentType'], content=request.data['content'], categories=request.data['categories'], count=0, published=datetime.now().isoformat(), visibility=request.data['visibility'], unlisted=request.data['unlisted'])
         return Response(status=status.HTTP_201_CREATED)
     
-    def list(self, request, *args, **kwargs): #
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
