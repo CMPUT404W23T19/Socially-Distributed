@@ -1,4 +1,3 @@
-
 import React, { Component, useState, useEffect } from 'react';
 import axios from 'axios';
 import Nav from '../components/CommonNav'

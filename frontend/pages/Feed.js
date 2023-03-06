@@ -41,7 +41,7 @@ const Feed = () => {
   };
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto pt-10 pl-32">
       <h1 className="text-3xl font-bold mt-10 mb-5" style={{ marginLeft: "20px" }}>See What Your Friends Are Up to!</h1>
       {posts.map(post => (
         <div key={post.id} className="bg-white rounded-lg shadow-lg p-5 my-5">
