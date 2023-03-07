@@ -94,6 +94,7 @@ INSTALLED_APPS = [
     'app',
     'common',
     'posts',
+    'inbox',
 ]
 
 MIDDLEWARE = [

@@ -35,7 +35,61 @@ class AuthorListCreateView(ListCreateAPIView):
         return Response(response)
 
 
-class AuthorDetailView(RetrieveUpdateDestroyAPIView):
+class AuthorDetailView(APIView):
+    """
+    Display an individual :model: `app.userProfile`, 
+    or update an existing :model: `app.userProfile`,
+    or partial_update an existing :model: `app.userProfile`.
+    or delete an existing :model: `app.userProfile`.
+
+    Authentication required to update or delete.
+    Non-authenticated users can only view(get).
+
+    """
+
+    queryset=Author.objects.all()
+    serializer_class=AuthorSerializer
+    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        instance = Author.objects.get(id=author_id)
+        serializer = AuthorSerializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def post(self, request, *args, **kwargs):
+        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        instance = Author.objects.get(id=author_id)
+        serializer = AuthorSerializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+class FollowerList(ListAPIView):
+    """
+    List all :model: `app.Author`'s followers,
+    or create a new :model: `app.Author`'s followers.
+
+    Authentication required.
+
+    """
+    serializer_class=FollowerSerializer
+    # permission_classes=[IsAuthenticated] #ignore for now
+
+    def get_queryset(self):
+        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        author=Author.objects.get(id=author_id)
+        return author.followers.all()
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = FollowerSerializer(queryset, many=True)
+        response = {"type": "followers", "items": serializer.data}
+        return Response(response, status=status.HTTP_200_OK)
+    
+    
+class FollowerDetailView(RetrieveUpdateDestroyAPIView):
     """
     Display an individual :model: `app.userProfile`, 
     or update an existing :model: `app.userProfile`,
@@ -53,38 +107,30 @@ class AuthorDetailView(RetrieveUpdateDestroyAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
-        instance = Author.objects.get(id=author_id)
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-    
+        author = Author.objects.get(id=author_id)
+        exists = author.followers.filter(id=self.kwargs['friend_id']).exists()
+        if exists:
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
     def update(self, request, *args, **kwargs):
         author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
-        instance = Author.objects.get(id=author_id)
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
-    
+        author = Author.objects.get(id=author_id)
+        friend = Author.objects.get(id=self.kwargs['friend_id'])
+        author.followers.add(friend)
+        return Response(status=status.HTTP_200_OK)
+
     def destroy(self, request, *args, **kwargs):
         author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
-        instance = Author.objects.get(id=author_id)
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-    
+        author = Author.objects.get(id=author_id)
+        exists = author.followers.filter(id=self.kwargs['friend_id']).exists()
+        if exists:
+            friend = Author.objects.get(id=self.kwargs['friend_id'])
+            author.followers.remove(friend)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
 
-class FollowerList(ListAPIView):
-    """
-    List all :model: `app.Author`'s followers,
-    or create a new :model: `app.Author`'s followers.
-
-    Authentication required.
-
-    """
-    serializer_class=FollowerSerializer
-    # permission_classes=[IsAuthenticated] #ignore for now
-
-    def get_queryset(self):
-        author_id=self.kwargs['author_id']
-        author=Author.objects.get(id=author_id)
-        return author.followers.all()
 
