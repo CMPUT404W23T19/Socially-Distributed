@@ -10,3 +10,5 @@ dj-database-url
 python-decouple
 django-debreach
 drf-yasg
+djoser==2.1.0
+djangorestframework_simplejwt

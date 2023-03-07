@@ -38,6 +38,11 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
+
+    #path to djoser end points
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),
+
     path('admin/', admin.site.urls),
     path('', include('app.urls')),
     path('', include('posts.urls')),

@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 from decouple import config  # noqa
 from dj_database_url import parse as db_url  # noqa
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,6 +30,7 @@ SECRET_KEY = os.environ.get(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.environ.get("DJANGO_DEBUG", default=True))
+TESTING = bool(os.environ.get("DJANGO_TESTING", default=False))
 
 ALLOWED_HOSTS = ['*']
 
@@ -89,6 +91,7 @@ INSTALLED_APPS = [
     "corsheaders",
     'rest_framework',
     'drf_yasg', # swagger
+    'djoser', # auth
 
     # apps
     'app',
@@ -147,6 +150,21 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+if TESTING:
+    REST_FRAMEWORK = {
+        'DEFAULT_AUTHENTICATION_CLASSES': (
+            'rest_framework.authentication.TokenAuthentication',
+            'rest_framework.authentication.SessionAuthentication',
+        ),
+        'PAGE_SIZE': 10
+    }
+else:
+    REST_FRAMEWORK = {
+        'DEFAULT_AUTHENTICATION_CLASSES': (
+            'rest_framework_simplejwt.authentication.JWTAuthentication',
+            
+        ),
+    }
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
@@ -195,3 +213,27 @@ LOGGING = {
         }
     },
 }
+
+# DJOSER = {
+#     'PASSWORD_RESET_CONFIRM_URL': 'reset-password/{uid}/{token}',
+#     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
+#     'PASSWORD_RESET_CONFIRM_RETYPE': True,
+#     'SERIALIZERS': 
+#     {
+#         'user_create': 'app.djoserSerializers.UserCreateSerializer',
+#     },
+# }
+
+# if debug, JWT should be held longer
+if (DEBUG):
+    SIMPLE_JWT = {
+        'AUTH_HEADER_TYPES': ('Token','Bearer',),
+        'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+        'REFRESH_TOKEN_LIFETIME': timedelta(minutes=480),
+    }
+else:
+    SIMPLE_JWT = {
+        'AUTH_HEADER_TYPES': ('Token','Bearer',),
+        'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
+        'REFRESH_TOKEN_LIFETIME': timedelta(minutes=360),
+    }
