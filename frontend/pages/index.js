@@ -4,6 +4,7 @@ import ErrorMessage from '../components/common/ErrorMessage'
 import FormField from '../components/common/FormField.js'
 import Button from '../components/common/SubmitButton.js'
 import RedirectLink from '../components/common/RedirectLink'
+// import Home from './home'
 // import { post } from '../components/utils/Api'
 // import { setAccessToken, setRefreshToken } from '../components/utils/CookieStorage'
 
@@ -80,44 +81,54 @@ export default function LoginForm() {
 
   return (
     <div className="bg-grey min-h-screen flex flex-col bg-no-repeat bg-cover">
-      <div className="container max-w-sm mx-auto flex-1 flex flex-col items-center justify-center px-2">
+  <div className="py-10 px-4 text-center text-black">
+    <h1 className="text-4xl font-bold mb-2 text-blue-500">Welcome Back!</h1>
+    <p className="text-lg">Login to continue to our site.</p>
+  </div>
+      <div className="container max-w-sm mx-auto flex-1 flex flex-col items-center justify-start px-2">
         <div className="bg-grey px-6 py-8 rounded-xl shadow-md text-black w-full ">
-          <form onSubmit={handleLogin}>
+          <div>
             <h1 className="mb-8 text-3xl text-center">Login</h1>
-
-            <FormField
-              type="email"
-              name="username"
-              action={handleEmailChange}
-              placeholder="Email"
-            />
-            <ErrorMessage error={emailError} />
-
-            <FormField
-              type="password"
-              name="password"
-              action={handlePasswordChange}
-              placeholder="Password"
-            />
-            <ErrorMessage error={passwordError} />
-
-            <RedirectLink message="Forgot Password?" href="/request-reset" />
-            <Button name="Login" />
-            <RedirectLink message="New?" href="/signup" />
-
-            {/* account created toast */}
-            {router?.query?.isNew && (
-              <div
-                className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mt-4"
-                role="alert"
-              >
-                <p className="block sm:inline">Account created successfully.</p>
+            <form onSubmit={handleLogin}>
+              <div>
+                <h2 className="mb-4 text-lg font-medium text-gray-900">Enter your login details:</h2>
+                <FormField
+                  type="email"
+                  name="username"
+                  action={handleEmailChange}
+                  placeholder="Email"
+                />
+                <ErrorMessage error={emailError} />
+  
+                <FormField
+                  type="password"
+                  name="password"
+                  action={handlePasswordChange}
+                  placeholder="Password"
+                />
+                <ErrorMessage error={passwordError} />
+  
+                <RedirectLink message={<a href="/forgotPassword" style={{color: 'blue'}}>Forgot Password?</a>}/>
+                <Button name="Login" />
+  
+                <RedirectLink message={<a href="/signup" style={{color: 'blue'}}>New User?</a>}/>
+                <RedirectLink message={<a href="/home" style={{color: 'blue'}}>home test</a>}/>
+  
+                {/* account created toast */}
+                {router?.query?.isNew && (
+                  <div
+                    className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mt-4"
+                    role="alert"
+                  >
+                    <p className="block sm:inline">Account created successfully.</p>
+                  </div>
+                )}
               </div>
-            )}
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
