@@ -7,19 +7,14 @@ from .serializers import InboxSerializer
 from rest_framework import status
 from app.models import Author, Follow
 from posts.models import Post
+from common.logging.logging_service import Logger
+import json
 
 # Create your views here.
 
 ### NEED TO ADD ERROR HANDLING FOR WHEN AUTHOR DOES NOT EXIST. FOR ALL VIEWS ###
 
 class InboxView(APIView):
-    """
-    List all :model: `inbox.Inbox`,
-    or create a new :model: `inbox.Inbox`.
-
-    Authentication required.
-
-    """
 
     # permission_classes=[IsAuthenticated] #ignore for now
 
@@ -29,6 +24,9 @@ class InboxView(APIView):
         return inbox
 
     def get(self, request, *args, **kwargs):
+        """
+        Get inbox for a given author
+        """
         author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
         queryset = self.get_queryset()
         serializer = InboxSerializer(queryset)
@@ -44,11 +42,13 @@ class InboxView(APIView):
         return Response(response, status=status.HTTP_200_OK)
     
     def post(self, request, *args, **kwargs):
+        """
+        Add a post or request to the inbox
+        """
         inbox = self.get_queryset()
         type = request.data['type']
 
         if type == 'post':
-            # todo: check if author exists, if post exists. Else create.
             try:
                 post = Post.objects.get(id=request.data['id'])
             except Post.DoesNotExist:
@@ -58,7 +58,7 @@ class InboxView(APIView):
                     author = Author.objects.create(id=request.data['author']['id'], host=request.data['author']['host'], displayName=request.data['author']['displayName'], url=request.data['author']['url'], github=request.data['author']['github'], profileImage=request.data['author']['profileImage'])
                 post = Post.objects.create(id=request.data['id'], title=request.data['title'], source=request.data['source'], origin=request.data['origin'], description=request.data['description'], contentType=request.data['contentType'], content=request.data['content'], author=author, categories=request.data['categories'], count=request.data['count'], comments=request.data['comments'], published=request.data['published'], visibility=request.data['visibility'], unlisted=request.data['unlisted'])
             inbox.posts.add(post)
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_200_OK)
         
         elif type == 'follow':
             # todo: check if author exists, if follow exists. Else create.
@@ -72,12 +72,15 @@ class InboxView(APIView):
                 return Response(status=status.HTTP_404_NOT_FOUND)
             follow = Follow.objects.create(author=author, object=object, summary=request.data['summary'])
             inbox.requests.add(follow)
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
     def delete(self, request, *args, **kwargs):
+        """
+        Delete all posts and requests from inbox
+        """
         inbox = self.get_queryset()
         inbox.posts.clear()
         inbox.requests.clear()

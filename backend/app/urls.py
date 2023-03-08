@@ -1,7 +1,7 @@
 from django.urls import path, include
 from .views import AuthorListCreateView, AuthorDetailView, FollowerList, FollowerDetailView
 
-app_name = 'app'
+#app_name = 'app'
 
 urlpatterns = [
     # gets all user profiles and create a new profile

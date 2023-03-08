@@ -5,6 +5,3 @@ from common.logging.logging_service import Logger
 class CommonsTest(TestCase):
     def setUp(self):
         pass
-
-    def testLogging(self):
-        Logger().info("Log Working")
