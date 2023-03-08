@@ -4,25 +4,29 @@ import ErrorMessage from '../components/common/ErrorMessage'
 import FormField from '../components/common/FormField.js'
 import Button from '../components/common/SubmitButton.js'
 import RedirectLink from '../components/common/RedirectLink'
-// import Home from './home'
-// import { post } from '../components/utils/Api'
-// import { setAccessToken, setRefreshToken } from '../components/utils/CookieStorage'
+import { reqLogin, reqUserProfile } from '../api/Api'
+import { setAccessToken } from '../components/utils/cookieStorage'
+
 
 /**
  * Login form page
  * @returns jsx
  */
 export default function LoginForm() {
-  const [emailId, setEmailId] = useState('')
+  // const [emailId, setEmailId] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [emailError, setEmailError] = useState('')
+  // const [emailError, setEmailError] = useState('')
+  const [usernameError, setUsernameError] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const router = useRouter()
   let validCheck = false
 
-  const handleEmailChange = useCallback((event) => {
-    setEmailError('')
-    setEmailId(event.target.value)
+  const handleUsernameChange = useCallback((event) => {
+    // setEmailError('')
+    // setEmailId(event.target.value)
+    setUsernameError('')
+    setUsername(event.target.value)
   }, [])
 
   const handlePasswordChange = useCallback((event) => {
@@ -33,12 +37,13 @@ export default function LoginForm() {
   const handleLogin = useCallback(
     async (e) => {
       e.preventDefault()
-      const isEmailEmpty = emailId.length === 0
+      // const isEmailEmpty = emailId.length === 0
+      const isUsernameEmpty = username.length === 0
       const isPasswordEmpty = password.length === 0
       validCheck = true
 
-      if (isEmailEmpty) {
-        setEmailError('Email can not be empty.')
+      if (isUsernameEmpty) {
+        setUsernameError('Username can not be empty.')
         validCheck = false
       }
       if (isPasswordEmpty) {
@@ -53,38 +58,37 @@ export default function LoginForm() {
         sendData(e)
       }
     },
-    [emailId, password, emailError, passwordError]
+    [username, password, usernameError, passwordError]
   )
 
   function sendData(e) {
     if (validCheck) {
-      post('auth/jwt/create/', e.target)
-        .then((res) => {
-          setAccessToken(res.access)
-          setRefreshToken(res.refresh)
-          if (router.query.isNew) {
-            //if new to skillcity, redirect to profile to edit a new profile.
-            router.push('/profile')
-          } else {
-            //if not new to skillcity, redirect to dashboard.
-            router.push('/dashboard')
-          }
-        })
-        .catch((e) => {
+      reqLogin({ username, password })
+        .then(
+          res => {
+            console.log(res.data.access);
+            setAccessToken(res.data.access)
+            router.push('/home')
+            
+            // get user id
+            // reqUserProfile()
+
+          },
+        ).catch(e => {
           const errorMessage = e.message
           setPasswordError('Username/Password is not valid.')
           console.error(errorMessage)
         })
-      validCheck = true
+      validCheck = true;
     }
   }
 
   return (
     <div className="bg-grey min-h-screen flex flex-col bg-no-repeat bg-cover">
-  <div className="py-10 px-4 text-center text-black">
-    <h1 className="text-4xl font-bold mb-2 text-blue-500">Welcome Back!</h1>
-    <p className="text-lg">Login to continue to our site.</p>
-  </div>
+      <div className="py-10 px-4 text-center text-black">
+        <h1 className="text-4xl font-bold mb-2 text-blue-500">Welcome Back!</h1>
+        <p className="text-lg">Login to continue to our site.</p>
+      </div>
       <div className="container max-w-sm mx-auto flex-1 flex flex-col items-center justify-start px-2">
         <div className="bg-grey px-6 py-8 rounded-xl shadow-md text-black w-full ">
           <div>
@@ -93,13 +97,13 @@ export default function LoginForm() {
               <div>
                 <h2 className="mb-4 text-lg font-medium text-gray-900">Enter your login details:</h2>
                 <FormField
-                  type="email"
+                  type="text"
                   name="username"
-                  action={handleEmailChange}
-                  placeholder="Email"
+                  action={handleUsernameChange}
+                  placeholder="Username"
                 />
-                <ErrorMessage error={emailError} />
-  
+                <ErrorMessage error={usernameError} />
+
                 <FormField
                   type="password"
                   name="password"
@@ -107,13 +111,13 @@ export default function LoginForm() {
                   placeholder="Password"
                 />
                 <ErrorMessage error={passwordError} />
-  
-                <RedirectLink message={<a href="/forgotPassword" style={{color: 'blue'}}>Forgot Password?</a>}/>
+
+                <RedirectLink message={<a href="/forgotPassword" style={{ color: 'blue' }}>Forgot Password?</a>} />
                 <Button name="Login" />
-  
-                <RedirectLink message={<a href="/signup" style={{color: 'blue'}}>New User?</a>}/>
-                <RedirectLink message={<a href="/home" style={{color: 'blue'}}>home test</a>}/>
-  
+
+                <RedirectLink message={<a href="/signup" style={{ color: 'blue' }}>New User?</a>} />
+                <RedirectLink message={<a href="/home" style={{ color: 'blue' }}>home test</a>} />
+
                 {/* account created toast */}
                 {router?.query?.isNew && (
                   <div
