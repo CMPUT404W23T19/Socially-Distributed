@@ -1,11 +1,12 @@
 import React, { Component } from 'react'
 import FormField from '../components/common/FormField.js'
-
+import TopNavigation from './TopNavigation.js'
 export default class CreatePost extends Component {
   render() {
     return (
       <div className="bg-gray-100 min-h-screen flex flex-col items-center">
-        <div className="container max-w-2xl mx-auto flex-1 flex flex-col items-center justify-center px-2 py-4">
+        <TopNavigation />
+        <div className="container max-w-2xl mx-auto flex-1 flex flex-col items-center justify-center px-2 py-4 mt-20">
           <div className="bg-white px-6 py-8 rounded-xl shadow-md text-black w-full max-w-xl">
             <form>
               <h1 className="mb-8 text-3xl text-center font-bold">Create Post</h1>
