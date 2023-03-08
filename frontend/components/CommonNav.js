@@ -25,9 +25,9 @@ export default class CommonNav extends Component {
                 <h3>Comments</h3>
               </div>
             </Link>
-            <Link href='/create-post'>
+            <Link href='/Feed'>
               <div className='flex mb-2 justify-start items-center pl-5 hover:bg-gray-400 p-2 rounded-md cursor-pointer bg-blue-500'>
-                <h3 className='text-white'>Create Post</h3>
+                <h3 className='text-white'>View Posts</h3>
               </div>
             </Link>
           </div>

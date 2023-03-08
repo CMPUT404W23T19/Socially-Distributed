@@ -11,7 +11,7 @@ export default function Home() {
     <div>
       <TopNavigation />
       <div className="flex">
-        <Nav />
+        {/* <Nav /> */}
         <Feed />
       </div>
     </div>
