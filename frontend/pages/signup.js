@@ -41,9 +41,9 @@ export default function Signup() {
 
     const userInfo = { username, password }
     storeUser(userInfo);
-    if (success) {
-      router.push('/')
-    }
+    // if (success) {
+    //   router.push('/')
+    // }
   }
 
   async function storeUser(userInfo) {
@@ -51,6 +51,9 @@ export default function Signup() {
       let result = await reqSignUp(userInfo);
       if (result.status >= 200 && result.status <= 300) {
         setSuccess(true)
+        setTimeout(() => {
+          router.push('/')
+        }, 2000);
       }
     } catch (error) {
       let usernameError = error.response.data.username
