@@ -4,7 +4,7 @@ import ErrorMessage from '../components/common/ErrorMessage'
 import FormField from '../components/common/FormField.js'
 import Button from '../components/common/SubmitButton.js'
 import RedirectLink from '../components/common/RedirectLink'
-import { reqLogin, reqUserProfile } from '../api/Api'
+import { reqLogin, reqUserId } from '../api/Api'
 import { setAccessToken } from '../components/utils/cookieStorage'
 
 
@@ -14,11 +14,13 @@ import { setAccessToken } from '../components/utils/cookieStorage'
  */
 export default function LoginForm() {
   // const [emailId, setEmailId] = useState('')
+  const [userId, setUserId] = useState(0);
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   // const [emailError, setEmailError] = useState('')
   const [usernameError, setUsernameError] = useState('')
   const [passwordError, setPasswordError] = useState('')
+  
   const router = useRouter()
   let validCheck = false
 
@@ -66,12 +68,18 @@ export default function LoginForm() {
       reqLogin({ username, password })
         .then(
           res => {
-            console.log(res.data.access);
             setAccessToken(res.data.access)
-            router.push('/home')
-            
+
             // get user id
-            // reqUserProfile()
+            reqUserId().then(
+              res => {
+                setUserId(res.data.id)
+                router.push({
+                  pathname:'/home',
+                  query: {userId}
+                })
+              }
+            );
 
           },
         ).catch(e => {
@@ -95,7 +103,7 @@ export default function LoginForm() {
             <h1 className="mb-8 text-3xl text-center">Login</h1>
             <form onSubmit={handleLogin}>
               <div>
-                <h2 className="mb-4 text-lg font-medium text-gray-900">Enter your login details:</h2>
+                {/* <h2 className="mb-4 text-lg font-medium text-gray-900">Enter your login details:</h2> */}
                 <FormField
                   type="text"
                   name="username"
@@ -116,7 +124,6 @@ export default function LoginForm() {
                 <Button name="Login" />
 
                 <RedirectLink message={<a href="/signup" style={{ color: 'blue' }}>New User?</a>} />
-                <RedirectLink message={<a href="/home" style={{ color: 'blue' }}>home test</a>} />
 
                 {/* account created toast */}
                 {router?.query?.isNew && (
