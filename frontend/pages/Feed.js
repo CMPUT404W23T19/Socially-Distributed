@@ -4,10 +4,13 @@ import TopNavigation from './TopNavigation';
 import { IconButton } from '@material-ui/core';
 import CommentIcon from '@material-ui/icons/Comment';
 import FavoriteIcon from '@material-ui/icons/Favorite';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const Feed = () => {
   const [posts, setPosts] = useState([]);
   const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState("");
 
   useEffect(() => {
     axios.get('https://jsonplaceholder.typicode.com/posts')
@@ -34,7 +37,56 @@ const Feed = () => {
   };
 
   const handleComment = (postId) => {
-    // handle comment logic here
+    return;
+    const existingComment = comments.find(comment => comment.postId === postId);
+    setCommentText(existingComment ? existingComment.body : "");
+    setIsCollapsed(false);
+  
+    const handleCommentSave = () => {
+      if (existingComment) {
+        // Update existing comment
+        axios.put(`https://jsonplaceholder.typicode.com/comments/${existingComment.id}`, { body: commentText })
+          .then(response => {
+            const updatedComments = [...comments];
+            updatedComments[updatedComments.findIndex(comment => comment.id === existingComment.id)] = response.data;
+            setComments(updatedComments);
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      } else {
+        // Create new comment
+        axios.post('https://jsonplaceholder.typicode.com/comments', { postId, body: commentText })
+          .then(response => {
+            setComments([...comments, response.data]);
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      }
+      setCommentText("");
+      setPosts([
+        ...posts.slice(0, postIndex),
+        { ...post, comments: existingComment ? post.comments : [...post.comments, comments.length + 1] },
+        ...posts.slice(postIndex + 1),
+      ]);
+    };
+  
+    const commentEditor = (
+      <ReactQuill
+        value={commentText}
+        onChange={setCommentText}
+      />
+    );
+  
+    // Render comment editor and save button
+    ReactDOM.render(
+      <div>
+        {commentEditor}
+        <button onClick={handleCommentSave}>Save</button>
+      </div>,
+      document.getElementById(`comment-editor-${postId}`)
+    );
   };
 
   const [isCollapsed, setIsCollapsed] = useState(true);
