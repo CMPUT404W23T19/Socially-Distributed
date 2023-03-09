@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TopNavigation from './TopNavigation';
+import { IconButton } from '@material-ui/core';
+import CommentIcon from '@material-ui/icons/Comment';
+import FavoriteIcon from '@material-ui/icons/Favorite';
 
 const Feed = () => {
   const [posts, setPosts] = useState([]);
@@ -53,8 +56,8 @@ const Feed = () => {
           <p className="text-base mb-3">{post.body}</p>
           <div className="flex justify-between">
             <div className="flex">
-              <button className="bg-gray-200 rounded-lg px-4 py-2 mr-3 hover:bg-gray-300" onClick={() => handleLike(post.id)}>Like</button>
-              <button className="bg-gray-200 rounded-lg px-4 py-2 hover:bg-gray-300" onClick={() => handleComment(post.id)}>Comment</button>
+            <IconButton onClick={() => handleLike(post.id)}><FavoriteIcon /></IconButton>
+              <IconButton onClick={() => handleComment(post.id)}><CommentIcon /></IconButton>
             </div>
             <button className="bg-gray-200 rounded-lg px-4 py-2" onClick={toggleComments}>{isCollapsed ? "Show Comments" : "Hide Comments"}</button>
           </div>
