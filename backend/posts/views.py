@@ -43,16 +43,6 @@ class PostList(ListCreateAPIView):
         return Response(response, status=status.HTTP_200_OK)
 
 class PostDetailView(APIView):
-    """
-    Display an individual :model: `posts.Post`,
-    or update an existing :model: `posts.Post`,
-    or partial_update an existing :model: `posts.Post`.
-    or delete an existing :model: `posts.Post`.
-
-    Authentication required to update or delete.
-    Non-authenticated users can only view(get).
-
-    """
 
     # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
 
