@@ -1,44 +1,71 @@
-import { React, useState } from 'react'
-import Nav from '../components/CommonNav';
-// import profileStyle from '../styles/profile.module.css'
-// import signupStyle from '../pages/signup/signup.module.css'
-export default function profile() {
+import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
+import NavHeader from './TopNavigation'
+import Link from 'next/link'
+import { reqUserProfile, reqUserId } from '../api/Api'
+function ProfilePage() {
+  const [userId, setUserId] = useState(0)
+  const [username, setUsername] = useState('')
+  const [github, setGithub] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
 
-  const username = useState('');
-  const email = useState('');
-  const password = useState('');
-  const likes = useState('');
-  const followers = useState('');
+  // router
+  const router = useRouter()
 
-  // const { container, left, middle, right, userPhoto, editButton } = profileStyle;
-  // const { title } = signupStyle;
-  function editProfile() {
-    console.log('edit');
-  }
+  useEffect(() => {
+    reqUserId().then(
+      res => {
+        setUserId(res.data.id)
+      }
+    );
+    reqUserProfile(userId)
+    .then(
+      res => {
+        setUsername(res.data.display_name)
+        setGithub(res.data.github)
+        setImageUrl(res.data.profile_image)
+        console.log(res);
+      }
+    ).catch (
+      e => {
+        console.log(e);
+      }
+    )
+  })
+
   return (
-    <div className='flex flex-row'>
-      <Nav></Nav>
-      <div className='flex flex-row my-8 mx-10'>
-        <div className="w-1/3">
-          <h1 className="text-2xl font-semibold mb-5">My Profile</h1>
-          <p>Followers:<span>{followers}</span></p>
-          <p>Likes:<span>{likes}</span></p>
+    <div className="bg-primary min-h-screen flex flex-col">
+      <div>
+        <NavHeader />
+      </div>
+      <Link href='/editprofile'>
+        <div className="mt-20 text-center">
+          <button
+            className="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white shadow-xl font-bold mt-8w-full py-2 px-6 rounded focus:outline-none focus:shadow-outline transition"
+          >
+            Edit profile
+          </button>
         </div>
-        <div className="w-2/5">
-          <div className='text-center'>
-            <img className="w-52 h-52 rounded-full m-5" src="" alt="" />
-            <ul>
-              <li><span>Username: </span></li>
-              <li><span>Email: </span></li>
-              <li><span>Password: </span></li>
-            </ul>
-            <button className="bg-gray-200 mt-10 py-1 px-3" onClick={editProfile}>edit profile</button>
+      </Link>
+      <div className="container max-w-2xl mx-auto flex-col items-center justify-center px-2">
+        <div className="bg-lighter px-10 h-4/5 rounded-xl shadow-xl text-main w-full">
+          <div>
+            <div className='w-28 h-28 my-10 mx-auto'>
+              <img className='w-28 h-28 rounded-full' src={imageUrl} />
+            </div>
+            <div className="items-center justify-between mb-8">
+              <h2 className="text-3xl font-bold leading-none tracking-tighter mb-5">Username</h2>
+              <p className="text-content ml-8 h-10 font-bold">{username == '' ? 'test username':username}</p>
+            </div>
+            <div className="items-center justify-between mb-8">
+              <h2 className="text-3xl font-bold leading-none tracking-tighter mb-5">Github</h2>
+              <a><p className="text-content ml-8 h-10 font-bold">{github == '' ? 'test github' : github}</p></a>
+            </div>
           </div>
-        </div>
-        <div>
-
         </div>
       </div>
     </div>
   )
 }
+
+export default ProfilePage

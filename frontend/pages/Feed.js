@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
+import TopNavigation from './TopNavigation';
 
 const Feed = () => {
   const [posts, setPosts] = useState([]);
@@ -42,6 +42,7 @@ const Feed = () => {
 
   return (
     <div className="container mx-auto pt-10 pl-32">
+      <TopNavigation />
       <h1 className="text-3xl font-bold mt-10 mb-5" style={{ marginLeft: "20px" }}>See What Your Friends Are Up to!</h1>
       {posts.map(post => (
         <div key={post.id} className="bg-white rounded-lg shadow-lg p-5 my-5">

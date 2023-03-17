@@ -16,18 +16,15 @@ import uuid
 # Create your views here.
 
 class PostList(ListCreateAPIView):
-    """
-    List all :model: `posts.Post`,
-    or create a new :model: `posts.Post`.
-
-    Authentication required.
-
-    """
+   
     queryset=Post.objects.all()
     serializer_class=PostSerializer
     # permission_classes=[IsAuthenticated] #ignore for now
 
     def create(self, request, *args, **kwargs):
+        """
+        Create a new post for the currently authenticated user.
+        """
         author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
         post_id = author_id + "/posts/" + str(uuid.uuid4())
         instance = Author.objects.get(id=author_id)
@@ -60,15 +57,18 @@ class PostDetailView(APIView):
     # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
+        """
+        This view should return a single post of the currently authenticated user.
+        """
         post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         instance = Post.objects.get(id=post_id)
         serializer = PostSerializer(instance)
-        # log request data
-        logger = logging.getLogger("app")
-        logger.info(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request, *args, **kwargs):  # post is used for update
+        """
+        Update a single post of the currently authenticated user.
+        """
         post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         instance = Post.objects.get(id=post_id)
         serializer = PostSerializer(instance, data=request.data)
@@ -77,12 +77,17 @@ class PostDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
+        """
+        Ddelete a single post of the currently authenticated user."""
         post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         instance = Post.objects.get(id=post_id)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def put(self, request, *args, **kwargs):
+        """
+        Create a single post of the currently authenticated user with given post id.
+        """
         author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
         instance = Author.objects.get(id=author_id)
         post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']

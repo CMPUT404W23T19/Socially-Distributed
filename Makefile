@@ -66,7 +66,7 @@ test: unit e2e
 
 # backend unit tests
 unit:
-	docker-compose exec backend python3 manage.py test . $(ARG) --parallel --keepdb
+	docker-compose exec backend python3 manage.py test . $(ARG) --keepdb
 
 # opens e2e tests
 e2e:

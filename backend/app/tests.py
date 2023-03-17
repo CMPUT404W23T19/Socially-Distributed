@@ -1,42 +1,44 @@
+from rest_framework import status
+from rest_framework.test import APITestCase
+from django.urls import reverse
 from django.test import TestCase
 from common.logging.logging_service import Logger
 
-# Create your tests here.
-class AppTest(TestCase):
+class AuthorTestCase(APITestCase):
+    """
+    Tests for the API endpoints that are related to auhtors.
+    """
+    author_list_url=reverse('authors')  # actual url for the author list
     def setUp(self):
-        pass
+        # create a new user making a post request to djoser endpoint
+        self.user=self.client.post('/auth/users/',data={'username':'mario','password':'i-keep-jumping'})
+        # obtain a json web token for the newly created user
+        response=self.client.post('/auth/jwt/create/',data={'username':'mario','password':'i-keep-jumping'})
+        self.token=response.data['access']
+        self.api_authentication()
+        response = self.client.get('/auth/users/me/')  # get id of newly made user
+        self.id = str(response.data['id'])
 
-    def testLogging(self):
-        Logger().info("Log Working")
+    def api_authentication(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Token '+self.token)
 
-    def assertResponse200(self, response):
-        """ Given response has status_code 200 OK"""
-        self.assertEqual(response.status_code, 200)
+    # retrieve a list of all authors while the request user is authenticated
+    def test_author_list_authenticated(self):
+        response=self.client.get(self.author_list_url)
+        self.assertEqual(response.status_code,status.HTTP_200_OK)
 
-    def assertResponse201(self, response):
-        """ Given response has status_code 201 CREATED"""
-        self.assertEqual(response.status_code, 201)
+    # check to retrieve the author details of the authenticated user
+    def test_author_detail_retrieve(self):
+        response=self.client.get(reverse('author',kwargs={'author_id':self.id}))
+        self.assertEqual(response.status_code,status.HTTP_200_OK)
 
-    def assertResponse301(self, response):
-        """ Given response has status_code 301 MOVED PERMANENTLY"""
-        self.assertEqual(response.status_code, 301)
+    # populate the author profile that was automatically created using the signals
+    def test_author_populate(self):
+        author_data={'github':'https://github.com/'}
+        response=self.client.post(reverse('author',kwargs={'author_id':self.id}),data=author_data)
+        self.assertEqual(response.status_code,status.HTTP_200_OK)
 
-    def assertResponse302(self, response):
-        """ Given response has status_code 302 FOUND"""
-        self.assertEqual(response.status_code, 302)
-
-    def assertResponse400(self, response):
-        """ Given response has status_code 400 BAD REQUEST"""
-        self.assertEqual(response.status_code, 400)
-
-    def assertResponse401(self, response):
-        """ Given response has status_code 401 UNAUTHORIZED"""
-        self.assertEqual(response.status_code, 401)
-
-    def assertResponse403(self, response):
-        """ Given response has status_code 403 FORBIDDEN"""
-        self.assertEqual(response.status_code, 403)
-
-    def assertResponse404(self, response):
-        """ Given response has status_code 404 NOT FOUND"""
-        self.assertEqual(response.status_code, 404)
+    # test adding a user with a name that already exists
+    def test_author_already_exists(self):
+        response = self.client.post('/auth/users/',data={'username':'mario','password':'i-keep-jumping'})
+        self.assertEqual(response.status_code,status.HTTP_400_BAD_REQUEST)

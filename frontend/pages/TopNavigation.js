@@ -18,13 +18,26 @@ const TopNavigation = () => {
     setShowNotification(!showNotification);
   };
 
+  const handleLogout = () => {
+
+  }
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-800 px-4 py-3">
       <div className="flex justify-between">
         <div>
           <Link href="/">
-            <a className="text-white font-semibold text-lg">My App</a>
+            <a className="text-white hover:text-gray-400 font-semibold text-lg">My App</a>
           </Link>
+            <Link href="/profile">
+              <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10 ml-10">Profile</a>
+            </Link>
+            <Link href="/Feed">
+              <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10">Posts</a>
+            </Link>
+            <Link href="/createPost">
+              <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10">Create a post</a>
+            </Link>
         </div>
         <div className="flex">
           <div className="relative mr-4">
@@ -59,6 +72,7 @@ const TopNavigation = () => {
               </div>
             )}
           </button>
+          <button onClick={handleLogout} className="relative text-white hover:text-gray-400 ml-5 pl-5 border-l-2 border-white">Logout</button>
         </div>
       </div>
     </nav>
