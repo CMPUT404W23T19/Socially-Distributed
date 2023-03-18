@@ -6,7 +6,7 @@ from .models import Inbox
 from .serializers import InboxSerializer
 from rest_framework import status
 from app.models import Author, Follow
-from posts.models import Post
+from posts.models import Post, Comment, Like
 from common.logging.logging_service import Logger
 import json
 
@@ -56,6 +56,7 @@ class InboxView(APIView):
                     author = Author.objects.get(id=request.data['author']['id'])
                 except Author.DoesNotExist:
                     author = Author.objects.create(id=request.data['author']['id'], host=request.data['author']['host'], displayName=request.data['author']['displayName'], url=request.data['author']['url'], github=request.data['author']['github'], profileImage=request.data['author']['profileImage'])
+                # check it exists at foreign host first?
                 post = Post.objects.create(id=request.data['id'], title=request.data['title'], source=request.data['source'], origin=request.data['origin'], description=request.data['description'], contentType=request.data['contentType'], content=request.data['content'], author=author, categories=request.data['categories'], count=request.data['count'], comments=request.data['comments'], published=request.data['published'], visibility=request.data['visibility'], unlisted=request.data['unlisted'])
             inbox.posts.add(post)
             return Response(status=status.HTTP_200_OK)
@@ -73,6 +74,31 @@ class InboxView(APIView):
             follow = Follow.objects.create(author=author, object=object, summary=request.data['summary'])
             inbox.requests.add(follow)
             return Response(status=status.HTTP_200_OK)
+        
+        elif type == 'like':
+            # add like to inbox
+            # check that author and post of object exists
+            try:
+                obj = Post.objects.get(id=request.data['object'])
+            except Post.DoesNotExist:
+                try:
+                    obj = Comment.objects.get(id=request.data['object'])
+                except Comment.DoesNotExist:
+                    return Response(status=status.HTTP_404_NOT_FOUND)
+            like = Like.objects.create(author=request.data['author'], object=request.data['object'], summary=request.data['summary'])
+            inbox.likes.add(like)
+            return Response(status=status.HTTP_200_OK)
+        
+        elif type == 'comment':
+            # add comment to inbox
+            # check that author and post of object exists
+            try:
+                comment = Comment.objects.get(id=request.data['id'])
+            except Comment.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            inbox.comments.add(comment)
+            return Response(status=status.HTTP_200_OK)
+
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
