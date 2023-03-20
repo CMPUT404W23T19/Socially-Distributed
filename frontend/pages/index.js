@@ -75,7 +75,7 @@ export default function LoginForm() {
                 setCookieUserId(res.data.id)
 
                 router.push({
-                  pathname:'/home',
+                  pathname:'/post/',
                   // query: {userId}
                 })
               }

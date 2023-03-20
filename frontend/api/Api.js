@@ -40,10 +40,18 @@ export const reqEditUserProfile = (userId, data) => {
     data
   })
 }
+
 export const reqCreatePost = (data, userId) => {
   return axios({
     url: `http://localhost:8000/authors/${userId}/posts/`,
     method: 'post',
     data
+  })
+}
+
+export const reqGetMyPosts = (userId) => {
+  return axios({
+    url:`http://localhost:8000/authors/${userId}/posts/`,
+    method: 'get'
   })
 }

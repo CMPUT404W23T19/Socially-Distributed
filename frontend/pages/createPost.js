@@ -72,7 +72,7 @@ export default function CreatePost() {
     try {
       const res = await reqCreatePost(data, userId)
       if (res.status === 201) {
-        router.replace('/Feed');
+        router.replace('/post/me');
       }
         // console.log(res);
     } catch(error) {
