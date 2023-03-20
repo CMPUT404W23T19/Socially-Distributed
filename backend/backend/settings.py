@@ -214,7 +214,7 @@ LOGGING = {
     },
 }
 
-DJOSER = {
+# DJOSER = {
 #     'PASSWORD_RESET_CONFIRM_URL': 'reset-password/{uid}/{token}',
 #     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
 #     'PASSWORD_RESET_CONFIRM_RETYPE': True,
@@ -222,10 +222,10 @@ DJOSER = {
 #     {
 #         'user_create': 'app.djoserSerializers.UserCreateSerializer',
 #     },
-    'PERMISSIONS': {  # temporary
-        'user' : ['rest_framework.permissions.AllowAny'],
-    },
-}
+#     'PERMISSIONS': {  # temporary
+#         'user' : ['rest_framework.permissions.AllowAny'],
+#     },
+# }
 
 # if debug, JWT should be held longer
 if (DEBUG):
