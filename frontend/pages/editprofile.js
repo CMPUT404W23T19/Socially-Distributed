@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import TopNavigation from './TopNavigation'
-import { reqUserId, reqUserProfile, reqEditUserProfile } from '../api/Api'
+import { reqUserProfile, reqEditUserProfile } from '../api/Api'
+import { getCookieUserId } from '../components/utils/cookieStorage'
 
 export default function EditProfileForm() {
   const [userId, setUserId] = useState('')
@@ -14,11 +15,7 @@ export default function EditProfileForm() {
   const router = useRouter()
 
   useEffect(() => {
-    reqUserId().then(
-      res => {
-        setUserId(res.data.id)
-      }
-    );
+    setUserId(getCookieUserId)
     reqUserProfile(userId)
       .then(
         res => {

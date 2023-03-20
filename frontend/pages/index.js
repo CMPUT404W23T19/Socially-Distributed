@@ -5,8 +5,7 @@ import FormField from '../components/common/FormField.js'
 import Button from '../components/common/SubmitButton.js'
 import RedirectLink from '../components/common/RedirectLink'
 import { reqLogin, reqUserId } from '../api/Api'
-import { setAccessToken } from '../components/utils/cookieStorage'
-
+import { setAccessToken, setCookieUserId } from '../components/utils/cookieStorage'
 
 /**
  * Login form page
@@ -69,14 +68,15 @@ export default function LoginForm() {
         .then(
           res => {
             setAccessToken(res.data.access)
-
             // get user id
             reqUserId().then(
               res => {
                 setUserId(res.data.id)
+                setCookieUserId(res.data.id)
+
                 router.push({
                   pathname:'/home',
-                  query: {userId}
+                  // query: {userId}
                 })
               }
             );

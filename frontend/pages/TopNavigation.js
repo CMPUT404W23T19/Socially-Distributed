@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-
+import { clearInfo } from '../components/utils/cookieStorage';
 const TopNavigation = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotification, setShowNotification] = useState(false);
@@ -19,7 +19,8 @@ const TopNavigation = () => {
   };
 
   const handleLogout = () => {
-
+    clearInfo();
+    router.replace('/')
   }
 
   return (
