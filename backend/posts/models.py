@@ -22,3 +22,27 @@ class Post(models.Model):
     
     def __str__(self):
         return self.title
+    
+class Like(models.Model):
+    type = 'like'
+    summary = models.CharField(max_length=100)
+    actor = models.ForeignKey(Author, on_delete=models.CASCADE)
+    object = models.ForeignKey(Post, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.summary
+    
+    class Meta:
+        unique_together = ('actor', 'object')
+    
+class Comment(models.Model):
+    type = 'comment'
+    id = models.CharField(max_length=200, primary_key=True)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    comment = models.TextField()
+    contentType = models.CharField(max_length=100) # probably make this a choice field
+    published = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.comment

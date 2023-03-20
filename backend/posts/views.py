@@ -4,22 +4,27 @@ from rest_framework.response import Response
 import logging
 from common.email.email_service import send_email
 from app.models import Author
-from .models import Post
+from .models import Post, Comment, Like
 # from .permission import IsOwnerProfileOrReadOnly
-from .serializers import PostSerializer
+from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 from app.serializers import AuthorSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from datetime import datetime
-import uuid
+import uuid, base64
 
 # Create your views here.
 
 class PostList(ListCreateAPIView):
    
-    queryset=Post.objects.all()
+    
     serializer_class=PostSerializer
     # permission_classes=[IsAuthenticated] #ignore for now
+
+    def get_queryset(self):
+        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        posts=Post.objects.filter(author=author_id)
+        return posts
 
     def create(self, request, *args, **kwargs):
         """
@@ -93,4 +98,93 @@ class PostDetailView(APIView):
         post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         Post.objects.create(id=post_id, author=instance, title=request.data['title'], source=request.data['source'], origin=request.data['origin'], description=request.data['description'], contentType=request.data['contentType'], content=request.data['content'], categories=request.data['categories'], count=0, published=datetime.now().isoformat(), visibility=request.data['visibility'], unlisted=request.data['unlisted'])
         return Response(status=status.HTTP_201_CREATED)
+    
+    
+class GetImageView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        """
+        Returns a decoded image of specified Image post.
+        """
+        post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
+        instance = Post.objects.get(id=post_id)
+
+        if instance.contentType == "image/png;base64" or instance.contentType == "image/jpeg;base64" or instance.contentType == "application/base64":
+            return Response(base64.b64decode(instance.content), status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class PostLikes(APIView):
+
+    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+       
+        post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
+        likes = Like.objects.filter(object=post_id)
+        serializer = LikeSerializer(likes, many=True)
+        response = {"type": "likes", "items": serializer.data}
+        return Response(response, status=status.HTTP_200_OK)
+    
+class CommentLikes(APIView):
+
+    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+       
+        comment_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']+ '/comments/' + self.kwargs['comment_id']
+        likes = Like.objects.filter(object=comment_id)
+        serializer = LikeSerializer(likes, many=True)
+        response = {"type": "likes", "items": serializer.data}
+        return Response(response, status=status.HTTP_200_OK)
+    
+class AuthorLiked(APIView):
+
+    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        likes = Like.objects.filter(author=author_id)
+        serializer = LikeSerializer(likes, many=True)
+        response = {"type": "liked", "items": serializer.data}
+        return Response(response, status=status.HTTP_200_OK)
+
+class CommentsView(ListCreateAPIView):
+
+    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+
+    paginate_by = 5
+
+    serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
+        return Comment.objects.filter(post=post_id)
+    
+    def create(self, request, *args, **kwargs):
+        post_id = 'http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
+        comment_id = post_id + '/comments/' + str(uuid.uuid4())
+        try:
+            author = Author.objects.get(id=request.data['author'])
+            post = Post.objects.get(id=post_id)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        comment = Comment.objects.create(id=comment_id, post=post, author=author, comment=request.data['comment'], contentType=request.data['contentType'], published=datetime.now().isoformat())
+        return Response(status=status.HTTP_201_CREATED)
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        response = {"type": "comments", "items": serializer.data}
+        return Response(response)
+        
+
+
+
     

@@ -16,5 +16,5 @@ def create_author(sender, instance, created, **kwargs):
         author_instance = Author.objects.create(user=instance, id=id_arg, url=url_arg, display_name=instance.username, host=host_arg)
 
         # create inbox for the author
-        inbox = Inbox.objects.create(author=author_instance)
+        Inbox.objects.create(author=author_instance)
 
