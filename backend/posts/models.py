@@ -39,6 +39,7 @@ class Comment(models.Model):
     type = 'comment'
     id = models.CharField(max_length=200, primary_key=True)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
     comment = models.TextField()
     contentType = models.CharField(max_length=100) # probably make this a choice field
     published = models.CharField(max_length=100)

@@ -55,18 +55,26 @@ class InboxView(APIView):
                 try:
                     author = Author.objects.get(id=request.data['author']['id'])
                 except Author.DoesNotExist:
-                    author = Author.objects.create(id=request.data['author']['id'], host=request.data['author']['host'], displayName=request.data['author']['displayName'], url=request.data['author']['url'], github=request.data['author']['github'], profileImage=request.data['author']['profileImage'])
-                # check it exists at foreign host first?
-                post = Post.objects.create(id=request.data['id'], title=request.data['title'], source=request.data['source'], origin=request.data['origin'], description=request.data['description'], contentType=request.data['contentType'], content=request.data['content'], author=author, categories=request.data['categories'], count=request.data['count'], comments=request.data['comments'], published=request.data['published'], visibility=request.data['visibility'], unlisted=request.data['unlisted'])
+                    try:
+                        author = Author.objects.create(id=request.data['author']['id'], host=request.data['author']['host'], displayName=request.data['author']['displayName'], url=request.data['author']['url'], github=request.data['author']['github'], profileImage=request.data['author']['profileImage'])
+                    except:
+                        return Response(status=status.HTTP_400_BAD_REQUEST)
+                try:
+                    post = Post.objects.create(id=request.data['id'], title=request.data['title'], source=request.data['source'], origin=request.data['origin'], description=request.data['description'], contentType=request.data['contentType'], content=request.data['content'], author=author, categories=request.data['categories'], count=request.data['count'], comments=request.data['comments'], published=request.data['published'], visibility=request.data['visibility'], unlisted=request.data['unlisted'])
+                except:
+                    return Response(status=status.HTTP_400_BAD_REQUEST)
             inbox.posts.add(post)
             return Response(status=status.HTTP_200_OK)
         
         elif type == 'follow':
             # todo: check if author exists, if follow exists. Else create.
             try:
-                author = Author.objects.get(id=request.data['author']['id'])
+                author = Author.objects.get(id=request.data['actor']['id'])
             except Author.DoesNotExist:
-                author = Author.objects.create(id=request.data['author']['id'], host=request.data['author']['host'], displayName=request.data['author']['displayName'], url=request.data['author']['url'], github=request.data['author']['github'], profileImage=request.data['author']['profileImage'])
+                try:
+                    author = Author.objects.create(id=request.data['author']['id'], host=request.data['author']['host'], displayName=request.data['author']['displayName'], url=request.data['author']['url'], github=request.data['author']['github'], profileImage=request.data['author']['profileImage'])
+                except:
+                    return Response(status=status.HTTP_400_BAD_REQUEST)
             try:
                 object = Author.objects.get(id=request.data['object']['id'])
             except Author.DoesNotExist: # local author does not exist
@@ -85,7 +93,10 @@ class InboxView(APIView):
                     obj = Comment.objects.get(id=request.data['object'])
                 except Comment.DoesNotExist:
                     return Response(status=status.HTTP_404_NOT_FOUND)
-            like = Like.objects.create(author=request.data['author'], object=request.data['object'], summary=request.data['summary'])
+            try:
+                like = Like.objects.create(author=request.data['author'], object=request.data['object'], summary=request.data['summary'])
+            except:
+                return Response(status=status.HTTP_400_BAD_REQUEST) # probably duplicate
             inbox.likes.add(like)
             return Response(status=status.HTTP_200_OK)
         
@@ -96,6 +107,12 @@ class InboxView(APIView):
                 comment = Comment.objects.get(id=request.data['id'])
             except Comment.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
+            #     try:
+            #         post_id = '/'.join((request.data['id']).split('/')[:-2])
+            #         post = Post.objects.get(id=post_id)
+            #     except Post.DoesNotExist:
+            #         return Response(status=status.HTTP_400_BAD_REQUEST)
+            #     comment = Comment.objects.create(id=request.data['id'], author=request.data['author'], comment=request.data['comment'], contentType=request.data['contentType'], published=request.data['published'], post=post)
             inbox.comments.add(comment)
             return Response(status=status.HTTP_200_OK)
 
@@ -110,6 +127,8 @@ class InboxView(APIView):
         inbox = self.get_queryset()
         inbox.posts.clear()
         inbox.requests.clear()
+        inbox.likes.clear()
+        inbox.comments.clear()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

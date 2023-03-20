@@ -6,7 +6,7 @@ from common.email.email_service import send_email
 from .models import Author
 from posts.models import Post
 # from .permission import IsOwnerProfileOrReadOnly
-from .serializers import AuthorSerializer, FollowerSerializer
+from .serializers import AuthorSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 
@@ -61,7 +61,7 @@ class AuthorDetailView(APIView):
 
 class FollowerList(ListAPIView):
 
-    serializer_class=FollowerSerializer
+    serializer_class=AuthorSerializer
     # permission_classes=[IsAuthenticated] #ignore for now
 
     def get_queryset(self):
@@ -74,7 +74,7 @@ class FollowerList(ListAPIView):
         Get all followers of an author
         """
         queryset = self.get_queryset()
-        serializer = FollowerSerializer(queryset, many=True)
+        serializer = AuthorSerializer(queryset, many=True)
         response = {"type": "followers", "items": serializer.data}
         return Response(response, status=status.HTTP_200_OK)
     
@@ -91,7 +91,8 @@ class FollowerDetailView(RetrieveUpdateDestroyAPIView):
         """
         author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
         author = Author.objects.get(id=author_id)
-        exists = author.followers.filter(id=self.kwargs['friend_id']).exists()
+        friend_id = 'http://127.0.0.1:8000/authors/'+self.kwargs['friend_id']
+        exists = author.followers.filter(id=friend_id).exists()
         if exists:
             return Response(status=status.HTTP_200_OK)
         else:
@@ -102,8 +103,12 @@ class FollowerDetailView(RetrieveUpdateDestroyAPIView):
         Add a follower to current author
         """
         author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
-        author = Author.objects.get(id=author_id)
-        friend = Author.objects.get(id=self.kwargs['friend_id'])
+        friend_id='http://127.0.0.1:8000/authors/'+self.kwargs['friend_id']
+        try:
+            author = Author.objects.get(id=author_id)
+            friend = Author.objects.get(id=friend_id)
+        except Author.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         author.followers.add(friend)
         return Response(status=status.HTTP_200_OK)
 

@@ -15,7 +15,7 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ('id', 'type', 'author', 'comment', 'contentType', 'published',)
 
 class LikeSerializer(serializers.ModelSerializer):
-    actor = AuthorSerializer(read_only=True)
+    author = AuthorSerializer(read_only=True)
     class Meta:
         model = Like
         fields = ('type', 'summary', 'actor', 'object',)

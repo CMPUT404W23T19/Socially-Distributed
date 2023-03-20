@@ -149,6 +149,42 @@ class AuthorLiked(APIView):
         response = {"type": "liked", "items": serializer.data}
         return Response(response, status=status.HTTP_200_OK)
 
+class CommentsView(ListCreateAPIView):
+
+    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+
+    paginate_by = 5
+
+    serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        post_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
+        return Comment.objects.filter(post=post_id)
+    
+    def create(self, request, *args, **kwargs):
+        post_id = 'http://127.0.0.1:8000/authors/'+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
+        comment_id = post_id + '/comments/' + str(uuid.uuid4())
+        try:
+            author = Author.objects.get(id=request.data['author'])
+            post = Post.objects.get(id=post_id)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        comment = Comment.objects.create(id=comment_id, post=post, author=author, comment=request.data['comment'], contentType=request.data['contentType'], published=datetime.now().isoformat())
+        return Response(status=status.HTTP_201_CREATED)
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        response = {"type": "comments", "items": serializer.data}
+        return Response(response)
+        
+
 
 
     
