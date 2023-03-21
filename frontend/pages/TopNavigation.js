@@ -33,7 +33,7 @@ const TopNavigation = () => {
             <Link href="/profile">
               <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10 ml-10">Profile</a>
             </Link>
-            <Link href="/Feed">
+            <Link href="/post">
               <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10">Posts</a>
             </Link>
             <Link href="/createPost">

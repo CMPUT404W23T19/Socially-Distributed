@@ -49,9 +49,16 @@ export const reqCreatePost = (data, userId) => {
   })
 }
 
-export const reqGetMyPosts = (userId) => {
+export const reqGetUserPosts = (userId) => {
   return axios({
     url:`http://localhost:8000/authors/${userId}/posts/`,
     method: 'get'
+  })
+}
+
+export const reqGetAuthorsList = () => {
+  return axios({
+    url:`http://localhost:8000/authors/`,
+    method:'get'
   })
 }

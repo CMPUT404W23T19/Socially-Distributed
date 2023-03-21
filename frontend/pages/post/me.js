@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import TopNavigation from '../TopNavigation'
 import SideNav from '../../components/SideNav'
 import { getCookieUserId } from '../../components/utils/cookieStorage'
-import { reqGetMyPosts } from '../../api/Api'
+import { reqGetUserPosts } from '../../api/Api'
+
 export default function Public() {
   const [userId, setUserId] = useState('')
   const [myPostList, setMyPostList] = useState([])
@@ -13,7 +14,7 @@ export default function Public() {
       setUserId(getCookieUserId);
       if (userId !== '') {
         try {
-          const res = await reqGetMyPosts(userId);
+          const res = await reqGetUserPosts(userId);
           if (res.status === 200) {
             setMyPostList(res.data.items)
           }
@@ -41,13 +42,11 @@ export default function Public() {
       <TopNavigation />
       <SideNav />
       <div className='mt-20 ml-40'>
-        {console.log(myPostList)}
         {myPostList.map(post => (
-          post.visibility === "PUBLIC" && (
             <div key={post.id} className="bg-white rounded-lg shadow-lg p-5 my-5">
               <div className="flex items-center mb-3">
                 <img src={post.author.profile_image} alt="" className="w-8 h-8 rounded-full mr-2" />
-                <h2 className="text-lg font-bold">{`User ${post.author.display_name}`}</h2>
+                <h2 className="text-lg font-bold">{post.author.display_name}</h2>
               </div>
               <p className="text-base mb-3">{post.content}</p>
               <div className="flex justify-between">
@@ -71,7 +70,7 @@ export default function Public() {
                   ))}
                 </div>
               )} */}
-            </div>)
+            </div>
         ))} 
       </div>
     </div>

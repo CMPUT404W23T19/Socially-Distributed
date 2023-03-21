@@ -21,7 +21,7 @@ export default class CommonNav extends Component {
             </Link>
             <Link href='/post/me'>
               <div className='flex mb-2 justify-start items-center pl-5 hover:bg-gray-400 p-2 rounded-md cursor-pointer'>
-                <h3 className='text-white'>Me</h3>
+                <h3>Me</h3>
               </div>
             </Link>
           </div>

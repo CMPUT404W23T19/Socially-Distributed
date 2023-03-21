@@ -2,25 +2,53 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TopNavigation from '../TopNavigation';
 import SideNav from '../../components/SideNav'
+import { reqGetAuthorsList, reqGetUserPosts } from '../../api/Api';
+import Link from 'next/link';
 
 const Feed = () => {
-  const [posts, setPosts] = useState([]);
+  // const [posts, setPosts] = useState([]);
   const [comments, setComments] = useState([]);
+  const [postsList, setPostsList] = useState([]);
+
+  // useEffect(() => {
+  //   axios.get('https://jsonplaceholder.typicode.com/posts')
+  //     .then(response => {
+  //       setPosts(response.data);
+  //     })
+  //     .catch(error => {
+  //       console.log(error);
+  //     });
+  // }, []);
+
+  // useEffect(() => {
+  //   axios.get('https://jsonplaceholder.typicode.com/comments')
+  //     .then(response => {
+  //       setComments(response.data);
+  //     })
+  //     .catch(error => {
+  //       console.log(error);
+  //     });
+  // }, []);
 
   useEffect(() => {
-    axios.get('https://jsonplaceholder.typicode.com/posts')
-      .then(response => {
-        setPosts(response.data);
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  }, []);
-
-  useEffect(() => {
-    axios.get('https://jsonplaceholder.typicode.com/comments')
-      .then(response => {
-        setComments(response.data);
+    reqGetAuthorsList()
+      .then(res => {
+        let authors = res.data.items;
+        const promises = authors.map(author => {
+          let userId = getIdFromUrl(author.id);
+          return reqGetUserPosts(userId)
+        });
+        Promise.all(promises)
+          .then(results => {
+            let posts = results.flatMap(res => res.data.items);
+            posts.sort((a, b) => {
+              return new Date(b.published) - new Date(a.published)
+            })
+            setPostsList(posts);
+          })
+          .catch(error => {
+            console.log(error);
+          });
       })
       .catch(error => {
         console.log(error);
@@ -41,12 +69,18 @@ const Feed = () => {
     setIsCollapsed(!isCollapsed);
   };
 
+  function getIdFromUrl(url) {
+    const regex = /\/(\d+)\/?$/
+    const match = url.match(regex)
+    return match ? parseInt(match[1]) : null
+  }
+
   return (
     <div className="container mx-auto pt-10 pl-32">
       <TopNavigation />
       <SideNav />
-      <h1 className="text-3xl font-bold mt-10 mb-5" style={{ marginLeft: "20px" }}>See What Your Friends Are Up to!</h1>
-      {posts.map(post => (
+      {/* {console.log(postsList)} */}
+      {/* {posts.map(post => (
         <div key={post.id} className="bg-white rounded-lg shadow-lg p-5 my-5">
           <div className="flex items-center mb-3">
             <img src={`https://i.pravatar.cc/50?u=${post.userId}`} alt="" className="w-8 h-8 rounded-full mr-2" />
@@ -75,7 +109,30 @@ const Feed = () => {
             </div>
           )}
         </div>
-      ))}
+      ))} */}
+      <div>
+        {postsList.map(post => (
+          post.visibility === 'PUBLIC' &&
+          <div key={post.id} className="bg-white rounded-lg shadow-lg p-5 my-5">
+            <div  className='cursor-pointer w-auto'>
+              <Link href="/profile/[id]" as={`/profile/${getIdFromUrl(post.author.id)}`}>
+                <div className="flex items-center mb-3">
+                  <img src={post.author.profile_image} alt="" className="w-8 h-8 rounded-full mr-2" />
+                  <h2 className="text-lg font-bold">{post.author.display_name}</h2>
+                </div>
+              </Link>
+            </div>
+            <p className="text-base mb-3">{post.content}</p>
+            <div className="flex justify-between">
+              <div className="flex">
+                <button className="bg-gray-200 rounded-lg px-4 py-2 mr-3 hover:bg-gray-300" onClick={() => handleLike(post.id)}>Like</button>
+                <button className="bg-gray-200 rounded-lg px-4 py-2 hover:bg-gray-300" onClick={() => handleComment(post.id)}>Comment</button>
+              </div>
+              <button className="bg-gray-200 rounded-lg px-4 py-2" onClick={toggleComments}>{isCollapsed ? "Show Comments" : "Hide Comments"}</button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
