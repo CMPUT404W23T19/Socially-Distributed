@@ -4,7 +4,8 @@ import TopNavigation from '../TopNavigation';
 import SideNav from '../../components/SideNav'
 import { reqGetAuthorsList, reqGetUserPosts } from '../../api/Api';
 import Link from 'next/link';
-
+import { getTime } from '../../components/common';
+import { getUserIdFromUrl } from '../../components/common';
 const Feed = () => {
   // const [posts, setPosts] = useState([]);
   const [comments, setComments] = useState([]);
@@ -35,7 +36,7 @@ const Feed = () => {
       .then(res => {
         let authors = res.data.items;
         const promises = authors.map(author => {
-          let userId = getIdFromUrl(author.id);
+          let userId = getUserIdFromUrl(author.id);
           return reqGetUserPosts(userId)
         });
         Promise.all(promises)
@@ -69,11 +70,6 @@ const Feed = () => {
     setIsCollapsed(!isCollapsed);
   };
 
-  function getIdFromUrl(url) {
-    const regex = /\/(\d+)\/?$/
-    const match = url.match(regex)
-    return match ? parseInt(match[1]) : null
-  }
 
   return (
     <div className="container mx-auto pt-10 pl-32">
@@ -115,14 +111,22 @@ const Feed = () => {
           post.visibility === 'PUBLIC' &&
           <div key={post.id} className="bg-white rounded-lg shadow-lg p-5 my-5">
             <div  className='cursor-pointer w-auto'>
-              <Link href="/profile/[id]" as={`/profile/${getIdFromUrl(post.author.id)}`}>
+              <Link href="/profile/[id]" as={`/profile/${getUserIdFromUrl(post.author.id)}`}>
+              <div >
+              <div className='flex justify-between'>
                 <div className="flex items-center mb-3">
                   <img src={post.author.profile_image} alt="" className="w-8 h-8 rounded-full mr-2" />
                   <h2 className="text-lg font-bold">{post.author.display_name}</h2>
                 </div>
+                <div>
+                  <span>{getTime(post.published)}</span>
+                </div>
+              </div>
+              <p className="text-base mb-3 font-semibold">{post.title}</p>
+            </div>
               </Link>
             </div>
-            <p className="text-base mb-3">{post.content}</p>
+            <p className="text-base mb-3 px-5">{post.content}</p>
             <div className="flex justify-between">
               <div className="flex">
                 <button className="bg-gray-200 rounded-lg px-4 py-2 mr-3 hover:bg-gray-300" onClick={() => handleLike(post.id)}>Like</button>

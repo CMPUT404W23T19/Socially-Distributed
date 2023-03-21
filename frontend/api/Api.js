@@ -62,3 +62,10 @@ export const reqGetAuthorsList = () => {
     method:'get'
   })
 }
+
+export const reqDeletePost = (authorId, postId) => {
+  return axios({
+    url:`http://localhost:8000/authors/${authorId}/posts/${postId}`,
+    method:'delete'
+  })
+}
