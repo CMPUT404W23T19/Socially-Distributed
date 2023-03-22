@@ -19,6 +19,6 @@ class Author(models.Model):
     
 class Follow(models.Model):
     type = 'follow'
-    summary = models.CharField(max_length=100, blank=True, null=True)
+    summary = models.CharField(max_length=500, blank=True, null=True)
     actor = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='actor')
     object = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='object')
