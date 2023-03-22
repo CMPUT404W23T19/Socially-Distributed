@@ -100,7 +100,7 @@ class FollowerDetailView(RetrieveUpdateDestroyAPIView):
         """
         author_id=HOST+self.kwargs['author_id']
         author = Author.objects.get(id=author_id)
-        friend_id = HOST+self.kwargs['friend_id']
+        friend_id = self.kwargs['friend_id']
         exists = author.followers.filter(id=friend_id).exists()
         if exists:
             return Response(status=status.HTTP_200_OK)
@@ -112,7 +112,7 @@ class FollowerDetailView(RetrieveUpdateDestroyAPIView):
         Add a follower to current author
         """
         author_id=HOST+self.kwargs['author_id']
-        friend_id=HOST+self.kwargs['friend_id']
+        friend_id=self.kwargs['friend_id']
         try:
             author = Author.objects.get(id=author_id)
             friend = Author.objects.get(id=friend_id)
