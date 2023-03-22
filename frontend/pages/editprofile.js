@@ -16,7 +16,8 @@ export default function EditProfileForm() {
 
   useEffect(() => {
     setUserId(getCookieUserId)
-    reqUserProfile(userId)
+    if (userId) {
+      reqUserProfile(userId)
       .then(
         res => {
           setUsername(res.data.display_name)
@@ -32,6 +33,7 @@ export default function EditProfileForm() {
           alert(e)
         }
       )
+    }
   }, [userId])
 
   const handleUsernameChange = useCallback((event) => {

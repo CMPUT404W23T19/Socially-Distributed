@@ -1,0 +1,12 @@
+.follower {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 54px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.follower:hover {
+  background-color: #f6f6f6;
+}
