@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-
+import { clearInfo } from '../components/utils/cookieStorage';
 const TopNavigation = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotification, setShowNotification] = useState(false);
@@ -19,7 +19,8 @@ const TopNavigation = () => {
   };
 
   const handleLogout = () => {
-
+    clearInfo();
+    router.replace('/')
   }
 
   return (
@@ -32,7 +33,7 @@ const TopNavigation = () => {
             <Link href="/profile">
               <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10 ml-10">Profile</a>
             </Link>
-            <Link href="/Feed">
+            <Link href="/post">
               <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10">Posts</a>
             </Link>
             <Link href="/createPost">

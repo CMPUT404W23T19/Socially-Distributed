@@ -4,7 +4,7 @@ import Nav from '../components/CommonNav'
 import { useRouter } from 'next/router'
 import PostsList from './posts';
 import TopNavigation from './TopNavigation';
-import Feed from './Feed';
+import Feed from './post';
 
 export default function Home() {
   return (
