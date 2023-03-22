@@ -36,6 +36,9 @@ class Like(models.Model):
         unique_together = ('actor', 'object')
     
 class Comment(models.Model):
+    """
+    author, comment and contentType required
+    """
     type = 'comment'
     id = models.CharField(max_length=200, primary_key=True)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)

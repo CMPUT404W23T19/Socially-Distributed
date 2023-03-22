@@ -4,15 +4,16 @@ from django.dispatch import receiver
 from .models import Author
 from inbox.models import Inbox
 
+HOST = "http://127.0.0.1:8000"
 
 @receiver(post_save, sender=User)
 def create_author(sender, instance, created, **kwargs):
     if created: # if the user is created
 
         # create an author object
-        id_arg = "http://127.0.0.1:8000/authors/"+str(instance.id)
-        url_arg = "http://127.0.0.1:8000/authors/"+str(instance.id)
-        host_arg = "http://127.0.0.1:8000"
+        id_arg = HOST+"/authors/"+str(instance.id)
+        url_arg = HOST+"/authors/"+str(instance.id)
+        host_arg = HOST
         author_instance = Author.objects.create(user=instance, id=id_arg, url=url_arg, display_name=instance.username, host=host_arg)
 
         # create inbox for the author
