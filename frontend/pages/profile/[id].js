@@ -3,37 +3,20 @@ import { useRouter } from 'next/router'
 import TopNavigation from '../TopNavigation'
 import Link from 'next/link'
 import Image from "next/image"
-import { reqUserProfile, reqUserId } from '../../api/Api'
+import { reqUserProfile, reqFollowOthers, reqGetFollowersList } from '../../api/Api'
 import { getCookieUserId } from '../../components/utils/cookieStorage'
-
-// export async function getServerSideProps({ params }) {
-//   const { id } = params;
-//   console.log(id);
-//   let user = null;
-//   try {
-//     const res = await reqUserProfile(id);
-//     user = {
-//       display_name: res.data.display_name,
-//       github: res.data.github,
-//       profile_page: res.data.profile_page
-//     }
-//   } catch (err) {
-//     console.log(err);
-//   }
-//   return {
-//     props: {
-//       user
-//     }
-//   };
-// }
+import styles from './profile.module.css'
+import { getUserIdFromUrl } from '../../components/common'
 
 export default function UserProfile() {
   const router = useRouter()
+  const [localId, setLocalId] = useState('')
   const { id } = router.query
-  // console.log(id);
   const [user, setUser] = useState(null)
+  const [isFollowing, setIsFollowing] = useState(false)
   useEffect(() => {
-    if (id) {
+    setLocalId(getCookieUserId())
+    if (localId && id) {
       reqUserProfile(id)
         .then(
           res => {
@@ -42,23 +25,48 @@ export default function UserProfile() {
           err => {
             console.log(err);
           }
-        )
+        );
+      reqGetFollowersList(id)
+        .then(
+          res => {
+            const found = res.data.items.find(follower => getUserIdFromUrl(follower.id).toString() === localId);
+            if (found) {
+              setIsFollowing(true)
+            }
+          },
+          err => {
+            console.log(err);
+          }
+        );
     }
-  }, [id])
+  }, [localId, isFollowing])
 
   const goBack = () => {
     router.back();
   }
 
-  const handleFollow = () => {
+  const handleFollow = (id) => {
     // handle follow here
+    const current_author = getCookieUserId();
+    const data = {
+      id: current_author
+    }
+    reqFollowOthers(data, id, current_author)
+      .then(
+        res => {
+          setIsFollowing(true)
+          console.log(res);
+        },
+        err => {
+          // console.log(err);
+          alert(err)
+        }
+      )
   }
 
   if (!user) {
     return (
       <div>
-        {console.log(user)}
-
         <TopNavigation />
         <p>Loading...</p>
       </div>
@@ -72,7 +80,13 @@ export default function UserProfile() {
       <button onClick={goBack} className="absolute top-0 left-0 mt-24 px-3 py-1 ml-10 rounded-md bg-gray-100 text-sm">← Back</button>
       <div className="mt-24 container max-w-2xl mx-auto flex-col items-center justify-center px-2">
         <div className="bg-lighter px-10 h-4/5 rounded-xl shadow-xl text-main w-full relative">
-          <button onClick={handleFollow} className='absolute top-5 right-3 rounded-md px-5 py-2 transition-all duration-200 ease-in-out text-white text-base' style={{background:"#008CBA"}}>Follow</button>
+          {localId !== id && (
+            isFollowing ? (
+              <button className={styles.followButton}>Following</button>
+            ) : (
+              <button onClick={() => handleFollow(id)} className={styles.followButton}>+ Follow</button>
+            )
+          )}
           <div>
             <div className='w-28 h-28 my-10 mx-auto'>
               <img className='w-28 h-28 rounded-full border-2 border-gray-100' src={user.profile_image ? user.profile_image : "../defaultUser.png"} alt="User" />
