@@ -9,8 +9,11 @@ from posts.models import Post
 from .serializers import AuthorSerializer
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 
 # Create your views here.
+
+HOST='http://127.0.0.1:8000/authors/'
 
 class AuthorListCreateView(ListCreateAPIView):
     queryset=Author.objects.all()
@@ -24,11 +27,17 @@ class AuthorListCreateView(ListCreateAPIView):
     def list(self, request, *args, **kwargs):
         """
         
-        Return a list of all the authors
+        Return a list of all the authors. Pagination is supported.
         """
-        queryset = self.get_queryset()
-        serializer = AuthorSerializer(queryset, many=True)
-        response = {"type": "authors", "items": serializer.data}
+        p = PageNumberPagination()
+        p.page_query_param = 'page'
+        p.page_size_query_param = 'size'
+        queryset = Author.objects.all()
+        authors = p.paginate_queryset(queryset, request)
+        serializer = AuthorSerializer(authors, many=True)
+        page = p.get_page_number(request, p)
+        size = p.get_page_size(request)
+        response = {"type": "authors", 'page': page, 'size': size, "items": serializer.data}
         return Response(response)
 
 
@@ -42,7 +51,7 @@ class AuthorDetailView(APIView):
         """
         Return an individual author
         """
-        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        author_id=HOST+self.kwargs['author_id']
         instance = Author.objects.get(id=author_id)
         serializer = AuthorSerializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -51,7 +60,7 @@ class AuthorDetailView(APIView):
         """
         Update an individual author details
         """
-        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        author_id=HOST+self.kwargs['author_id']
         instance = Author.objects.get(id=author_id)
         serializer = AuthorSerializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -65,7 +74,7 @@ class FollowerList(ListAPIView):
     # permission_classes=[IsAuthenticated] #ignore for now
 
     def get_queryset(self):
-        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        author_id=HOST+self.kwargs['author_id']
         author=Author.objects.get(id=author_id)
         return author.followers.all()
     
@@ -89,9 +98,9 @@ class FollowerDetailView(RetrieveUpdateDestroyAPIView):
         """
         check if FOREIGN_AUTHOR_ID is a follower of AUTHOR_ID
         """
-        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        author_id=HOST+self.kwargs['author_id']
         author = Author.objects.get(id=author_id)
-        friend_id = 'http://127.0.0.1:8000/authors/'+self.kwargs['friend_id']
+        friend_id = HOST+self.kwargs['friend_id']
         exists = author.followers.filter(id=friend_id).exists()
         if exists:
             return Response(status=status.HTTP_200_OK)
@@ -102,8 +111,8 @@ class FollowerDetailView(RetrieveUpdateDestroyAPIView):
         """
         Add a follower to current author
         """
-        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
-        friend_id='http://127.0.0.1:8000/authors/'+self.kwargs['friend_id']
+        author_id=HOST+self.kwargs['author_id']
+        friend_id=HOST+self.kwargs['friend_id']
         try:
             author = Author.objects.get(id=author_id)
             friend = Author.objects.get(id=friend_id)
@@ -116,7 +125,7 @@ class FollowerDetailView(RetrieveUpdateDestroyAPIView):
         """
         Remove a follower from current author
         """
-        author_id='http://127.0.0.1:8000/authors/'+self.kwargs['author_id']
+        author_id=HOST+self.kwargs['author_id']
         author = Author.objects.get(id=author_id)
         exists = author.followers.filter(id=self.kwargs['friend_id']).exists()
         if exists:
