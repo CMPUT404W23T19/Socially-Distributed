@@ -15,7 +15,7 @@ from rest_framework.pagination import PageNumberPagination
 
 ### NEED TO ADD ERROR HANDLING FOR WHEN AUTHOR DOES NOT EXIST. FOR ALL VIEWS ###
 
-HOST = 'http://127.0.0.1:8000/authors/'
+HOST = 'https://floating-fjord-51978.herokuapp.com/authors/'
 
 class InboxView(APIView):
 

@@ -13,7 +13,7 @@ from rest_framework.pagination import PageNumberPagination
 
 # Create your views here.
 
-HOST='http://127.0.0.1:8000/authors/'
+HOST='https://floating-fjord-51978.herokuapp.com/authors/'
 
 class AuthorListCreateView(ListCreateAPIView):
     queryset=Author.objects.all()

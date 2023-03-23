@@ -34,6 +34,11 @@ TESTING = bool(os.environ.get("DJANGO_TESTING", default=False))
 
 ALLOWED_HOSTS = ['*']
 
+from django.core.management.commands.runserver import Command as runserver
+
+runserver.default_port = os.environ.get('PORT') 
+runserver.default_addr = '0.0.0.0'
+
 # add your new traefik or URL host here
 CORS_ORIGIN_WHITELIST = [
     'http://next-django-template.test',
