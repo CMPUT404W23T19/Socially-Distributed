@@ -27,7 +27,7 @@ const TopNavigation = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-800 px-4 py-3">
       <div className="flex justify-between">
         <div>
-          <Link href="/">
+          <Link href="/inbox">
             <a className="text-white hover:text-gray-400 font-semibold text-lg">My App</a>
           </Link>
             <Link href="/profile">

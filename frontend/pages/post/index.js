@@ -10,7 +10,6 @@ const Feed = () => {
   // const [posts, setPosts] = useState([]);
   const [comments, setComments] = useState([]);
   const [postsList, setPostsList] = useState([]);
-
   // useEffect(() => {
   //   axios.get('https://jsonplaceholder.typicode.com/posts')
   //     .then(response => {

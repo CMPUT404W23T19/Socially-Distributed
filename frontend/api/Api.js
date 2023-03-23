@@ -53,43 +53,73 @@ export const reqCreatePost = (data, userId) => {
 
 export const reqGetUserPosts = (userId) => {
   return axios({
-    url:`${host}/authors/${userId}/posts/`,
-    method: 'get'
+    url: `${host}/authors/${userId}/posts/`,
+    method: 'get',
+    params: {// just for testing, pagination hasn't implemented
+      page:1,
+      size:10,
+    }
   })
 }
 
 export const reqGetAuthorsList = () => {
   return axios({
-    url:`${host}/authors/`,
-    method:'get'
+    url: `${host}/authors/`,
+    method: 'get',
+    params:{// just for testing, pagination hasn't implemented
+      page:1,
+      size:50 
+    }
   })
 }
 
 export const reqDeletePost = (authorId, postId) => {
   return axios({
-    url:`${host}/authors/${authorId}/posts/${postId}`,
-    method:'delete'
+    url: `${host}/authors/${authorId}/posts/${postId}`,
+    method: 'delete'
   })
 }
 
 export const reqModifyPost = (authorId, postId) => {
   return axios({
-    url:`${host}/authors/${authorId}/posts/${postId}`,
-    method:'put'
+    url: `${host}/authors/${authorId}/posts/${postId}`,
+    method: 'put'
   })
 }
 
 export const reqGetFollowersList = (authorId) => {
   return axios({
-    url:`${host}/authors/${authorId}/followers`,
+    url: `${host}/authors/${authorId}/followers`,
+    method: 'get'
+  })
+}
+
+export const reqGetSingleFollower = (authorId, friendId) => {
+  return axios({
+    url:`${host}/authors/${authorId}/followers/${friendId}`,
     method:'get'
   })
 }
 
 export const reqFollowOthers = (data, authorId, friendId) => {
   return axios({
-    url:`${host}/authors/${authorId}/followers/${friendId}`,
-    method:'put',
+    url: `${host}/authors/${authorId}/followers/${friendId}`,
+    method: 'put',
     data
+  })
+}
+
+export const reqPostToInbox = (data, authorId) => {
+  return axios({
+    url: `${host}/authors/${authorId}/inbox`,
+    method: "post",
+    data
+  })
+}
+
+export const reqGetInbox = (authorId) => {
+  return axios({
+    url: `${host}/authors/${authorId}/inbox`,
+    method: "get",
   })
 }

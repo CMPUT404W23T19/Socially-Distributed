@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import TopNavigation from '../TopNavigation'
 import Link from 'next/link'
 import Image from "next/image"
-import { reqUserProfile, reqFollowOthers, reqGetFollowersList } from '../../api/Api'
+import { reqUserProfile, reqFollowOthers, reqGetFollowersList, reqPostToInbox } from '../../api/Api'
 import { getCookieUserId } from '../../components/utils/cookieStorage'
 import styles from './profile.module.css'
 import { getUserIdFromUrl } from '../../components/common'
@@ -13,7 +13,10 @@ export default function UserProfile() {
   const [localId, setLocalId] = useState('')
   const { id } = router.query
   const [user, setUser] = useState(null)
+  const [localUser,setLocalUser] = useState(null)
   const [isFollowing, setIsFollowing] = useState(false)
+  const host = 'http://127.0.0.1:8000'
+
   useEffect(() => {
     setLocalId(getCookieUserId())
     if (localId && id) {
@@ -26,6 +29,15 @@ export default function UserProfile() {
             console.log(err);
           }
         );
+      reqUserProfile(localId)
+      .then(
+        res => {
+          setLocalUser(res.data)
+        },
+        err => {
+          console.log(err);
+        }
+      )
       reqGetFollowersList(id)
         .then(
           res => {
@@ -45,17 +57,51 @@ export default function UserProfile() {
     router.back();
   }
 
-  const handleFollow = (id) => {
+  const handleFollow = async (id) => {
     // handle follow here
-    const current_author = getCookieUserId();
     const data = {
-      id: current_author
+      id: localId
     }
-    reqFollowOthers(data, id, current_author)
+    reqFollowOthers(data, id, encodeURIComponent(localUser.id))
       .then(
         res => {
           setIsFollowing(true)
-          console.log(res);
+          // console.log(res);
+          let summary = `${localId} want to follow ${id}`
+          console.log(summary);
+          const data = {
+            "type": "follow",
+            "summary": `${localId} want to follow ${id}`,
+            "actor": {
+              "id": `${host}/authors/${localId}`,
+              "type": `${localUser.type}`,
+              "display_name": `${localUser.display_name}`,
+              "host": `${localUser.host}`,
+              "github": `${localUser.github}`,
+              "profile_image": `${localUser.profile_image}`,
+              "url": `${localUser.url}`
+            },
+            "object": {
+              "id": `${host}/authors/${id}`,
+              "type": `${user.type}`,
+              "display_name": `${user.display_name}`,
+              "host": `${user.host}`,
+              "github": `${user.github}`,
+              "profile_image": `${user.profile_image}`,
+              "url": `${user.url}`
+            }
+          }
+          reqPostToInbox(data, id)
+          .then(
+            res => {
+              console.log('success');
+              console.log(res);
+            },
+            err => {
+              console.log('fail');
+              console.log(err);
+            }
+          )
         },
         err => {
           // console.log(err);
@@ -92,12 +138,16 @@ export default function UserProfile() {
               <img className='w-28 h-28 rounded-full border-2 border-gray-100' src={user.profile_image ? user.profile_image : "../defaultUser.png"} alt="User" />
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold leading-none tracking-tighter mb-5">Username</h2>
-              <p className="text-content ml-8 h-10 font-bold">{user.username == '' ? 'test username' : user.display_name}</p>
+              <h2 className="text-3xl font-semibold leading-none tracking-tighter mb-5">Username</h2>
+              <p className="text-content ml-8 h-10 font-bold">{user.username ? 'not exist' : user.display_name}</p>
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold leading-none tracking-tighter mb-5">Github</h2>
-              <a><p className="text-content ml-8 h-10 font-bold">{user.github == '' ? 'test github' : user.github}</p></a>
+              <h2 className="text-3xl font-semibold leading-none tracking-tighter mb-5">UserId</h2>
+              <p className="text-content ml-8 h-10 font-bold">{getUserIdFromUrl(user.id)}</p>
+            </div>
+            <div className="items-center justify-between mb-8">
+              <h2 className="text-3xl font-semibold leading-none tracking-tighter mb-5">Github</h2>
+              <a><p className="text-content ml-8 h-10 font-bold">{user.github ? 'not exist' : user.github}</p></a>
             </div>
           </div>
         </div>

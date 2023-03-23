@@ -30,7 +30,7 @@ export default function Public() {
       }
     }
     fetchData();
-  }, [userId, myPostList])
+  }, [userId])
 
   const handleLike = (postId) => {
     // handle like logic here
@@ -59,6 +59,7 @@ export default function Public() {
       <TopNavigation />
       <SideNav />
       <div className='mt-20 ml-40'>
+        {console.log(myPostList)}
         {myPostList.map(post => (
           <div key={post.id} className="bg-white rounded-lg shadow-lg p-5 my-5">
             <div >
