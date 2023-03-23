@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import TopNavigation from './TopNavigation'
-import { reqGetFollowersList, reqGetInbox, reqPostToInbox } from '../api/Api'
+import { reqGetFollowersList, reqGetInbox, reqPostToInbox, reqClearInbox } from '../api/Api'
 import { getCookieUserId } from '../components/utils/cookieStorage'
 import FriendRequest from '../components/common/FriendRequest'
 import { getUserIdFromUrl } from '../components/common'
 import { reqFollowOthers } from '../api/Api'
+import Styles from './styles.module.css'
 export default function inbox() {
   const [userId, setUserId] = useState('')
   const [friendRequestsList, setFriendRequestsList] = useState([])
+  const [isCleared, setIsCleared] = useState(false)
 
   useEffect(() => {
     setUserId(getCookieUserId)
@@ -15,7 +17,6 @@ export default function inbox() {
       reqGetInbox(userId)
         .then(
           res => {
-            console.log(res);
             const receivedList = res.data.items
             const requestsList = []
             receivedList.forEach(element => {
@@ -33,7 +34,7 @@ export default function inbox() {
         )
 
     }
-  }, [userId])
+  }, [userId, isCleared])
 
 
   const handleAcceptRequest = async (request) => {
@@ -91,6 +92,18 @@ export default function inbox() {
 
   }
 
+  const handleClear = () => {
+    reqClearInbox(userId)
+    .then(
+      res => {
+        setIsCleared(true)
+        return 'success'
+      },
+      err => {
+        return 'fail'
+      }
+    )
+  }
   if (friendRequestsList.length === 0) {
     return (
       <div>
@@ -105,8 +118,10 @@ export default function inbox() {
     return (
       <div>
         <TopNavigation />
-        {console.log(friendRequestsList.length)}
-        <div className='mt-20 w-4/5 h-screen py-3 mx-auto border border-gray-100'>
+        <div className='pt-16 w-4/5 h-screen py-3 mx-auto border border-gray-100'>
+          <div className='text-right border-b border-gray-200 pb-3 mb-3'>
+            <button className={Styles.clearButton} onClick={handleClear}>Clear</button>
+          </div>
           {friendRequestsList.map(request => (
             <div key={request.actor.id}>
               <FriendRequest

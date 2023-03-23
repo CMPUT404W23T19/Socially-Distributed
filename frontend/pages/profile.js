@@ -7,7 +7,7 @@ import { reqUserProfile, reqUserId, reqGetUserPosts, reqGetAuthorsList, reqGetFo
 import { getCookieUserId } from '../components/utils/cookieStorage'
 import { Close } from '@material-ui/icons'
 import { getUserIdFromUrl } from '../components/common'
-import followerStyle from './myProfile.module.css'
+import followerStyle from './styles.module.css'
 
 function ProfilePage() {
   const [userId, setUserId] = useState(0)

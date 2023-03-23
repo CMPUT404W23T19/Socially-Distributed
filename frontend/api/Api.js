@@ -130,3 +130,10 @@ export const reqGetInbox = (authorId) => {
     method: "get",
   })
 }
+
+export const reqClearInbox = (authorId) => {
+  return axios({
+    url: `${host}/authors/${authorId}/inbox`,
+    method:'delete'
+  })
+}

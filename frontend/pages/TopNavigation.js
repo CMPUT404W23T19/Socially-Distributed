@@ -64,7 +64,7 @@ const TopNavigation = () => {
       <div className="flex justify-between">
         <div>
           <Link href="/inbox">
-            <a className="text-white hover:text-gray-400 font-semibold text-lg">My App</a>
+            <a className="text-white hover:text-gray-400 font-semibold text-lg">Inbox</a>
           </Link>
             <Link href="/profile">
               <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10 ml-10">Profile</a>
