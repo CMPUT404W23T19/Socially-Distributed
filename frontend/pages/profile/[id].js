@@ -44,10 +44,13 @@ export default function UserProfile() {
             const found = res.data.items.find(follower => getUserIdFromUrl(follower.id).toString() === localId);
             if (found) {
               setIsFollowing(true)
+            } else {
+              setIsFollowing(false)
             }
           },
           err => {
             console.log(err);
+            setIsFollowing(false)
           }
         );
     }
@@ -148,9 +151,9 @@ export default function UserProfile() {
     <div>
       {/* {console.log(user)} */}
       <TopNavigation />
-      <button onClick={goBack} className="absolute top-0 left-0 mt-24 px-3 py-1 ml-10 rounded-md bg-gray-100 text-sm">← Back</button>
-      <div className="mt-24 container max-w-2xl mx-auto flex-col items-center justify-center px-2">
-        <div className="bg-lighter px-10 h-4/5 rounded-xl shadow-xl text-main w-full relative">
+      <button onClick={goBack} className="absolute top-0 left-0 mt-24 px-3 py-1 ml-10 rounded-md z-10 bg-gray-100 text-sm">← Back</button>
+      <div className="pt-24 container max-w-2xl mx-auto flex-col items-center justify-center px-2">
+        <div className="bg-lighter px-10 z-10 rounded-xl shadow-xl text-main w-full relative">
           {localId !== id && (
             isFollowing ? (
               <button className={styles.followButton} onClick={() => handleUnfollow(id)}>Following</button>
