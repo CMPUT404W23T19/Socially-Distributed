@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import TopNavigation from '../TopNavigation'
 import Link from 'next/link'
 import Image from "next/image"
-import { reqUserProfile, reqFollowOthers, reqGetFollowersList, reqPostToInbox } from '../../api/Api'
+import { reqUserProfile, reqFollowOthers, reqGetFollowersList, reqPostToInbox, reqUnfollow, reqGetInbox } from '../../api/Api'
 import { getCookieUserId } from '../../components/utils/cookieStorage'
 import styles from './profile.module.css'
 import { getUserIdFromUrl } from '../../components/common'
@@ -13,7 +13,7 @@ export default function UserProfile() {
   const [localId, setLocalId] = useState('')
   const { id } = router.query
   const [user, setUser] = useState(null)
-  const [localUser,setLocalUser] = useState(null)
+  const [localUser, setLocalUser] = useState(null)
   const [isFollowing, setIsFollowing] = useState(false)
   const host = 'http://127.0.0.1:8000'
 
@@ -30,14 +30,14 @@ export default function UserProfile() {
           }
         );
       reqUserProfile(localId)
-      .then(
-        res => {
-          setLocalUser(res.data)
-        },
-        err => {
-          console.log(err);
-        }
-      )
+        .then(
+          res => {
+            setLocalUser(res.data)
+          },
+          err => {
+            console.log(err);
+          }
+        )
       reqGetFollowersList(id)
         .then(
           res => {
@@ -51,7 +51,7 @@ export default function UserProfile() {
           }
         );
     }
-  }, [localId, isFollowing])
+  }, [id, localId, isFollowing])
 
   const goBack = () => {
     router.back();
@@ -91,25 +91,50 @@ export default function UserProfile() {
               "url": `${user.url}`
             }
           }
-          reqPostToInbox(data, id)
-          .then(
-            res => {
-              console.log('success');
-              console.log(res);
-            },
-            err => {
-              console.log('fail');
-              console.log(err);
-            }
-          )
+          reqGetInbox(id)
+            .then(
+              res => {
+                let a = res.data.items.findIndex(item => {
+                  return item.actor.id === data.actor.id && item.object.id === data.object.id && item.type === data.type
+                })
+                if (a === -1) {
+                  reqPostToInbox(data, id)
+                    .then(
+                      res => {
+                        console.log('success');
+                        // console.log(res);
+                      },
+                      err => {
+                        console.log('fail');
+                        console.log(err);
+                      }
+                    )
+                }
+              }
+            )
+
         },
         err => {
           // console.log(err);
+          setIsFollowing(false)
           alert(err)
         }
       )
   }
 
+  const handleUnfollow = async (id) => {
+    try {
+      const res = await reqUnfollow(id, encodeURIComponent(localUser.id))
+      if (res.status == 204) {
+        setIsFollowing(false);
+        console.log("success");
+      }
+    } catch (err) {
+      setIsFollowing(false);
+      console.log(err);
+    }
+
+  }
   if (!user) {
     return (
       <div>
@@ -128,7 +153,7 @@ export default function UserProfile() {
         <div className="bg-lighter px-10 h-4/5 rounded-xl shadow-xl text-main w-full relative">
           {localId !== id && (
             isFollowing ? (
-              <button className={styles.followButton}>Following</button>
+              <button className={styles.followButton} onClick={() => handleUnfollow(id)}>Following</button>
             ) : (
               <button onClick={() => handleFollow(id)} className={styles.followButton}>+ Follow</button>
             )

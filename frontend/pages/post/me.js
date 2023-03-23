@@ -65,7 +65,7 @@ export default function Public() {
             <div >
               <div className='flex justify-between'>
                 <div className="flex items-center mb-3">
-                  <img src={post.author.profile_image} alt="" className="w-8 h-8 rounded-full mr-2" />
+                  <img src={post.author.profile_image ? post.author.profile_image:"../defaultUser.png"} alt="" className="w-8 h-8 rounded-full mr-2" />
                   <h2 className="text-lg font-bold">{post.author.display_name}</h2>
                 </div>
                 <div>

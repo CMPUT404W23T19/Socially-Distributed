@@ -56,8 +56,8 @@ export const reqGetUserPosts = (userId) => {
     url: `${host}/authors/${userId}/posts/`,
     method: 'get',
     params: {// just for testing, pagination hasn't implemented
-      page:1,
-      size:10,
+      page: 1,
+      size: 10,
     }
   })
 }
@@ -66,9 +66,9 @@ export const reqGetAuthorsList = () => {
   return axios({
     url: `${host}/authors/`,
     method: 'get',
-    params:{// just for testing, pagination hasn't implemented
-      page:1,
-      size:50 
+    params: {// just for testing, pagination hasn't implemented
+      page: 1,
+      size: 50
     }
   })
 }
@@ -96,8 +96,8 @@ export const reqGetFollowersList = (authorId) => {
 
 export const reqGetSingleFollower = (authorId, friendId) => {
   return axios({
-    url:`${host}/authors/${authorId}/followers/${friendId}`,
-    method:'get'
+    url: `${host}/authors/${authorId}/followers/${friendId}`,
+    method: 'get'
   })
 }
 
@@ -106,6 +106,13 @@ export const reqFollowOthers = (data, authorId, friendId) => {
     url: `${host}/authors/${authorId}/followers/${friendId}`,
     method: 'put',
     data
+  })
+}
+
+export const reqUnfollow = (authorId, friendId) => {
+  return axios({
+    url: `${host}/authors/${authorId}/followers/${friendId}`,
+    method: 'delete'
   })
 }
 
