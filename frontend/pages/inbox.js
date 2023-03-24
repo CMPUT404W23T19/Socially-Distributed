@@ -6,6 +6,7 @@ import FriendRequest from '../components/common/FriendRequest'
 import { getUserIdFromUrl } from '../components/common'
 import { reqFollowOthers } from '../api/Api'
 import Styles from './styles.module.css'
+
 export default function inbox() {
   const [userId, setUserId] = useState('')
   const [friendRequestsList, setFriendRequestsList] = useState([])
@@ -40,9 +41,9 @@ export default function inbox() {
   const handleAcceptRequest = async (request) => {
     const data = {
       id: getUserIdFromUrl(request.object.id) 
-      // ######################### e.g. follower's id or following's id, format like, 6 or http://localhost:8000/authors/6 ?
+      // ######### follower's id or following's id, format like, 6 or http://localhost:8000/authors/6 ?
     }
-    reqFollowOthers(data, getUserIdFromUrl(request.actor.id), encodeURIComponent(request.object.id))
+    reqFollowOthers(data, getUserIdFromUrl(request.object.id), encodeURIComponent(request.actor.id))
       .then(
         res => {
           console.log(res);
@@ -50,27 +51,11 @@ export default function inbox() {
           // and request to get the inbox list again, this request isn't there any more?
           const data = {
             "type": "follow",
-            "summary": `${userId} want to follow ${id}`,
-            "actor": {
-              "id": `${host}/authors/${localId}`,
-              "type": `${localUser.type}`,
-              "display_name": `${localUser.display_name}`,
-              "host": `${localUser.host}`,
-              "github": `${localUser.github}`,
-              "profile_image": `${localUser.profile_image}`,
-              "url": `${localUser.url}`
-            },
-            "object": {
-              "id": `${host}/authors/${id}`,
-              "type": `${user.type}`,
-              "display_name": `${user.display_name}`,
-              "host": `${user.host}`,
-              "github": `${user.github}`,
-              "profile_image": `${user.profile_image}`,
-              "url": `${user.url}`
-            }
+            "summary": `${getUserIdFromUrl(request.object.id)} want to follow ${getUserIdFromUrl(request.actor.id)}`,
+            actor: request.object,
+            object: request.actor
           }
-          reqPostToInbox(data, id)
+          reqPostToInbox(data, getUserIdFromUrl(request.actor.id))
           .then(
             res => {
               console.log('success');

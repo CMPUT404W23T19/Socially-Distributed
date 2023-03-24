@@ -134,6 +134,25 @@ export const reqGetInbox = (authorId) => {
 export const reqClearInbox = (authorId) => {
   return axios({
     url: `${host}/authors/${authorId}/inbox`,
-    method:'delete'
+    method: 'delete'
+  })
+}
+
+export const reqPostComments = (data, authorId, postId) => {
+  return axios({
+    url: `${host}/authors/${authorId}/posts/${postId}/comments`,
+    method: 'post',
+    data
+  })
+}
+
+export const reqGetComments = (authorId, postId) => {
+  return axios({
+    url:`${host}/authors/${authorId}/posts/${postId}/comments`,
+    method:'get',
+    params:{    // ##################### again, just test to get comments, pagination not implemented yet
+      page:1,
+      size:5
+    }
   })
 }

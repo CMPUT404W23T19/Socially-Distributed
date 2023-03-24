@@ -48,11 +48,11 @@ const TopNavigation = () => {
     <div>
       {isPopupOpen && (
         <div>
-          <div className="fixed w-screen h-screen opacity-80 bg-black z-30" onClick={togglePopup}></div>
+          <div className="fixed w-screen h-screen opacity-80 bg-black z-30" onClick={() => togglePopup}></div>
           <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/4 z-40 rounded-md bg-gray-800 text-white">
             <div className='flex justify-between m-5'>
               <h2 className="text-base font-semibold mb-2">BAD FRIEND ID ENTERED</h2>
-              <span className='cursor-pointer' onClick={togglePopup}><Close /></span>
+              <span className='cursor-pointer' onClick={() => togglePopup}><Close /></span>
             </div>
             <div className='text-left m-5'>
               <p className='text-sm font-normal text-gray-100'>The ID you entered does not exists. Please check the ID of your friend and try again.</p>
