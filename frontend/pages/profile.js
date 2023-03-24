@@ -7,7 +7,7 @@ import { reqUserProfile, reqUserId, reqGetUserPosts, reqGetAuthorsList, reqGetFo
 import { getCookieUserId } from '../components/utils/cookieStorage'
 import { Close } from '@material-ui/icons'
 import { getUserIdFromUrl } from '../components/common'
-import followerStyle from './myProfile.module.css'
+import followerStyle from './styles.module.css'
 
 function ProfilePage() {
   const [userId, setUserId] = useState(0)
@@ -114,12 +114,16 @@ function ProfilePage() {
               </div>
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold leading-none tracking-tighter mb-5">Username</h2>
-              <p className="text-content ml-8 h-10 font-bold">{username == '' ? 'test username' : username}</p>
+              <h2 className="text-2xl font-semibold leading-none tracking-tighter mb-5">Username</h2>
+              <p className="text-content ml-8 h-10 font-bold">{username == '' ? 'Not exist' : username}</p>
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold leading-none tracking-tighter mb-5">Github</h2>
-              <a><p className="text-content ml-8 h-10 font-bold">{github == '' ? 'test github' : github}</p></a>
+              <h2 className="text-2xl font-semibold leading-none tracking-tighter mb-5">UserId</h2>
+              <p className="text-content ml-8 h-10 font-bold">{userId == '' ? 'Not exist' : userId}</p>
+            </div>
+            <div className="items-center justify-between mb-8">
+              <h2 className="text-2xl font-semibold leading-none tracking-tighter mb-5">Github</h2>
+              <a><p className="text-content ml-8 h-10 font-bold">{github == '' ? 'Not exist' : github}</p></a>
             </div>
           </div>
         </div>

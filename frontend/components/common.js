@@ -20,3 +20,16 @@ export const getPostIdFromUrl = (url) => {
   const postid = urlParts[urlParts.length - 1];
   return postid
 }
+
+export const getPostIdFromCommentUrl = (url) => {
+  const regex = /\/posts\/([\w-]+)/;
+  const match = url.match(regex);
+
+  if (match) {
+    const postId = match[1];
+    return postId
+  } else {
+    return ''
+  }
+
+}
