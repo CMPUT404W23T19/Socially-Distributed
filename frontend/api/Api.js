@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getJWTToken } from "../components/utils/cookieStorage";
 
-const host = 'http://localhost:8000'
+const host = 'https://floating-fjord-51978.herokuapp.com'
 export const reqSignUp = (data) => {
   return axios({
     url: `${host}/auth/users/`,
