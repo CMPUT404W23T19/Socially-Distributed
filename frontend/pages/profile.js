@@ -19,6 +19,7 @@ function ProfilePage() {
   const [followingsList, setFollowingsList] = useState([])
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [isDarkBackground, setIsDarkBackground] = useState(false)
+  const [userUrl, setUserUrl] = useState('')
   // router
   const router = useRouter()
 
@@ -31,6 +32,7 @@ function ProfilePage() {
             setUsername(res.data.display_name)
             setGithub(res.data.github)
             setImageUrl(res.data.profile_image)
+            setUserUrl(res.data.id)
             console.log(res.data.profile_image);
           }
         ).catch(
@@ -119,7 +121,7 @@ function ProfilePage() {
             </div>
             <div className="items-center justify-between mb-8">
               <h2 className="text-2xl font-semibold leading-none tracking-tighter mb-5">UserId</h2>
-              <p className="text-content ml-8 h-10 font-bold">{userId == '' ? 'Not exist' : userId}</p>
+              <p className="text-content ml-8 h-10 font-bold">{userUrl == '' ? 'Not exist' : userUrl}</p>
             </div>
             <div className="items-center justify-between mb-8">
               <h2 className="text-2xl font-semibold leading-none tracking-tighter mb-5">Github</h2>

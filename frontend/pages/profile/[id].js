@@ -15,8 +15,8 @@ export default function UserProfile() {
   const [user, setUser] = useState(null)
   const [localUser, setLocalUser] = useState(null)
   const [isFollowing, setIsFollowing] = useState(false)
-  const host = 'http://127.0.0.1:8000'
-
+  // const host = 'http://127.0.0.1:8000'
+  const host = 'https://floating-fjord-51978.herokuapp.com'
   useEffect(() => {
     setLocalId(getCookieUserId())
     if (localId && id) {
@@ -171,7 +171,7 @@ export default function UserProfile() {
             </div>
             <div className="items-center justify-between mb-8">
               <h2 className="text-3xl font-semibold leading-none tracking-tighter mb-5">UserId</h2>
-              <p className="text-content ml-8 h-10 font-bold">{getUserIdFromUrl(user.id)}</p>
+              <p className="text-content ml-8 h-10 font-bold">{user.id}</p>
             </div>
             <div className="items-center justify-between mb-8">
               <h2 className="text-3xl font-semibold leading-none tracking-tighter mb-5">Github</h2>
