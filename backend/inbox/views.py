@@ -11,7 +11,7 @@ from common.logging.logging_service import Logger
 import json
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.authentication import BasicAuthentication
-from rest_framework.simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # Create your views here.
 

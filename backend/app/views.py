@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.authentication import BasicAuthentication
-from rest_framework.simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # Create your views here.
 
@@ -60,7 +60,10 @@ class AuthorDetailView(APIView):
         Return an individual author
         """
         author_id=HOST+self.kwargs['author_id']
-        instance = Author.objects.get(id=author_id)
+        try:
+            instance = Author.objects.get(id=author_id)
+        except Author.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = AuthorSerializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -69,7 +72,10 @@ class AuthorDetailView(APIView):
         Update an individual author details
         """
         author_id=HOST+self.kwargs['author_id']
-        instance = Author.objects.get(id=author_id)
+        try:
+            instance = Author.objects.get(id=author_id)
+        except Author.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = AuthorSerializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
