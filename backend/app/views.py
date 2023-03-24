@@ -10,6 +10,8 @@ from .serializers import AuthorSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.simplejwt.authentication import JWTAuthentication
 
 # Create your views here.
 
@@ -29,15 +31,21 @@ class AuthorListCreateView(ListCreateAPIView):
         
         Return a list of all the authors. Pagination is supported.
         """
-        p = PageNumberPagination()
-        p.page_query_param = 'page'
-        p.page_size_query_param = 'size'
-        queryset = Author.objects.all()
-        authors = p.paginate_queryset(queryset, request)
-        serializer = AuthorSerializer(authors, many=True)
-        page = p.get_page_number(request, p)
-        size = p.get_page_size(request)
-        response = {"type": "authors", 'page': page, 'size': size, "items": serializer.data}
+        self.authentication_classes = [BasicAuthentication]
+        if 'page' in request.GET:
+            p = PageNumberPagination()
+            p.page_query_param = 'page'
+            p.page_size_query_param = 'size'
+            queryset = Author.objects.all()
+            authors = p.paginate_queryset(queryset, request)
+            page = int(p.get_page_number(request, p))
+            size = p.get_page_size(request)
+            serializer = AuthorSerializer(authors, many=True)
+            response = {"type": "authors", 'page': page, 'size': size, "items": serializer.data}
+        else:
+            authors = Author.objects.all()
+            serializer = AuthorSerializer(authors, many=True)
+            response = {"type": "authors", "items": serializer.data}
         return Response(response)
 
 

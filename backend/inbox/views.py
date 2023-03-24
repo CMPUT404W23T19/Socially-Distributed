@@ -10,6 +10,8 @@ from posts.models import Post, Comment, Like
 from common.logging.logging_service import Logger
 import json
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.simplejwt.authentication import JWTAuthentication
 
 # Create your views here.
 
@@ -30,14 +32,21 @@ class InboxView(APIView):
         """
         Get inbox for a given author
         """
+        self.authentication_classes = [JWTAuthentication]
         author_id=HOST+self.kwargs['author_id']
-        p = PageNumberPagination()
-        p.page_query_param = 'page'
-        p.page_size_query_param = 'size'
-        queryset = self.get_queryset()
-        serializer = InboxSerializer(queryset)
-        page = p.get_page_number(request, p)
-        size = p.get_page_size(request)
+        if 'page' in request.GET:
+            p = PageNumberPagination()
+            p.page_query_param = 'page'
+            p.page_size_query_param = 'size'
+            queryset = self.get_queryset()
+            serializer = InboxSerializer(queryset)
+            page = p.get_page_number(request, p)
+            size = p.get_page_size(request)
+        else:
+            queryset = self.get_queryset()
+            serializer = InboxSerializer(queryset)
+            page = None
+            size = None
         # get posts and requests and put them in one list
         items = []
         try:
@@ -65,7 +74,7 @@ class InboxView(APIView):
             items.append(comment)
         for like in likes:
             items.append(like)
-        response = {"type": "inbox", "author":author_id, "items": items}
+        response = {"type": "inbox", "author":author_id, "items": items, "size": size, "page": page}
         return Response(response, status=status.HTTP_200_OK)
     
     def post(self, request, *args, **kwargs):

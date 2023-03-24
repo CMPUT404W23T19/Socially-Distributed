@@ -13,6 +13,8 @@ from rest_framework.views import APIView
 from datetime import datetime
 import uuid, base64
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.simplejwt.authentication import JWTAuthentication
 
 # Create your views here.
 
@@ -45,15 +47,21 @@ class PostList(ListCreateAPIView):
         This view should return a list of all the posts
         for the currently authenticated user.
         """
-        p = PageNumberPagination()
-        p.page_query_param = 'page'
-        p.page_size_query_param = 'size'
-        queryset = self.get_queryset()
-        posts = p.paginate_queryset(queryset, request)
-        serializer = PostSerializer(posts, many=True)
-        page = p.get_page_number(request, p)
-        size = p.get_page_size(request)
-        response = {"type": "posts", "items": serializer.data, "page": page, "size": size}
+        self.authentication_classes = [BasicAuthentication]
+        if 'page' in request.GET:
+            p = PageNumberPagination()
+            p.page_query_param = 'page'
+            p.page_size_query_param = 'size'
+            queryset = self.get_queryset()
+            posts = p.paginate_queryset(queryset, request)
+            page = int(p.get_page_number(request, p))
+            size = p.get_page_size(request)
+            serializer = PostSerializer(posts, many=True)
+            response = {"type": "posts", 'page': page, 'size': size, "items": serializer.data}
+        else:
+            queryset = self.get_queryset()
+            serializer = PostSerializer(queryset, many=True)
+            response = {"type": "posts", "items": serializer.data}
         return Response(response, status=status.HTTP_200_OK)
 
 class PostDetailView(APIView):
@@ -182,18 +190,23 @@ class CommentsView(ListCreateAPIView):
         return Response(status=status.HTTP_201_CREATED)
     
     def list(self, request, *args, **kwargs):
-        p = PageNumberPagination()
-        p.page_query_param = 'page'
-        p.page_size_query_param = 'size'
-        queryset = self.get_queryset()
-        if not queryset: # if queryset is empty
-            return Response({"type": "comments", "items": [],})
-        comments = p.paginate_queryset(queryset, request)
-        page = p.get_page_number(request, p)
-        size = p.get_page_size(request)
-        serializer = self.get_serializer(comments, many=True)
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
-        response = {"type": "comments", "items": serializer.data, "page": page, "size": size, "post": post_id}
+        if 'page' in request.GET:
+            p = PageNumberPagination()
+            p.page_query_param = 'page'
+            p.page_size_query_param = 'size'
+            queryset = self.get_queryset()
+            if not queryset: # if queryset is empty
+                return Response({"type": "comments", "items": [],})
+            comments = p.paginate_queryset(queryset, request)
+            page = p.get_page_number(request, p)
+            size = p.get_page_size(request)
+            serializer = self.get_serializer(comments, many=True)
+            response = {"type": "comments", "items": serializer.data, "page": page, "size": size, "post": post_id}
+        else:
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            response = {"type": "comments", "items": serializer.data, "post": post_id}
         return Response(response)
         
 
