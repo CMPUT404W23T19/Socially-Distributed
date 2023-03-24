@@ -54,8 +54,8 @@ export default function CreatePost() {
     const published = new Date().toISOString();
     const data = {
       title,
-      source: "http://google.com",
-      origin: "http://google.com",
+      source: "",
+      origin: "",
       description: "",
       contentType: " text/markdown",  // only text now, should handle image next
       content,
