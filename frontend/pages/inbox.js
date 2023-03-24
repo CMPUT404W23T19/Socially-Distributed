@@ -1,20 +1,25 @@
 import React, { useEffect, useState } from 'react'
 import TopNavigation from './TopNavigation'
-import { reqGetFollowersList, reqGetInbox, reqPostToInbox, reqClearInbox } from '../api/Api'
+import { reqGetFollowersList, reqGetInbox, reqPostToInbox, reqClearInbox, reqUserProfile } from '../api/Api'
 import { getCookieUserId } from '../components/utils/cookieStorage'
 import FriendRequest from '../components/common/FriendRequest'
 import { getUserIdFromUrl } from '../components/common'
 import { reqFollowOthers } from '../api/Api'
 import Styles from './styles.module.css'
+import axios from 'axios'
+import { Close } from '@material-ui/icons'
 
 export default function inbox() {
   const [userId, setUserId] = useState('')
+  const [user, setUser] =useState(null)
   const [friendRequestsList, setFriendRequestsList] = useState([])
   const [isCleared, setIsCleared] = useState(false)
-
+  const [isAccept, setIsAccept] = useState(false)
   useEffect(() => {
     setUserId(getCookieUserId)
     if (userId) {
+      reqUserProfile(userId)
+      .then(res=>setUser(res.data), err=>console.log(err))
       reqGetInbox(userId)
         .then(
           res => {
@@ -39,38 +44,15 @@ export default function inbox() {
 
 
   const handleAcceptRequest = async (request) => {
-    const data = {
-      id: getUserIdFromUrl(request.object.id) 
-      // ######### follower's id or following's id, format like, 6 or http://localhost:8000/authors/6 ?
+
+    const res = await axios({
+      url: `${request.object.host}/authors/${getUserIdFromUrl(request.object.id)}/followers/${request.actor.id}`,
+      method: 'put',
+      data: user
+    })
+    if (res.status >= 200 && res.status <= 300) {
+      setIsAccept(true)
     }
-    reqFollowOthers(data, getUserIdFromUrl(request.object.id), encodeURIComponent(request.actor.id))
-      .then(
-        res => {
-          console.log(res);
-          // should remove this request from both frontend and backend so that when user refresh page
-          // and request to get the inbox list again, this request isn't there any more?
-          const data = {
-            "type": "follow",
-            "summary": `${getUserIdFromUrl(request.object.id)} want to follow ${getUserIdFromUrl(request.actor.id)}`,
-            actor: request.object,
-            object: request.actor
-          }
-          reqPostToInbox(data, getUserIdFromUrl(request.actor.id))
-          .then(
-            res => {
-              console.log('success');
-              console.log(res);
-            },
-            err => {
-              console.log('fail');
-              console.log(err);
-            }
-          )
-        },
-        err => {
-          console.log(err);
-        }
-      )
   }
 
   const handleRefuseRequest = () => {
@@ -103,6 +85,17 @@ export default function inbox() {
     return (
       <div>
         <TopNavigation />
+        {isAccept && (
+        <div>
+          <div className="fixed w-screen h-screen opacity-80 bg-black z-30" onClick={() => setIsAccept(!isAccept)}></div>
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/4 z-40 rounded-md bg-gray-800 text-white">
+            <div className='flex justify-between m-5'>
+              <h2 className="text-base font-semibold mb-2">Accepted</h2>
+              <span className='cursor-pointer' onClick={() => setIsAccept(!isAccept)}><Close /></span>
+            </div>
+          </div>
+        </div>
+      )}
         <div className='pt-16 w-4/5 h-screen py-3 mx-auto border border-gray-100'>
           <div className='text-right border-b border-gray-200 pb-3 mb-3'>
             <button className={Styles.clearButton} onClick={handleClear}>Clear</button>
