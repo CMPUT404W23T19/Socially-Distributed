@@ -1,21 +1,29 @@
 import React, { Component, useCallback, useEffect, useState } from 'react'
 import FormField from '../components/common/FormField.js'
 import TopNavigation from './TopNavigation.js'
-import { reqCreatePost } from '../api/Api.js'
+import { reqCreatePost, reqGetFollowersList, reqPostToInbox, reqUserProfile } from '../api/Api.js'
 import { getCookieUserId } from '../components/utils/cookieStorage.js';
 import { useRouter } from 'next/router.js';
-
+import axios from 'axios';
 export default function CreatePost() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [visibility, setVisibility] = useState('');
   const [userId, setUserId] = useState('');
   const [error, setError] = useState(null);
+  const [followers, setFollowers] = useState([])
+  const [user, setUser] = useState(null)
   const router = useRouter();
 
   useEffect(() => {
     setUserId(getCookieUserId)
-  })
+    if (userId) {
+      reqGetFollowersList(userId)
+        .then(res => setFollowers(res.data.items), err => console.log(err))
+      reqUserProfile(userId)
+        .then(res => setUser(res.data), err => console.log(err))
+    }
+  }, [userId])
   // an get url and host from api: get, http://localhost:8000/authors/{author_id}/
   const handleTitleChange = useCallback((event) => {
     setTitle(event.target.value)
@@ -57,13 +65,9 @@ export default function CreatePost() {
       source: "",
       origin: "",
       description: "",
-      contentType: " text/markdown",  // only text now, should handle image next
+      contentType: " text/markdown",
       content,
-      author: {
-        id: userId,
-        // host:"",
-        // url:"",
-      },
+      author: user,
       categories: 'categories',
       published,
       visibility,
@@ -72,10 +76,27 @@ export default function CreatePost() {
     try {
       const res = await reqCreatePost(data, userId)
       if (res.status === 201) {
-        router.replace('/post/me');
+        if (visibility === 'PUBLIC') {
+          const postData = {
+            "type": "post",
+            ...res.data
+        }
+          const promises = followers.map(follower => {
+            console.log(postData);
+            return axios({
+              url: `${follower.url}/inbox`,
+              method: "post",
+              data:postData
+            })
+          })
+          Promise.all(promises)
+            .then(res => {
+              console.log("successful post to followers' inbox",res);
+              router.replace('/post/me');
+            }, err => console.log("failed post to followers' inbox",err))
+        }
       }
-        // console.log(res);
-    } catch(error) {
+    } catch (error) {
       console.log(error);
     }
   }
