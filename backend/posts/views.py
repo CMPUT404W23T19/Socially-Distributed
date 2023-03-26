@@ -40,7 +40,8 @@ class PostList(ListCreateAPIView):
         instance = Author.objects.get(id=author_id)
         published = datetime.now().isoformat()
         post = Post.objects.create(id=post_id, author=instance, title=request.data['title'], source=request.data['source'], origin=request.data['origin'], description=request.data['description'], contentType=request.data['contentType'], content=request.data['content'], categories=request.data['categories'], count=0, published=published, visibility=request.data['visibility'], unlisted=request.data['unlisted'])
-        return Response(status=status.HTTP_201_CREATED)
+        serializer = PostSerializer(post)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     def list(self, request, *args, **kwargs):
         """
