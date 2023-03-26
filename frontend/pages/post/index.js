@@ -118,8 +118,8 @@ const Feed = () => {
                 <div >
                   <div className='flex justify-between'>
                     <div className="flex items-center mb-3">
-                      <img src={post.author.profile_image ? post.author.profile_image : '../defaultUser.png'} alt="" className="w-8 h-8 rounded-full mr-2" />
-                      <h2 className="text-lg font-bold">{post.author.display_name}</h2>
+                      <img src={post.author.profileImage ? post.author.profileImage : '../defaultUser.png'} alt="" className="w-8 h-8 rounded-full mr-2" />
+                      <h2 className="text-lg font-bold">{post.author.displayName}</h2>
                     </div>
                     <div>
                       <span>{getTime(post.published)}</span>
@@ -144,8 +144,8 @@ const Feed = () => {
                 {allComments.filter(comment => getPostIdFromCommentUrl(comment.id) === getPostIdFromUrl(post.id)).map(comment => (
                   <div key={comment.id} className="bg-gray-200 rounded-lg p-3 my-3">
                     <div className="flex items-center mb-2">
-                      <img src={`${comment.author.profile_image ? comment.author.profile_image:'../defaultUser.png'}`} alt="" className="w-8 h-8 rounded-full mr-2" />
-                      <h4 className="text-base font-bold">{comment.author.display_name}</h4>
+                      <img src={`${comment.author.profileImage ? comment.author.profileImage:'../defaultUser.png'}`} alt="" className="w-8 h-8 rounded-full mr-2" />
+                      <h4 className="text-base font-bold">{comment.author.displayName}</h4>
                     </div>
                     <p className="text-base">{comment.comment}</p>
                   </div>

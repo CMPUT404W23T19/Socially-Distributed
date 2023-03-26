@@ -29,11 +29,11 @@ function ProfilePage() {
       reqUserProfile(userId)
         .then(
           res => {
-            setUsername(res.data.display_name)
+            setUsername(res.data.displayName)
             setGithub(res.data.github)
-            setImageUrl(res.data.profile_image)
+            setImageUrl(res.data.profileImage)
             setUserUrl(res.data.id)
-            console.log(res.data.profile_image);
+            console.log(res.data.profileImage);
           }
         ).catch(
           e => {
@@ -84,8 +84,8 @@ function ProfilePage() {
                   {followersList.map((follower) => (
                     <Link key={follower.id} href="/profile/[id]" as={`/profile/${getUserIdFromUrl(follower.id)}`}>
                       <li className={followerStyle.follower}>
-                        <img className='mr-4 w-12 h-12 rounded-full' src={follower.profile_image ? follower.profile_image : 'defaultUser.png'} />
-                        <span>{follower.display_name}</span>
+                        <img className='mr-4 w-12 h-12 rounded-full' src={follower.profileImage ? follower.profileImage : 'defaultUser.png'} />
+                        <span>{follower.displayName}</span>
                       </li>
                     </Link>
                   ))}

@@ -119,7 +119,7 @@ export default function inbox() {
             <div key={request.id}>
               <FriendRequest
                 id={request.actor.id}
-                displayName={request.actor.display_name}
+                displayName={request.actor.displayName}
                 profileImage={request.actor.profile_image}
                 acceptAction={() => handleAcceptRequest(request)}
                 refuseAction={() => handleRefuseRequest} />
@@ -132,7 +132,7 @@ export default function inbox() {
                   <div className='flex flex-row items-center'>
                     <img className='mr-4 w-12 h-12 rounded-full' src={request.author.profile_image ? request.author.profile_image : '../defaultUser.png'} />
                     <div className='flex flex-col'>
-                      <span className='font-semibold mb-1'>{request.author.display_name}</span>
+                      <span className='font-semibold mb-1'>{request.author.displayName}</span>
                       <span className='font-normal text-xs'>id: {request.author.id}</span>
                     </div>
                   </div>

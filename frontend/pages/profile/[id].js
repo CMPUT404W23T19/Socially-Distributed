@@ -78,19 +78,19 @@ export default function UserProfile() {
             "actor": {
               "id": `${host}/authors/${localId}`,
               "type": `${localUser.type}`,
-              "display_name": `${localUser.display_name}`,
+              "displayName": `${localUser.displayName}`,
               "host": `${localUser.host}`,
               "github": `${localUser.github}`,
-              "profile_image": `${localUser.profile_image}`,
+              "profileImage": `${localUser.profileImage}`,
               "url": `${localUser.url}`
             },
             "object": {
               "id": `${host}/authors/${id}`,
               "type": `${user.type}`,
-              "display_name": `${user.display_name}`,
+              "displayName": `${user.displayName}`,
               "host": `${user.host}`,
               "github": `${user.github}`,
-              "profile_image": `${user.profile_image}`,
+              "profileImage": `${user.profileImage}`,
               "url": `${user.url}`
             }
           }
@@ -163,11 +163,11 @@ export default function UserProfile() {
           )}
           <div>
             <div className='w-28 h-28 my-10 mx-auto'>
-              <img className='w-28 h-28 rounded-full border-2 border-gray-100' src={user.profile_image ? user.profile_image : "../defaultUser.png"} alt="User" />
+              <img className='w-28 h-28 rounded-full border-2 border-gray-100' src={user.profileImage ? user.profileImage : "../defaultUser.png"} alt="User" />
             </div>
             <div className="items-center justify-between mb-8">
               <h2 className="text-3xl font-semibold leading-none tracking-tighter mb-5">Username</h2>
-              <p className="text-content ml-8 h-10 font-bold">{user.username ? 'not exist' : user.display_name}</p>
+              <p className="text-content ml-8 h-10 font-bold">{user.username ? 'not exist' : user.displayName}</p>
             </div>
             <div className="items-center justify-between mb-8">
               <h2 className="text-3xl font-semibold leading-none tracking-tighter mb-5">UserId</h2>

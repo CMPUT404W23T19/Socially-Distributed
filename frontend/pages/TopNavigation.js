@@ -38,25 +38,41 @@ const TopNavigation = () => {
     })
     const lastSlashIndex = userUrl.lastIndexOf("/");
     const host = userUrl.substring(0, lastSlashIndex + 1);
+    const domain = userUrl.match(/^https?:\/\/[^/]+/i)[0];
     const author_id = userUrl.substring(lastSlashIndex + 1);
     if (res.status >= 200 && res.status <= 300) {
-      const res2 = await axios({
-        url: `${host}${author_id}/inbox`,
-        method: 'post',
-        data: {
-          type: "follow",
-          summary: `${localId} want to follow ${userUrl}`,
-          actor: localUser,
-          object: res.data
-        }
-      })
+      console.log(res);
+      let res2 = ""
+      if (domain === "https://floating-fjord-51978.herokuapp.com") {
+        res2 = await axios({
+          url: `${host}${author_id}/inbox`,
+          method: 'post',
+          data: {
+            type: "follow",
+            summary: `${localId} want to follow ${userUrl}`,
+            actor: localUser,
+            object: res.data
+          }
+        })
+      } else if (domain === "https://distributed-social-net.herokuapp.com") {
+        res2 = await axios({
+          url: `${host}${author_id}/inbox/`,
+          method: 'post',
+          data: {
+            type: "follow",
+            summary: `${localId} want to follow ${res.data.displayName}`,
+            actor: localUser,
+            object: res.data
+          }
+        })
+      }
       if (res2.status >= 200 && res2.status <= 300) {
         console.log('friend request sent');
         setIsSuccessPopupOpen(true)
         setSearchTerm('')
       } else {
         console.log('friend: request failed to send');
-        console.log('error:',res2.message);
+        console.log('error:', res2.message);
       }
     } else {
       setIsPopupOpen(true)

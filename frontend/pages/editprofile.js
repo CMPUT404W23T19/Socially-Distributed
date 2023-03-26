@@ -20,7 +20,7 @@ export default function EditProfileForm() {
       reqUserProfile(userId)
       .then(
         res => {
-          setUsername(res.data.display_name)
+          setUsername(res.data.displayName)
           if (res.data.github) {
             setGithub(res.data.github)
           }
@@ -59,7 +59,7 @@ export default function EditProfileForm() {
  const handleEditProfile = async (e) => {
    e.preventDefault();
    const updatedProfile = {
-     display_name: username,
+     displayName: username,
      github,
     }
     if (imageFile) {
