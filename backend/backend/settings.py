@@ -52,8 +52,11 @@ CORS_ORIGIN_WHITELIST = [
 
 # get db from the other docker container running psql
 DATABASES = {
-    "default": config("DATABASE_URL", cast=db_url),
+    "default": config("HEROKU_POSTGRESQL_YELLOW_URL", cast=db_url),
 }
+
+
+
 
 SERVER_EMAIL = "hello@example.com"
 

@@ -188,7 +188,8 @@ class CommentsView(ListCreateAPIView):
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         comment = Comment.objects.create(id=comment_id, post=post, author=author, comment=request.data['comment'], contentType=request.data['contentType'], published=datetime.now().isoformat())
-        return Response(status=status.HTTP_201_CREATED)
+        serializer = CommentSerializer(comment)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     def list(self, request, *args, **kwargs):
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
