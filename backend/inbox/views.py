@@ -79,7 +79,8 @@ class InboxView(APIView):
     
     def post(self, request, *args, **kwargs):
         """
-        Add a post or request to the inbox
+        Add a "post", "follow", "like" or "comment" to the inbox.
+        All fields of the object must be present.
         """
         inbox = self.get_queryset()
         type = request.data['type']
@@ -149,7 +150,11 @@ class InboxView(APIView):
                     post = Post.objects.get(id=post_id)
                 except Post.DoesNotExist:
                     return Response(status=status.HTTP_400_BAD_REQUEST)
-                comment = Comment.objects.create(id=request.data['id'], author=request.data['author'], comment=request.data['comment'], contentType=request.data['contentType'], published=request.data['published'], post=post)
+                try:
+                    author = Author.objects.get(id=request.data['author']['id'])
+                except Author.DoesNotExist:
+                    return Response(status=status.HTTP_400_BAD_REQUEST)
+                comment = Comment.objects.create(id=request.data['id'], author=author, comment=request.data['comment'], contentType=request.data['contentType'], published=request.data['published'], post=post)
             inbox.comments.add(comment)
             return Response(status=status.HTTP_200_OK)
 

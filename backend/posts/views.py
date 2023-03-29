@@ -21,7 +21,10 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 HOST = 'https://floating-fjord-51978.herokuapp.com/authors/'
 
 class PostList(ListCreateAPIView):
-   
+    """
+    GET: List all posts for the currently authenticated user.
+    POST: Create a new post for the currently authenticated user.
+    """
     
     serializer_class=PostSerializer
     # permission_classes=[IsAuthenticated] #ignore for now
@@ -67,14 +70,10 @@ class PostList(ListCreateAPIView):
 
 class PostDetailView(APIView):
     """
-    Display an individual :model: `posts.Post`,
-    or update an existing :model: `posts.Post`,
-    or partial_update an existing :model: `posts.Post`.
-    or delete an existing :model: `posts.Post`.
-
-    Authentication required to update or delete.
-    Non-authenticated users can only view(get).
-
+    GET: Get a single post of the currently authenticated user.
+    POST: Update a single post of the currently authenticated user.
+    PUT: Create a single post of the currently authenticated user with given post id.
+    DELETE: Delete a single post of the currently authenticated user.
     """
 
     # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
@@ -133,11 +132,13 @@ class GetImageView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class PostLikes(APIView):
-
+    
     # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-       
+        """
+        get a list of authors who liked the post
+        """
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         likes = Like.objects.filter(object=post_id)
         serializer = LikeSerializer(likes, many=True)
@@ -149,7 +150,9 @@ class CommentLikes(APIView):
     # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-       
+        """
+        get a list of authors who liked the comment
+        """
         comment_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']+ '/comments/' + self.kwargs['comment_id']
         likes = Like.objects.filter(object=comment_id)
         serializer = LikeSerializer(likes, many=True)
@@ -161,6 +164,9 @@ class AuthorLiked(APIView):
     # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
+        """
+        get a list of posts and comments liked by the author
+        """
         author_id=HOST+self.kwargs['author_id']
         likes = Like.objects.filter(author=author_id)
         serializer = LikeSerializer(likes, many=True)
@@ -168,6 +174,10 @@ class AuthorLiked(APIView):
         return Response(response, status=status.HTTP_200_OK)
 
 class CommentsView(ListCreateAPIView):
+    """
+    GET: Get all comments of a post of the currently authenticated user.
+    POST: Create a comment on a post of the currently authenticated user.
+    """
 
     # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
 

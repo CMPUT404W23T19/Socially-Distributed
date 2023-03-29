@@ -83,6 +83,9 @@ class AuthorDetailView(APIView):
     
 
 class FollowerList(ListAPIView):
+    """
+    Get all followers of an author
+    """
 
     serializer_class=AuthorSerializer
     # permission_classes=[IsAuthenticated] #ignore for now
@@ -93,9 +96,7 @@ class FollowerList(ListAPIView):
         return author.followers.all()
     
     def list(self, request, *args, **kwargs):
-        """
-        Get all followers of an author
-        """
+        
         queryset = self.get_queryset()
         serializer = AuthorSerializer(queryset, many=True)
         response = {"type": "followers", "items": serializer.data}
@@ -103,6 +104,11 @@ class FollowerList(ListAPIView):
     
     
 class FollowerDetailView(RetrieveUpdateDestroyAPIView):
+    """
+    GET: check if FOREIGN_AUTHOR_ID is a follower of AUTHOR_ID
+    PUT: Add a follower to current author
+    DELETE: Remove a follower from current author
+    """
 
     queryset=Author.objects.all()
     serializer_class=AuthorSerializer
