@@ -4,7 +4,7 @@ import { Link } from 'next/link'
 import { getUserIdFromUrl } from '../common';
 const FriendRequest = ({ id, displayName, profileImage, acceptAction, refuseAction }) => {
   return (
-    <div className='w-full border-b border-gray-200 pl-3 py-2'>
+    <div className='w-full pl-8 py-2'>
       {/* <Link href={`/profile/${userId}`}> */}
       <div className='flex flex-row items-center justify-between'>
         <div className='flex flex-row items-center'>

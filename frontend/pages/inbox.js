@@ -7,13 +7,16 @@ import { getUserIdFromUrl, getTime } from '../components/common'
 import { reqFollowOthers } from '../api/Api'
 import Styles from './styles.module.css'
 import axios from 'axios'
-import { Close, Policy } from '@material-ui/icons'
+import { Close } from '@material-ui/icons'
+import Link from 'next/link'
 
 export default function inbox() {
   const [userId, setUserId] = useState('')
   const [user, setUser] = useState(null)
   const [friendRequestsList, setFriendRequestsList] = useState([])
   const [postList, setPostList] = useState([])
+  const [commentList, setCommentList] = useState([])
+  const [likeList, setLikeList] = useState([])
   const [isCleared, setIsCleared] = useState(false)
   const [isAccept, setIsAccept] = useState(false)
   const [post1, setPost] = useState(null)
@@ -28,32 +31,27 @@ export default function inbox() {
             const receivedList = res.data.items
             const requestsList = []
             const posts = []
+            const comments = []
             receivedList.forEach(element => {
               if (element.type === 'follow') {
                 requestsList.push(element)
               }
-              if (element.type === 'post') {
+              else if (element.type === 'post') {
                 posts.push(element)
+              }
+              else if (element.type === 'comment') {
+                comments.push(element)
               }
             });
             setPostList(posts)
             setFriendRequestsList(requestsList)
+            setCommentList(comments)
           },
           err => {
             console.log(err);
             alert(err)
           }
         )
-// ########## code to be deleted
-      axios({
-        url: "https://distributed-social-net.herokuapp.com/service/authors/6952efd6743149eb86c472b96d84109a/posts/f086554a96124638ad6bff2777defca5",
-        method: "get"
-      }).then(
-        res => {
-          setPost(res.data)
-        }
-      )
-// ##########
     }
   }, [userId, isCleared])
 
@@ -67,6 +65,9 @@ export default function inbox() {
     })
     if (res.status >= 200 && res.status <= 300) {
       setIsAccept(true)
+      setTimeout(() => {
+        setFriendRequestsList(friendRequestsList.filter(frequest => frequest != request))
+      }, 2000);
     }
   }
 
@@ -86,7 +87,7 @@ export default function inbox() {
         }
       )
   }
-  if (friendRequestsList.length === 0 && postList.length === 0) {
+  if (friendRequestsList.length === 0 && postList.length === 0 && commentList.length === 0) {
     return (
       <div>
         <TopNavigation />
@@ -112,53 +113,102 @@ export default function inbox() {
           </div>
         )}
         <div className='pt-16 w-4/5 h-screen py-3 mx-auto border border-gray-100'>
-          <div className='text-right border-b border-gray-200 pb-3 mb-3'>
+          <div className='text-right pb-3 mb-3'>
             <button className={Styles.clearButton} onClick={handleClear}>Clear</button>
           </div>
-          {friendRequestsList.map(request => (
-            <div key={request.id}>
-              <FriendRequest
-                id={request.actor.id}
-                displayName={request.actor.displayName}
-                profileImage={request.actor.profile_image}
-                acceptAction={() => handleAcceptRequest(request)}
-                refuseAction={() => handleRefuseRequest} />
-            </div>
-          ))}
-          {postList.map(request => {
-            return (<div key={request.id}>
-              <div className='w-full border-b border-gray-200 pl-3 py-2'>
-                <div className='flex flex-row items-center justify-between'>
-                  <div className='flex flex-row items-center'>
-                    <img className='mr-4 w-12 h-12 rounded-full' src={request.author.profile_image ? request.author.profile_image : '../defaultUser.png'} />
-                    <div className='flex flex-col'>
-                      <span className='font-semibold mb-1'>{request.author.displayName}</span>
-                      <span className='font-normal text-xs'>id: {request.author.id}</span>
+          <div className='mb-5 border-b border-gray-200'>
+            <h2 className='mb-3 text-lg ml-3 font-semibold'>Friend Requests</h2>
+            {friendRequestsList.map((request, index) => (
+              <div key={index}>
+                <FriendRequest
+                  id={request.actor.id}
+                  displayName={request.actor.displayName}
+                  profileImage={request.actor.profileImage}
+                  acceptAction={() => handleAcceptRequest(request)}
+                  refuseAction={() => handleRefuseRequest} />
+              </div>
+            ))}
+          </div>
+          <div className='mb-5 border-b border-gray-200'>
+            <h2 className='mb-3 text-lg ml-3 font-semibold'>Posts</h2>
+            {postList.map((request, index) => {
+              const nrequest = {
+                "type": request.type,
+                "title": request.title,
+                "id": request.id,
+                "source": request.source,
+                "origin": request.origin,
+                "description": request.description,
+                "contentType": request.contentType,
+                "content": request.content,
+                "author": JSON.stringify(request.author),
+                "comments": request.comments,
+                "published": request.published,
+                "visibility": request.published,
+                "unlisted": false
+              }
+              return (
+                <Link href={{ pathname: "/postdetail", query: nrequest }} key={index} className='cursor-pointer'>
+                  <div>
+                    <div className='w-full px-8 py-2'>
+                      <div className='flex flex-row items-center justify-between'>
+                        <div className='flex flex-row items-center'>
+                          <img className='mr-4 w-12 h-12 rounded-full' src={request.author.profileImage ? request.author.profileImage : '../defaultUser.png'} />
+                          <div className='flex flex-col'>
+                            <span className='font-semibold mb-1'>{request.author.displayName}</span>
+                            <span className='font-normal text-xs'>id: {request.author.id}</span>
+                          </div>
+                        </div>
+                        <div><span>{getTime(request.published)}</span></div>
+                      </div>
+                      <p className="text-base mb-3 font-semibold">{request.title}</p>
+                      <p>{request.content}</p>
                     </div>
                   </div>
-                  <div><span>{getTime(request.published)}</span></div>
+                </Link>
+              )
+            })}
+          </div>
+          <div className='mb-5 border-b border-gray-200'>
+            <h2 className='mb-3 text-lg ml-3 font-semibold'>Comments</h2>
+            {commentList.map((comment, index) => (
+              <div key={index}>
+                <div className='w-full px-8 py-2'>
+                  <div className='flex flex-row items-center justify-between'>
+                    <div className='flex flex-row items-center'>
+                      <img className='mr-4 w-12 h-12 rounded-full' src={comment.author.profileImage ? comment.author.profileImage : '../defaultUser.png'} />
+                      <div className='flex flex-col'>
+                        <span className='font-semibold mb-1'>{comment.author.displayName}</span>
+                        <span className='font-normal text-xs'>id: {comment.author.id}</span>
+                      </div>
+                    </div>
+                    <div><span>{getTime(comment.published)}</span></div>
+                  </div>
+                  <p className='mt-3'>{comment.comment}</p>
                 </div>
-                <p className="text-base mb-3 font-semibold">{request.title}</p>
-                <p>{request.content}</p>
               </div>
-            </div>)
-          })}
-          {/* code below: to be deleted */}
-          {post1 && (<div className='w-full border-b border-gray-200 pl-3 py-2'>
-            <div className='flex flex-row items-center justify-between'>
-              <div className='flex flex-row items-center'>
-                <img className='mr-4 w-12 h-12 rounded-full' src={post1.profile_image ? post1.profile_image : '../defaultUser.png'} />
-                <div className='flex flex-col'>
-                  <span className='font-semibold mb-1'>{post1.author.displayName}</span>
-                  <span className='font-normal text-xs'>id: {post1.author.id}</span>
+            ))}
+          </div>
+          <div className='mb-5 border-b border-gray-200'>
+            <h2 className='mb-3 text-lg ml-3 font-semibold'>Likes</h2>
+            {likeList.map((like, index) => (
+              <div key={index}>
+                <div className='w-full px-8 py-2'>
+                  <div className='flex flex-row items-center justify-between'>
+                    <div className='flex flex-row items-center'>
+                      <img className='mr-4 w-12 h-12 rounded-full' src={like.author.profileImage ? like.author.profileImage : '../defaultUser.png'} />
+                      <div className='flex flex-col'>
+                        <span className='font-semibold mb-1'>{like.author.displayName}</span>
+                        <span className='font-normal text-xs'>id: {like.author.id}</span>
+                      </div>
+                    </div>
+                    <div><span>{getTime(like.published)}</span></div>
+                  </div>
+                  <p className='mt-3'></p>
                 </div>
               </div>
-              <div><span>{getTime(post1.published)}</span></div>
-            </div>
-            <p className="text-base mb-3 font-semibold">{post1.title}</p>
-            <p>{post1.content}</p>
-          </div>)
-          }
+            ))}
+          </div>
         </div>
       </div>
     )

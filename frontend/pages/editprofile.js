@@ -24,7 +24,7 @@ export default function EditProfileForm() {
           if (res.data.github) {
             setGithub(res.data.github)
           }
-          setImageUrl(res.data.profile_image)
+          setImageUrl(res.data.profileImage)
           // cannot set image
         }
       ).catch(
@@ -66,7 +66,7 @@ export default function EditProfileForm() {
       let reader = new FileReader();
       reader.readAsDataURL(imageFile);
       reader.onload = function () {
-        updatedProfile.profile_image = reader.result
+        updatedProfile.profileImage = reader.result
         console.log(reader.result);
       }
     }

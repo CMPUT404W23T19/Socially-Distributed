@@ -41,7 +41,6 @@ const TopNavigation = () => {
     const domain = userUrl.match(/^https?:\/\/[^/]+/i)[0];
     const author_id = userUrl.substring(lastSlashIndex + 1);
     if (res.status >= 200 && res.status <= 300) {
-      console.log(res);
       let res2 = ""
       if (domain === "https://floating-fjord-51978.herokuapp.com") {
         res2 = await axios({
@@ -59,10 +58,24 @@ const TopNavigation = () => {
           url: `${host}${author_id}/inbox/`,
           method: 'post',
           data: {
-            type: "follow",
+            type: "Follow",
             summary: `${localId} want to follow ${res.data.displayName}`,
-            actor: localUser,
-            object: res.data
+            actor: {
+              id:localUser.id,
+              type:localUser.type,
+              displayName:localUser.displayName,
+              host:localUser.host,
+              github:localUser.github,
+              url:localUser.url
+            },
+            object: {
+              id:res.data.id,
+              type:res.data.type,
+              displayName:res.data.displayName,
+              host:res.data.host,
+              github:res.data.github,
+              url:res.data.url
+            }
           }
         })
       }
