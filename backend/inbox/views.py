@@ -21,7 +21,7 @@ HOST = 'https://floating-fjord-51978.herokuapp.com/authors/'
 
 class InboxView(APIView):
 
-    # permission_classes=[IsAuthenticated] #ignore for now
+    permission_classes=[IsAuthenticated]
 
     def get_queryset(self):
         author_id=HOST+self.kwargs['author_id']
@@ -82,6 +82,9 @@ class InboxView(APIView):
         Add a "post", "follow", "like" or "comment" to the inbox.
         All fields of the object must be present.
         """
+
+        self.authentication_classes = [BasicAuthentication]
+
         inbox = self.get_queryset()
         type = request.data['type']
 
