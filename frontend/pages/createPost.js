@@ -1,7 +1,7 @@
 import React, { Component, useCallback, useEffect, useState } from 'react'
 import FormField from '../components/common/FormField.js'
 import TopNavigation from './TopNavigation.js'
-import { reqCreatePost, reqGetFollowersList, reqPostToInbox, reqUserProfile } from '../api/Api.js'
+import { reqCreatePost, reqGetAuthorsList, reqGetFollowersList, reqPostToInbox, reqUserProfile } from '../api/Api.js'
 import { getCookieUserId } from '../components/utils/cookieStorage.js';
 import { useRouter } from 'next/router.js';
 import axios from 'axios';
@@ -13,6 +13,8 @@ export default function CreatePost() {
   const [error, setError] = useState(null);
   const [followers, setFollowers] = useState([])
   const [user, setUser] = useState(null)
+  const [isPrvate, setIsPrivate] = useState(false)
+  const [privateAuthor, setPrivateAuthor] = useState('')
   const router = useRouter();
 
   useEffect(() => {
@@ -34,8 +36,33 @@ export default function CreatePost() {
   }, [])
 
   const handleVisibilityChange = useCallback(event => {
-    setVisibility(event.target.value.toUpperCase())
+    const v = event.target.value.toUpperCase()
+    setVisibility(v)
+    if (v === "PRIVATE") {
+      setIsPrivate(true)
+    } else {
+      setIsPrivate(false)
+    }
   })
+
+  const handlePriavteMsg = useCallback(event => {
+    setPrivateAuthor(event.target.value)
+  })
+  const sendToInbox = (authors, postData) => {
+    const promises = authors.map(author => {
+      return axios({
+        url: `${author.url}/inbox`,
+        method: "post",
+        data: postData
+      })
+    })
+    Promise.all(promises)
+      .then(res => {
+        console.log("successful post to inbox", res);
+        router.replace('/post/me');
+      }, err => console.log("failed post to inbox", err))
+  }
+
   async function createPost(e) {
     e.preventDefault();
 
@@ -76,24 +103,30 @@ export default function CreatePost() {
     try {
       const res = await reqCreatePost(data, userId)
       if (res.status === 201) {
-        if (visibility === 'PUBLIC') {
-          const postData = {
-            "type": "post",
-            ...res.data
+        const postData = {
+          "type": "post",
+          ...res.data
         }
-          const promises = followers.map(follower => {
-            console.log(postData);
-            return axios({
-              url: `${follower.url}/inbox`,
-              method: "post",
-              data:postData
-            })
+        if (visibility === 'FRIEND') {
+          sendToInbox(followers, postData)
+        } else if (visibility === 'PUBLIC') {
+          const allAuthors = reqGetAuthorsList()
+          sendToInbox(allAuthors, postData)
+        } else if (visibility === 'PRIVATE') {
+          // Todo: determine the host of author's url, use the corresponding auth
+          let author = []
+          const res = await axios({
+            url: `${privateAuthor}`,
+            method: 'get',
+            auth: {
+              username: 'admin',
+              password: 'admin'
+            }
           })
-          Promise.all(promises)
-            .then(res => {
-              console.log("successful post to followers' inbox",res);
-              router.replace('/post/me');
-            }, err => console.log("failed post to followers' inbox",err))
+          if (res.status >= 200 && res.status < 300) {
+            author.push(res.data)
+          }
+          sendToInbox(author, postData)
         }
       }
     } catch (error) {
@@ -139,7 +172,8 @@ export default function CreatePost() {
                 >
                   <option value="">--Choose an option--</option>
                   <option value="public">Public</option>
-                  <option value="private">Friends</option>
+                  <option value="friend">Friends</option>
+                  <option value="private">Private</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                   <svg
@@ -153,6 +187,10 @@ export default function CreatePost() {
                   </svg>
                 </div>
               </div>
+              {isPrvate &&
+                  <div>
+                    <input onChange={handlePriavteMsg} placeholder="Please enter the author's id you'd message to" className='w-full outline-none mt-5 py-2 px-2 border rounded-md border-gray-200' />
+                  </div>}
             </div>
 
             <div className="mb-6">
