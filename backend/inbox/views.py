@@ -23,6 +23,13 @@ class InboxView(APIView):
 
     permission_classes=[IsAuthenticated]
 
+    def get_authenticators(self):
+        if self.request.method == 'POST':
+            authentication_classes = [BasicAuthentication]
+        else:
+            authentication_classes = [JWTAuthentication]
+        return [auth() for auth in authentication_classes]
+
     def get_queryset(self):
         author_id=HOST+self.kwargs['author_id']
         inbox=Inbox.objects.get(author=author_id)
@@ -32,7 +39,7 @@ class InboxView(APIView):
         """
         Get inbox for a given author
         """
-        self.authentication_classes = [JWTAuthentication]
+        #self.authentication_classes = [JWTAuthentication]
         author_id=HOST+self.kwargs['author_id']
         if 'page' in request.GET:
             p = PageNumberPagination()
@@ -83,7 +90,7 @@ class InboxView(APIView):
         All fields of the object must be present.
         """
 
-        self.authentication_classes = [BasicAuthentication]
+        #self.authentication_classes = [BasicAuthentication]
 
         inbox = self.get_queryset()
         type = request.data['type']
