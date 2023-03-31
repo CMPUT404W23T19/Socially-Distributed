@@ -23,7 +23,7 @@ class AuthorListCreateView(ListCreateAPIView):
     permission_classes=[IsAuthenticated]
 
     def get_authenticators(self):
-        if self.action == 'list':
+        if self.request.method == 'GET':
             authentication_classes = [BasicAuthentication]
         else:
             authentication_classes = [JWTAuthentication]
@@ -131,7 +131,7 @@ class FollowerDetailView(RetrieveUpdateDestroyAPIView):
     permission_classes=[IsAuthenticated]
     
     def get_authenticators(self):
-        if self.action == 'retrieve':
+        if self.request.method == 'GET':
             authentication_classes = [BasicAuthentication]
         else:
             authentication_classes = [JWTAuthentication]

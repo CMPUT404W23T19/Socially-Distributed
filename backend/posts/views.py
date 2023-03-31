@@ -30,7 +30,7 @@ class PostList(ListCreateAPIView):
     permission_classes=[IsAuthenticated] 
 
     def get_authenticators(self):
-        if self.action == 'list':
+        if self.request.method == 'GET':
             authentication_classes = [BasicAuthentication]
         else:
             authentication_classes = [JWTAuthentication]
@@ -212,7 +212,7 @@ class CommentsView(ListCreateAPIView):
     serializer_class = CommentSerializer
 
     def get_authenticators(self):
-        if self.action == 'list':
+        if self.request.method == 'GET':
             authentication_classes = [BasicAuthentication]
         else:
             authentication_classes = [JWTAuthentication]
