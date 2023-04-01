@@ -4,6 +4,7 @@ import TopNavigation from './TopNavigation.js'
 import { reqCreatePost, reqGetAuthorsList, reqGetFollowersList, reqPostToInbox, reqUserProfile } from '../api/Api.js'
 import { getCookieUserId } from '../components/utils/cookieStorage.js';
 import { useRouter } from 'next/router.js';
+import { getJWTToken } from '../components/utils/cookieStorage.js';
 import axios from 'axios';
 export default function CreatePost() {
   const [title, setTitle] = useState('');
@@ -53,7 +54,11 @@ export default function CreatePost() {
       return axios({
         url: `${author.url}/inbox`,
         method: "post",
-        data: postData
+        data: postData,
+        auth:{
+          username:'admin',
+          password:'admin'
+        }
       })
     })
     Promise.all(promises)

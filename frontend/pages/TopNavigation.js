@@ -32,9 +32,14 @@ const TopNavigation = () => {
   const handleSearch = async (e) => {
     e.preventDefault();
     let userUrl = searchTerm
+    // Todo: need to identify node and use their username and password
     const res = await axios({
       url: `${userUrl}`,
-      method: "get"
+      method: "get",
+      auth:{
+        username:'admin',
+        password:'admin'
+      }
     })
     const lastSlashIndex = userUrl.lastIndexOf("/");
     const host = userUrl.substring(0, lastSlashIndex + 1);
@@ -51,6 +56,10 @@ const TopNavigation = () => {
             summary: `${localId} want to follow ${userUrl}`,
             actor: localUser,
             object: res.data
+          },
+          auth:{
+            username:'admin',
+            password:'admin'
           }
         })
       } else if (domain === "https://distributed-social-net.herokuapp.com") {
@@ -76,6 +85,10 @@ const TopNavigation = () => {
               github:res.data.github,
               url:res.data.url
             }
+          },
+          auth: {
+            username:'admin',
+            password:"admin"
           }
         })
       }

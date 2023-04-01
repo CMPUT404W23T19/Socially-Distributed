@@ -3,7 +3,8 @@ import { useRouter } from 'next/router'
 import TopNavigation from '../TopNavigation'
 import Link from 'next/link'
 import Image from "next/image"
-import { reqUserProfile, reqFollowOthers, reqGetFollowersList, reqPostToInbox, reqUnfollow, reqGetInbox } from '../../api/Api'
+import { getTime } from '../../components/common'
+import { reqUserProfile, reqFollowOthers, reqGetFollowersList, reqPostToInbox, reqUnfollow, reqGetInbox, reqGetUserPosts } from '../../api/Api'
 import { getCookieUserId } from '../../components/utils/cookieStorage'
 import styles from './profile.module.css'
 import { getUserIdFromUrl } from '../../components/common'
@@ -15,6 +16,8 @@ export default function UserProfile() {
   const [user, setUser] = useState(null)
   const [localUser, setLocalUser] = useState(null)
   const [isFollowing, setIsFollowing] = useState(false)
+  const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false)
+  const [publicPosts, setPublicPosts] = useState([])
   // const host = 'http://127.0.0.1:8000'
   const host = 'https://floating-fjord-51978.herokuapp.com'
   useEffect(() => {
@@ -53,6 +56,14 @@ export default function UserProfile() {
             setIsFollowing(false)
           }
         );
+      reqGetUserPosts(id)
+        .then(
+          res => {
+            let posts = res.data.items;
+            posts = posts.filter(post => post.visibility === "PUBLIC")
+            setPublicPosts(posts)
+          }
+        )
     }
   }, [id, localId, isFollowing])
 
@@ -68,31 +79,11 @@ export default function UserProfile() {
     reqFollowOthers(data, id, encodeURIComponent(localUser.id))
       .then(
         res => {
-          setIsFollowing(true)
-          // console.log(res);
-          let summary = `${localId} want to follow ${id}`
-          console.log(summary);
           const data = {
             "type": "follow",
-            "summary": `${localId} want to follow ${id}`,
-            "actor": {
-              "id": `${host}/authors/${localId}`,
-              "type": `${localUser.type}`,
-              "displayName": `${localUser.displayName}`,
-              "host": `${localUser.host}`,
-              "github": `${localUser.github}`,
-              "profileImage": `${localUser.profileImage}`,
-              "url": `${localUser.url}`
-            },
-            "object": {
-              "id": `${host}/authors/${id}`,
-              "type": `${user.type}`,
-              "displayName": `${user.displayName}`,
-              "host": `${user.host}`,
-              "github": `${user.github}`,
-              "profileImage": `${user.profileImage}`,
-              "url": `${user.url}`
-            }
+            "summary": `${localUser.displayName} want to follow ${user.displayName}`,
+            "actor": localUser,
+            "object": user
           }
           reqGetInbox(id)
             .then(
@@ -105,6 +96,7 @@ export default function UserProfile() {
                     .then(
                       res => {
                         console.log('success');
+                        setIsSuccessPopupOpen(true)
                         // console.log(res);
                       },
                       err => {
@@ -151,6 +143,20 @@ export default function UserProfile() {
     <div>
       {/* {console.log(user)} */}
       <TopNavigation />
+      {isSuccessPopupOpen && (
+        <div>
+          <div className="fixed w-screen h-screen opacity-80 bg-black z-30" onClick={() => setIsSuccessPopupOpen(!isSuccessPopupOpen)}></div>
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/4 z-40 rounded-md bg-gray-800 text-white">
+            <div className='flex justify-between m-5'>
+              <h2 className="text-base font-semibold mb-2">SUCCESS</h2>
+              <span className='cursor-pointer' onClick={() => setIsSuccessPopupOpen(!isSuccessPopupOpen)}><Close /></span>
+            </div>
+            <div className='text-left m-5'>
+              <p className='text-sm font-normal text-gray-100'>Your friend request is sent.</p>
+            </div>
+          </div>
+        </div>
+      )}
       <button onClick={goBack} className="absolute top-0 left-0 mt-24 px-3 py-1 ml-10 rounded-md z-10 bg-gray-100 text-sm">← Back</button>
       <div className="pt-24 container max-w-2xl mx-auto flex-col items-center justify-center px-2">
         <div className="bg-lighter px-10 z-10 rounded-xl shadow-xl text-main w-full relative">
@@ -166,16 +172,37 @@ export default function UserProfile() {
               <img className='w-28 h-28 rounded-full border-2 border-gray-100' src={user.profileImage ? user.profileImage : "../defaultUser.png"} alt="User" />
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-3xl font-semibold leading-none tracking-tighter mb-5">Username</h2>
+              <h2 className="text-xl font-semibold leading-none tracking-tighter mb-5">Username</h2>
               <p className="text-content ml-8 h-10 font-bold">{user.username ? 'not exist' : user.displayName}</p>
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-3xl font-semibold leading-none tracking-tighter mb-5">UserId</h2>
+              <h2 className="text-xl font-semibold leading-none tracking-tighter mb-5">UserId</h2>
               <p className="text-content ml-8 h-10 font-bold">{user.id}</p>
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-3xl font-semibold leading-none tracking-tighter mb-5">Github</h2>
+              <h2 className="text-xl font-semibold leading-none tracking-tighter mb-5">Github</h2>
               <a><p className="text-content ml-8 h-10 font-bold">{user.github ? 'not exist' : user.github}</p></a>
+            </div>
+            <div>
+              <h1 className='font-bold text-xl'>Posts</h1>
+              {publicPosts.map(post => (
+                post.visibility === 'PUBLIC' &&
+                <div key={post.id} className="bg-white p-2 my-2 border-b border-gray-200">
+                  <div className='cursor-pointer w-auto'>
+                    <div className='flex justify-between'>
+                      <div className="flex items-center mb-3">
+                        <img src={post.author.profileImage ? post.author.profileImage : '../defaultUser.png'} alt="" className="w-8 h-8 rounded-full mr-2" />
+                        <h2 className="text-sm font-normal">{post.author.displayName}</h2>
+                      </div>
+                      <div>
+                        <span>{getTime(post.published)}</span>
+                      </div>
+                    </div>
+                    <p className="text-base mb-3 font-semibold">{post.title}</p>
+                  </div>
+                  <p className="text-base mb-3 px-5">{post.content}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

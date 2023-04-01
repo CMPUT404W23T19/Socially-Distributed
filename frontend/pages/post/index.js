@@ -31,6 +31,7 @@ const Feed = () => {
         Promise.all(promises)
           .then(results => {
             let posts = results.flatMap(res => res.data.items);
+            posts = posts.filter(post => post.visibility === "PUBLIC")
             posts.sort((a, b) => {
               return new Date(b.published) - new Date(a.published)
             })

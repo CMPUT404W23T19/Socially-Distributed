@@ -7,6 +7,7 @@ import { getUserIdFromUrl, getPostIdFromCommentUrl, getPostIdFromUrl, getTime, p
 import { Done, Close } from '@material-ui/icons';
 import axios from 'axios';
 import {v4 as uuidv4} from 'uuid';
+import { getJWTToken } from '../components/utils/cookieStorage';
 
 export default function postdetail() {
   const router = useRouter()
@@ -23,7 +24,11 @@ export default function postdetail() {
       .then(res => setLocalUser(res.data), err => console.log(err))
     axios({
       url: `${post.id}/comments`,
-      method: 'get'
+      method: 'get',
+      auth:{
+        username:"admin",
+        password:"admin"
+      }
     }).then(res => setAllComments(res.data.items))
   }, [post])
 
@@ -51,7 +56,10 @@ export default function postdetail() {
     axios({
       url: `${post.id}/comments`,
       method: 'post',
-      data
+      data,
+      headers:{
+        Authorization: `Bearer ${getJWTToken()}`,
+      }
     }).then(
       res => {
         console.log(res);
@@ -72,7 +80,11 @@ export default function postdetail() {
     axios({
       url:`${postAuthor.id}/inbox`,
       method:'post',
-      data: commentData
+      data: commentData,
+      auth:{
+        username:'admin',
+        password:'admin'
+      }
     })
     .then(
       res => console.log('successfully post a comment'),
@@ -101,7 +113,7 @@ export default function postdetail() {
           </div>
         </div>
       )}
-      <div className='mx-auto pt-20 pl-32 h-screen'>
+      <div className='pt-20 w-4/5 h-screen mx-auto '>
         <div className="bg-white rounded-lg shadow-lg h-screen p-5 my-5">
           <div className='cursor-pointer w-auto'>
             <div >
