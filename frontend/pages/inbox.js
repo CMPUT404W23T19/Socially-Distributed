@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import TopNavigation from './TopNavigation'
 import { reqGetFollowersList, reqGetInbox, reqPostToInbox, reqClearInbox, reqUserProfile } from '../api/Api'
-import { getCookieUserId } from '../components/utils/cookieStorage'
+import { getCookieUserId,getJWTToken } from '../components/utils/cookieStorage'
 import FriendRequest from '../components/common/FriendRequest'
 import { getUserIdFromUrl, getTime } from '../components/common'
 import { reqFollowOthers } from '../api/Api'
@@ -19,13 +19,16 @@ export default function inbox() {
   const [likeList, setLikeList] = useState([])
   const [isCleared, setIsCleared] = useState(false)
   const [isAccept, setIsAccept] = useState(false)
-  const [post1, setPost] = useState(null)
   useEffect(() => {
     setUserId(getCookieUserId)
     if (userId) {
       reqUserProfile(userId)
         .then(res => setUser(res.data), err => console.log(err))
-      reqGetInbox(userId)
+      reqGetFollowersList(userId)
+      .then(res => {
+        const followers = res.data.items;
+        const followerIds = followers.map(follower => follower.id)
+        reqGetInbox(userId)
         .then(
           res => {
             const receivedList = res.data.items
@@ -34,7 +37,9 @@ export default function inbox() {
             const comments = []
             receivedList.forEach(element => {
               if (element.type === 'follow') {
-                requestsList.push(element)
+                if (!followerIds.includes(element.actor.id)) {
+                  requestsList.push(element)
+                }
               }
               else if (element.type === 'post') {
                 posts.push(element)
@@ -43,6 +48,15 @@ export default function inbox() {
                 comments.push(element)
               }
             });
+            posts.sort((a, b) => {
+              return new Date(b.published) - new Date(a.published)
+            })
+            requestsList.sort((a, b) => {
+              return new Date(b.published) - new Date(a.published)
+            })
+            comments.sort((a, b) => {
+              return new Date(b.published) - new Date(a.published)
+            })
             setPostList(posts)
             setFriendRequestsList(requestsList)
             setCommentList(comments)
@@ -52,6 +66,8 @@ export default function inbox() {
             alert(err)
           }
         )
+      }, err => console.log('cannot get followers list'))
+      
     }
   }, [userId, isCleared])
 
@@ -61,7 +77,10 @@ export default function inbox() {
     const res = await axios({
       url: `${request.object.host}/authors/${getUserIdFromUrl(request.object.id)}/followers/${request.actor.id}`,
       method: 'put',
-      data: user
+      data: user,
+      headers: {
+        Authorization: `Bearer ${getJWTToken()}`,
+      }
     })
     if (res.status >= 200 && res.status <= 300) {
       setIsAccept(true)

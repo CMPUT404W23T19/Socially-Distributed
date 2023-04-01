@@ -6,7 +6,7 @@ import { reqUserProfile } from '../api/Api';
 import { getUserIdFromUrl, getPostIdFromCommentUrl, getPostIdFromUrl, getTime, parseNestedObject } from '../components/common';
 import { Done, Close } from '@material-ui/icons';
 import axios from 'axios';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { getJWTToken } from '../components/utils/cookieStorage';
 
 export default function postdetail() {
@@ -19,17 +19,22 @@ export default function postdetail() {
   const [allComments, setAllComments] = useState([]);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [localUser, setLocalUser] = useState(null);
+  const [canShowComment, setCanShowComment] = useState(false)
+
   useEffect(() => {
     reqUserProfile(getCookieUserId())
       .then(res => setLocalUser(res.data), err => console.log(err))
-    axios({
-      url: `${post.id}/comments`,
-      method: 'get',
-      auth:{
-        username:"admin",
-        password:"admin"
-      }
-    }).then(res => setAllComments(res.data.items))
+    if (post.visibility === "PUBLIC") {
+      setCanShowComment(true)
+      axios({
+        url: `${post.id}/comments`,
+        method: 'get',
+        auth: {
+          username: "admin",
+          password: "admin"
+        }
+      }).then(res => setAllComments(res.data.items))
+    }
   }, [post])
 
   const handleLike = (postId) => {
@@ -57,7 +62,7 @@ export default function postdetail() {
       url: `${post.id}/comments`,
       method: 'post',
       data,
-      headers:{
+      headers: {
         Authorization: `Bearer ${getJWTToken()}`,
       }
     }).then(
@@ -68,28 +73,28 @@ export default function postdetail() {
       },
       err => console.log('failed comment', err)
     )
-   
+
     const commentData = {
       id: `${post.id}/comments/${uuidv4()}`,
-      type:"comment",
-      author:localUser,
-      comment:comments,
-      contentType:"text/markdown",
+      type: "comment",
+      author: localUser,
+      comment: comments,
+      contentType: "text/markdown",
       published: new Date().toISOString(),
-  }
+    }
     axios({
-      url:`${postAuthor.id}/inbox`,
-      method:'post',
+      url: `${postAuthor.id}/inbox`,
+      method: 'post',
       data: commentData,
-      auth:{
-        username:'admin',
-        password:'admin'
+      auth: {
+        username: 'admin',
+        password: 'admin'
       }
     })
-    .then(
-      res => console.log('successfully post a comment'),
-      err => console.log('fail to post a comment: ', err)
-    )
+      .then(
+        res => console.log('successfully post a comment'),
+        err => console.log('fail to post a comment: ', err)
+      )
   }
 
   const togglePopup = () => {
@@ -135,7 +140,8 @@ export default function postdetail() {
               <button className="bg-gray-200 rounded-lg px-4 py-2 mr-3 hover:bg-gray-300" onClick={() => handleLike(post)}>Like</button>
               <button className="bg-gray-200 rounded-lg px-4 py-2 hover:bg-gray-300" onClick={() => handleComment()}>Comment</button>
             </div>
-            <button className="bg-gray-200 rounded-lg px-4 py-2" onClick={() => setIsCollapsed(!isCollapsed)}>{isCollapsed ? "Show Comments" : "Hide Comments"}</button>
+            {canShowComment? (<button className="bg-gray-200 rounded-lg px-4 py-2" onClick={() => setIsCollapsed(!isCollapsed)}>{isCollapsed ? "Show Comments" : "Hide Comments"}</button>):
+            (<button className="bg-gray-200 rounded-lg px-4 py-2" disabled>Comments Private</button>)}
           </div>
           {allComments.length > 0 && !isCollapsed && (
             <div className="mt-5">

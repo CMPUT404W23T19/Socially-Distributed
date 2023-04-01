@@ -53,7 +53,7 @@ const TopNavigation = () => {
           method: 'post',
           data: {
             type: "follow",
-            summary: `${localId} want to follow ${userUrl}`,
+            summary: `${localUser.displayName} want to follow ${res.data.displayName}`,
             actor: localUser,
             object: res.data
           },
@@ -68,7 +68,7 @@ const TopNavigation = () => {
           method: 'post',
           data: {
             type: "Follow",
-            summary: `${localId} want to follow ${res.data.displayName}`,
+            summary: `${localUser.displayName} want to follow ${res.data.displayName}`,
             actor: {
               id:localUser.id,
               type:localUser.type,
@@ -161,7 +161,7 @@ const TopNavigation = () => {
               <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10">Posts</a>
             </Link>
             <Link href="/createPost">
-              <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10">Create a post</a>
+              <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10">New Post</a>
             </Link>
           </div>
           <div className="flex">

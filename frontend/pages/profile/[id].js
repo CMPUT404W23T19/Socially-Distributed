@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import TopNavigation from '../TopNavigation'
 import Link from 'next/link'
 import Image from "next/image"
+import { Close } from '@material-ui/icons'
 import { getTime } from '../../components/common'
 import { reqUserProfile, reqFollowOthers, reqGetFollowersList, reqPostToInbox, reqUnfollow, reqGetInbox, reqGetUserPosts } from '../../api/Api'
 import { getCookieUserId } from '../../components/utils/cookieStorage'
@@ -16,9 +17,10 @@ export default function UserProfile() {
   const [user, setUser] = useState(null)
   const [localUser, setLocalUser] = useState(null)
   const [isFollowing, setIsFollowing] = useState(false)
+  const [isFollowed, setIsFollowed] = useState(false)
   const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false)
   const [publicPosts, setPublicPosts] = useState([])
-  // const host = 'http://127.0.0.1:8000'
+
   const host = 'https://floating-fjord-51978.herokuapp.com'
   useEffect(() => {
     setLocalId(getCookieUserId())
@@ -56,6 +58,21 @@ export default function UserProfile() {
             setIsFollowing(false)
           }
         );
+      reqGetFollowersList(localId)
+      .then(
+        res => {
+          const found = res.data.items.find(follower => getUserIdFromUrl(follower.id).toString() === id);
+          if (found) {
+            setIsFollowed(true)
+          } else {
+            setIsFollowed(false)
+          }
+        },
+        err => {
+          console.log(err);
+          setIsFollowed(false)
+        }
+      )
       reqGetUserPosts(id)
         .then(
           res => {
@@ -73,46 +90,35 @@ export default function UserProfile() {
 
   const handleFollow = async (id) => {
     // handle follow here
+    console.log(111);
     const data = {
-      id: localId
+      "type": "follow",
+      "summary": `${localUser.displayName} want to follow ${user.displayName}`,
+      "actor": localUser,
+      "object": user
     }
-    reqFollowOthers(data, id, encodeURIComponent(localUser.id))
+    reqGetInbox(id)
       .then(
         res => {
-          const data = {
-            "type": "follow",
-            "summary": `${localUser.displayName} want to follow ${user.displayName}`,
-            "actor": localUser,
-            "object": user
-          }
-          reqGetInbox(id)
-            .then(
-              res => {
-                let a = res.data.items.findIndex(item => {
-                  return item.actor.id === data.actor.id && item.object.id === data.object.id && item.type === data.type
-                })
-                if (a === -1) {
-                  reqPostToInbox(data, id)
-                    .then(
-                      res => {
-                        console.log('success');
-                        setIsSuccessPopupOpen(true)
-                        // console.log(res);
-                      },
-                      err => {
-                        console.log('fail');
-                        console.log(err);
-                      }
-                    )
+          let a = res.data.items.findIndex(item => {
+            return item.actor.id === data.actor.id && item.object.id === data.object.id && item.type === data.type
+          })
+          if (a === -1) {
+            reqPostToInbox(data, id)
+              .then(
+                res => {
+                  console.log('success');
+                  setIsSuccessPopupOpen(true)
+                  // console.log(res);
+                },
+                err => {
+                  console.log('fail');
+                  console.log(err);
                 }
-              }
-            )
-
-        },
-        err => {
-          // console.log(err);
-          setIsFollowing(false)
-          alert(err)
+              )
+          } else {
+            setIsSuccessPopupOpen(true)
+          }
         }
       )
   }
@@ -161,10 +167,12 @@ export default function UserProfile() {
       <div className="pt-24 container max-w-2xl mx-auto flex-col items-center justify-center px-2">
         <div className="bg-lighter px-10 z-10 rounded-xl shadow-xl text-main w-full relative">
           {localId !== id && (
-            isFollowing ? (
-              <button className={styles.followButton} onClick={() => handleUnfollow(id)}>Following</button>
-            ) : (
-              <button onClick={() => handleFollow(id)} className={styles.followButton}>+ Follow</button>
+            isFollowing && isFollowed? (
+              <button className={styles.followButton} onClick={() => handleUnfollow(id)}>Friend</button>
+            ) : ( isFollowing?
+              (<button onClick={() => handleUnfollow(id)} className={styles.followButton}>Following</button>):
+              (<button onClick={() => handleFollow(id)} className={styles.followButton}>+ Follow</button>)
+
             )
           )}
           <div>
@@ -172,19 +180,19 @@ export default function UserProfile() {
               <img className='w-28 h-28 rounded-full border-2 border-gray-100' src={user.profileImage ? user.profileImage : "../defaultUser.png"} alt="User" />
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-xl font-semibold leading-none tracking-tighter mb-5">Username</h2>
-              <p className="text-content ml-8 h-10 font-bold">{user.username ? 'not exist' : user.displayName}</p>
+              <h2 className="text-xl font-semibold leading-none text-gray-500 tracking-tighter mb-5">Display Name</h2>
+              <p className="text-content ml-8 h-10 font-bold">{user.displayName}</p>
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-xl font-semibold leading-none tracking-tighter mb-5">UserId</h2>
+              <h2 className="text-xl font-semibold leading-none text-gray-500 tracking-tighter mb-5">User Id</h2>
               <p className="text-content ml-8 h-10 font-bold">{user.id}</p>
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-xl font-semibold leading-none tracking-tighter mb-5">Github</h2>
-              <a><p className="text-content ml-8 h-10 font-bold">{user.github ? 'not exist' : user.github}</p></a>
+              <h2 className="text-xl font-semibold leading-none text-gray-500 tracking-tighter mb-5">Github Url</h2>
+              <a><p className="text-content ml-8 h-10 font-bold">{user.github ? user.github : 'Not Exist'}</p></a>
             </div>
             <div>
-              <h1 className='font-bold text-xl'>Posts</h1>
+              <h1 className='font-bold text-xl border-t-4 border-gray-200 pt-3'>Posts</h1>
               {publicPosts.map(post => (
                 post.visibility === 'PUBLIC' &&
                 <div key={post.id} className="bg-white p-2 my-2 border-b border-gray-200">

@@ -126,14 +126,20 @@ export const reqFollowOthers = (data, authorId, friendId) => {
   return axios({
     url: `${host}/authors/${authorId}/followers/${friendId}`,
     method: 'put',
-    data
+    data,
+    headers: {
+      Authorization: `Bearer ${getJWTToken()}`,
+    }
   })
 }
 
 export const reqUnfollow = (authorId, friendId) => {
   return axios({
     url: `${host}/authors/${authorId}/followers/${friendId}`,
-    method: 'delete'
+    method: 'delete',
+    headers: {
+      Authorization: `Bearer ${getJWTToken()}`,
+    }
   })
 }
 

@@ -115,8 +115,9 @@ export default function CreatePost() {
         if (visibility === 'FRIEND') {
           sendToInbox(followers, postData)
         } else if (visibility === 'PUBLIC') {
-          const allAuthors = reqGetAuthorsList()
-          sendToInbox(allAuthors, postData)
+          const res = await reqGetAuthorsList()
+          const localAuthors = res.data.items.filter(author => author.host === "https://floating-fjord-51978.herokuapp.com")
+          sendToInbox(localAuthors, postData)
         } else if (visibility === 'PRIVATE') {
           // Todo: determine the host of author's url, use the corresponding auth
           let author = []
@@ -130,8 +131,10 @@ export default function CreatePost() {
           })
           if (res.status >= 200 && res.status < 300) {
             author.push(res.data)
+            sendToInbox(author, postData)
+          } else {
+            confirm("User does not exsits!")
           }
-          sendToInbox(author, postData)
         }
       }
     } catch (error) {

@@ -16,7 +16,6 @@ function ProfilePage() {
   const [imageUrl, setImageUrl] = useState('')
   const [postsList, setPostsList] = useState([])
   const [followersList, setFollowersList] = useState([])
-  const [followingsList, setFollowingsList] = useState([])
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [isDarkBackground, setIsDarkBackground] = useState(false)
   const [userUrl, setUserUrl] = useState('')
@@ -111,20 +110,19 @@ function ProfilePage() {
                 <ul className='py-3 list-none'>
                   <li className='inline mr-5'><Link href='/post/me'><p className='font-semibold inline cursor-pointer'>{postsList.length}&nbsp;posts</p></Link></li>
                   <li className='inline mr-5'><button onClick={togglePopup}><span className='font-semibold'>{followersList.length}&nbsp;</span>followers</button></li>
-                  <li className='inline mr-5'><button><span className='font-semibold'>{followingsList.length}&nbsp;</span>followings</button></li>
                 </ul>
               </div>
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-2xl font-semibold leading-none tracking-tighter mb-5">Username</h2>
+              <h2 className="text-2xl font-semibold leading-none text-gray-500 tracking-tighter mb-5">Display Name</h2>
               <p className="text-content ml-8 h-10 font-bold">{username == '' ? 'Not exist' : username}</p>
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-2xl font-semibold leading-none tracking-tighter mb-5">UserId</h2>
+              <h2 className="text-2xl font-semibold leading-none text-gray-500 tracking-tighter mb-5">User Id</h2>
               <p className="text-content ml-8 h-10 font-bold">{userUrl == '' ? 'Not exist' : userUrl}</p>
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-2xl font-semibold leading-none tracking-tighter mb-5">Github</h2>
+              <h2 className="text-2xl font-semibold leading-none text-gray-500 tracking-tighter mb-5">Github Url</h2>
               <a><p className="text-content ml-8 h-10 font-bold">{github == '' ? 'Not exist' : github}</p></a>
             </div>
           </div>
