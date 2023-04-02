@@ -19,7 +19,7 @@ export default function CreatePost() {
   const router = useRouter();
 
   useEffect(() => {
-    setUserId(getCookieUserId)
+    setUserId(getCookieUserId())
     if (userId) {
       reqGetFollowersList(userId)
         .then(res => setFollowers(res.data.items), err => console.log(err))
@@ -116,7 +116,7 @@ export default function CreatePost() {
           sendToInbox(followers, postData)
         } else if (visibility === 'PUBLIC') {
           const res = await reqGetAuthorsList()
-          const localAuthors = res.data.items.filter(author => author.host === "https://floating-fjord-51978.herokuapp.com")
+          const localAuthors = res.data.items.filter(author => author.host === "https://floating-fjord-51978.herokuapp.com" && author.id !== user.id)
           sendToInbox(localAuthors, postData)
         } else if (visibility === 'PRIVATE') {
           // Todo: determine the host of author's url, use the corresponding auth

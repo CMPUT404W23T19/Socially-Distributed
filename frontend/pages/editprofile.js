@@ -51,63 +51,59 @@ export default function EditProfileForm() {
   const handleEditProfile = async (e) => {
     e.preventDefault();
     let updatedProfile = userProfile;
-    if (imageUrl) {
-      updatedProfile.profileImage = imageUrl
+    updatedProfile.profileImage = imageUrl
+    updatedProfile.github = github
+    updatedProfile.displayName = username
+    console.log(updatedProfile);
+    const res = await reqEditUserProfile(userId, updatedProfile);
+    if (res.status === 200) {
+      setTimeout(() => {
+        router.push('/profile')
+      }, 1000);
     }
-    if (github) {
-      updatedProfile.github = github
-    }
-    if (username) {
-      updatedProfile.displayName = username
-    }
-  console.log(updatedProfile);
-  const res = await reqEditUserProfile(userId, updatedProfile);
-  if (res.status === 200) {
-    setTimeout(() => {
-      router.push('/profile')
-    }, 1000);
   }
-}
 
-return (
-  <div className="bg-primary min-h-screen flex flex-col">
-    <div>
-      <TopNavigation />
-    </div>
-    <button className='mt-20 bg-blue-600 font-bold px-3 py-1 w-20 text-white rounded-md ml-6' onClick={() => router.back()}>{'<'} back</button>
-    <div className="container mx-auto mt-2 max-w-2xl flex-1 flex flex-col items-center justify-center px-2">
-      <div className="bg-lighter px-5 rounded-xl shadow-md w-full">
-        <form onSubmit={handleEditProfile}>
-          <h1 className="mb-8 text-3xl text-center">Edit Your Profile</h1>
-          {/* <div className='h-24 w-full text-center'> */}
-          <img className='userPhoto w-24 h-24 mx-auto rounded-full' src={imageUrl ? imageUrl : 'defaultUser.png'} />
-          {/* </div> */}
-          <input
-            type='text'
-            className='border w-full border-grey-light p-2 rounded-xl my-5 block'
-            placeholder='Image Url'
-            value={imageUrl}
-            onChange={handleImageChange}
-          />
-
-          <input
-            type='text'
-            className='border w-full border-grey-light p-2 rounded-xl my-5 block'
-            placeholder='Display Name'
-            value={username}
-            onChange={handleUsernameChange}
-          />
-          <input
-            type='text'
-            className='border w-full border-grey-light p-2 rounded-xl mb-5 block'
-            placeholder='Github Url'
-            value={github}
-            onChange={handleGithubChange}
-          />
-          <button className="w-full py-2 my-5 bg-gray-300 text-white hover:bg-gray-400 rounded">Confirm</button>
-        </form>
+  return (
+    <div className="bg-primary min-h-screen flex flex-col">
+      <div>
+        <TopNavigation />
+      </div>
+      <button className='mt-20 bg-blue-600 font-bold px-3 py-1 w-20 text-white rounded-md ml-6' onClick={() => router.back()}>{'<'} back</button>
+      <div className="container mx-auto mt-2 max-w-2xl flex-1 flex flex-col items-center justify-center px-2">
+        <div className="bg-lighter px-5 rounded-xl shadow-md w-full">
+          <form onSubmit={handleEditProfile}>
+            <h1 className="mb-8 text-3xl text-center">Edit Your Profile</h1>
+            {/* <div className='h-24 w-full text-center'> */}
+            <img className='userPhoto w-24 h-24 mx-auto rounded-full' src={imageUrl ? imageUrl : 'defaultUser.png'} />
+            {/* </div> */}
+            <p>Image</p>
+            <input
+              type='text'
+              className='border w-full border-grey-light p-2 rounded-xl my-5 block'
+              placeholder='Image Url'
+              value={imageUrl}
+              onChange={handleImageChange}
+            />
+            <p>Display Name</p>
+            <input
+              type='text'
+              className='border w-full border-grey-light p-2 rounded-xl my-5 block'
+              placeholder='Display Name'
+              value={username}
+              onChange={handleUsernameChange}
+            />
+            <p>Github</p>
+            <input
+              type='text'
+              className='border w-full border-grey-light p-2 rounded-xl mb-5 block'
+              placeholder='https://github/username'
+              value={github}
+              onChange={handleGithubChange}
+            />
+            <button className="w-full py-2 my-5 bg-gray-300 text-white hover:bg-gray-400 rounded">Confirm</button>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
-)
+  )
 }

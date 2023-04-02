@@ -4,7 +4,7 @@ import { getCookieUserId } from '../components/utils/cookieStorage';
 import TopNavigation from './TopNavigation';
 import { reqUserProfile } from '../api/Api';
 import { getUserIdFromUrl, getPostIdFromCommentUrl, getPostIdFromUrl, getTime, parseNestedObject } from '../components/common';
-import { Done, Close } from '@material-ui/icons';
+import { Done, Close,FavoriteBorder,AddComment } from '@material-ui/icons';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { getJWTToken } from '../components/utils/cookieStorage';
@@ -136,12 +136,12 @@ export default function postdetail() {
           </div>
           <p className="text-base mb-3 px-5">{post.content}</p>
           <div className="flex justify-between">
-            <div className="flex">
-              <button className="bg-gray-200 rounded-lg px-4 py-2 mr-3 hover:bg-gray-300" onClick={() => handleLike(post)}>Like</button>
-              <button className="bg-gray-200 rounded-lg px-4 py-2 hover:bg-gray-300" onClick={() => handleComment()}>Comment</button>
+            <div className="flex items-center">
+              <FavoriteBorder fontSize='large' className='cursor-pointer pr-4 text-gray-300' onClick={() => handleLike(post)} />
+              <AddComment className="cursor-pointer text-gray-300" onClick={() => handleComment(post)} />
             </div>
-            {canShowComment? (<button className="bg-gray-200 rounded-lg px-4 py-2" onClick={() => setIsCollapsed(!isCollapsed)}>{isCollapsed ? "Show Comments" : "Hide Comments"}</button>):
-            (<button className="bg-gray-200 rounded-lg px-4 py-2" disabled>Comments Private</button>)}
+            {canShowComment ? (<button className="bg-gray-200 rounded-lg px-4 py-2" onClick={() => setIsCollapsed(!isCollapsed)}>{isCollapsed ? "Show Comments" : "Hide Comments"}</button>) :
+              (<button className="bg-gray-200 rounded-lg px-4 py-2" disabled>Comments Private</button>)}
           </div>
           {allComments.length > 0 && !isCollapsed && (
             <div className="mt-5">

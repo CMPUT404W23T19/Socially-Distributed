@@ -149,23 +149,26 @@ const TopNavigation = () => {
         </div>
       )}
       <nav className="fixed top-0 left-0 right-0 z-20 bg-gray-800 px-4 py-3">
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center flex-wrap">
           <div>
             <Link href="/inbox">
-              <a className="text-white hover:text-gray-400 font-semibold text-lg">Inbox</a>
+              <a className="text-white hover:text-gray-400 font-semibold text-lg mr-10">Inbox</a>
             </Link>
             <Link href="/profile">
-              <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10 ml-10">Profile</a>
+              <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">Profile</a>
             </Link>
             <Link href="/post">
-              <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10">Posts</a>
+              <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">Explore</a>
             </Link>
             <Link href="/createPost">
-              <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10">New Post</a>
+              <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">New Post</a>
+            </Link>
+            <Link href="/githubActivity">
+              <a className='text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10'>Github Activity</a>
             </Link>
           </div>
           <div className="flex">
-            <div className="relative mr-4">
+            <div className="relative mr-2">
               <form onSubmit={(e) => handleSearch(e)}>
                 <input
                   type="text"
@@ -176,13 +179,13 @@ const TopNavigation = () => {
                 />
                 <button
                   type="submit"
-                  className="absolute right-0 top-0 mt-3 mr-3"
+                  className="absolute right-0 top-0 mt-3 mr-2"
                 >
                   {/* search */}
                 </button>
               </form>
             </div>
-            <button
+            {/* <button
               onClick={handleToggleNotification}
               className="relative text-white hover:text-gray-400"
             >
@@ -196,8 +199,8 @@ const TopNavigation = () => {
                   </div>
                 </div>
               )}
-            </button>
-            <button onClick={handleLogout} className="relative text-white hover:text-gray-400 ml-5 pl-5 border-l-2 border-white">Logout</button>
+            </button> */}
+            <button onClick={handleLogout} className="relative text-white hover:text-gray-400 ml-3 mr-3 pl-5 border-l-2 border-white">Logout</button>
           </div>
         </div>
       </nav>

@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TopNavigation from '../TopNavigation';
 import SideNav from '../../components/SideNav'
-import { reqGetAuthorsList, reqGetComments, reqGetUserPosts, reqPostComments, reqUserProfile } from '../../api/Api';
+import { reqGetAuthorsList, reqGetComments, reqGetUserPosts, reqPostComments, reqPostToInbox, reqUserProfile } from '../../api/Api';
 import Link from 'next/link';
 import { getPostIdFromCommentUrl, getPostIdFromUrl, getTime } from '../../components/common';
 import { getUserIdFromUrl } from '../../components/common';
-import { Close, Done } from '@material-ui/icons';
-import { getCookieUserId } from '../../components/utils/cookieStorage';
+import { Close, Done, FavoriteBorder, AddComment } from '@material-ui/icons';
+import { getCookieUserId, getJWTToken } from '../../components/utils/cookieStorage';
+import { v4 as uuidv4 } from 'uuid';
 
 const Feed = () => {
   const [comments, setComments] = useState([]);
@@ -21,7 +22,8 @@ const Feed = () => {
     reqUserProfile(getCookieUserId())
       .then(res => setLocalUser(res.data), err => console.log(err))
 
-    reqGetAuthorsList()
+    if (localUser) {
+      reqGetAuthorsList()
       .then(res => {
         let authors = res.data.items;
         const promises = authors.map(author => {
@@ -31,7 +33,7 @@ const Feed = () => {
         Promise.all(promises)
           .then(results => {
             let posts = results.flatMap(res => res.data.items);
-            posts = posts.filter(post => post.visibility === "PUBLIC")
+            posts = posts.filter(post => post.visibility === "PUBLIC" && post.author.id !== localUser.id)
             posts.sort((a, b) => {
               return new Date(b.published) - new Date(a.published)
             })
@@ -54,10 +56,28 @@ const Feed = () => {
       .catch(error => {
         console.log(error);
       });
-  }, [comments]);
+    }
+  }, [localUser,comments]);
 
-  const handleLike = (postId) => {
+  const handleLike = (post) => {
     // handle like logic here
+    const data = {
+      type: 'Like',
+      summary: `${localUser.displayName} liked your post`,
+      author: localUser,
+      object: post.id
+    }
+    axios({
+      url: `${post.author.url}/inbox`,
+      method: "post",
+      data,
+      headers: {
+        Authorization: `Bearer ${getJWTToken()}`,
+
+      }
+    }).then(res => console.log('successful like to inbox'), err => console.log('failed to post like to inbox', err))
+    // reqPostToInbox(data, getUserIdFromUrl(post.author.id))
+    // .then(res => console.log('successful like to inbox'), err => console.log('failed to post like to inbox',err))
   };
 
   const handleComment = (post) => {
@@ -72,21 +92,36 @@ const Feed = () => {
     // i.e. authorId: 10, postId: e456fa2f-3afd-47ee-8b02-cc417dd09a36
 
     const data = {
+      type: 'comment',
       author: localUser,
       comment: comments,    //################################## a length limit?
       contentType: "text/markdown",
-      published: new Date().toISOString()
+      published: new Date().toISOString(),
+      id: `${currentPost.id}/comments/${uuidv4()}`
     }
     const authorId = getUserIdFromUrl(currentPost.author.id);
+    console.log(authorId);
     const postId = getPostIdFromUrl(currentPost.id);
-    reqPostComments(data, authorId, postId)
-      .then(
-        res => {
-          setIsPopupOpen(false);
-          console.log('successful comment')
-        },
-        err => console.log('failed comment', err)
-      )
+    // reqPostComments(data, authorId, postId)
+    //   .then(
+    //     res => {
+    //       setIsPopupOpen(false);
+    //       console.log('successful comment')
+    //     },
+    //     err => console.log('failed comment', err)
+    //   )
+    axios({
+      url: `${currentPost.id}/comments`,
+      method: 'post',
+      data,
+      headers: {
+        Authorization: `Bearer ${getJWTToken()}`,
+      }
+    }).then(res => console.log('good'), err => console.log('bad', err))
+    reqPostToInbox(data, authorId)
+      .then(res => {
+        setIsPopupOpen(false)
+        console.log('successful comment to inbox')}, err => console.log('fail to comment to inbox', err))
   }
   const togglePopup = () => {
     setIsPopupOpen(!isPopupOpen)
@@ -132,9 +167,9 @@ const Feed = () => {
             </div>
             <p className="text-base mb-3 px-5">{post.content}</p>
             <div className="flex justify-between">
-              <div className="flex">
-                <button className="bg-gray-200 rounded-lg px-4 py-2 mr-3 hover:bg-gray-300" onClick={() => handleLike(post.id)}>Like</button>
-                <button className="bg-gray-200 rounded-lg px-4 py-2 hover:bg-gray-300" onClick={() => handleComment(post)}>Comment</button>
+              <div className="flex items-center">
+                <FavoriteBorder fontSize='large' className='cursor-pointer pr-4 text-gray-300' onClick={() => handleLike(post)} />
+                <AddComment fontSize='medium' className="cursor-pointer text-gray-300" onClick={() => handleComment(post)} />
               </div>
               <button className="bg-gray-200 rounded-lg px-4 py-2" onClick={() => setIsCollapsed(!isCollapsed)}>{isCollapsed ? "Show Comments" : "Hide Comments"}</button>
             </div>
@@ -145,7 +180,7 @@ const Feed = () => {
                 {allComments.filter(comment => getPostIdFromCommentUrl(comment.id) === getPostIdFromUrl(post.id)).map(comment => (
                   <div key={comment.id} className="bg-gray-200 rounded-lg p-3 my-3">
                     <div className="flex items-center mb-2">
-                      <img src={`${comment.author.profileImage ? comment.author.profileImage:'../defaultUser.png'}`} alt="" className="w-8 h-8 rounded-full mr-2" />
+                      <img src={`${comment.author.profileImage ? comment.author.profileImage : '../defaultUser.png'}`} alt="" className="w-8 h-8 rounded-full mr-2" />
                       <h4 className="text-base font-bold">{comment.author.displayName}</h4>
                     </div>
                     <p className="text-base">{comment.comment}</p>

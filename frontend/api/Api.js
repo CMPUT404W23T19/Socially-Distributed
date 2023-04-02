@@ -148,8 +148,9 @@ export const reqPostToInbox = (data, authorId) => {
     url: `${host}/authors/${authorId}/inbox`,
     method: "post",
     data,
-    headers: {
-      Authorization: `Bearer ${getJWTToken()}`,
+    auth:{
+      username:"admin",
+      password:"admin"
     }
   })
 }
@@ -183,7 +184,11 @@ export const reqPostComments = (data, authorId, postId) => {
   return axios({
     url: `${host}/authors/${authorId}/posts/${postId}/comments`,
     method: 'post',
-    data
+    data,
+    auth:{
+      username:'admin',
+      password:'admin'
+    }
   })
 }
 
