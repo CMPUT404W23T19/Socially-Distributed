@@ -22,7 +22,14 @@ HOST = 'https://floating-fjord-51978.herokuapp.com/authors/'
 
 class InboxView(APIView):
 
-    # permission_classes=[IsAuthenticated] #ignore for now
+    permission_classes=[IsAuthenticated]
+
+    def get_authenticators(self):
+        if self.request.method == 'POST':
+            authentication_classes = [BasicAuthentication]
+        else:
+            authentication_classes = [JWTAuthentication]
+        return [auth() for auth in authentication_classes]
 
     def get_queryset(self):
         author_id=HOST+self.kwargs['author_id']
@@ -33,7 +40,7 @@ class InboxView(APIView):
         """
         Get inbox for a given author
         """
-        self.authentication_classes = [JWTAuthentication]
+        #self.authentication_classes = [JWTAuthentication]
         author_id=HOST+self.kwargs['author_id']
         if 'page' in request.GET:
             p = PageNumberPagination()
@@ -83,6 +90,9 @@ class InboxView(APIView):
         Add a "post", "follow", "like" or "comment" to the inbox.
         All fields of the object must be present.
         """
+
+        #self.authentication_classes = [BasicAuthentication]
+
         inbox = self.get_queryset()
         type = request.data['type']
 
@@ -133,7 +143,8 @@ class InboxView(APIView):
                 except Comment.DoesNotExist:
                     return Response(status=status.HTTP_404_NOT_FOUND)
             try:
-                like = Like.objects.create(author=request.data['author'], object=request.data['object'], summary=request.data['summary'])
+                author = Author.objects.get(id=request.data['author']['id'])
+                like = Like.objects.create(author=author, object=request.data['object'], summary=request.data['summary'])
             except:
                 return Response(status=status.HTTP_400_BAD_REQUEST) # probably duplicate
             inbox.likes.add(like)

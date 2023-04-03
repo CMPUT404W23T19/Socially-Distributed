@@ -20,7 +20,14 @@ HOST='https://floating-fjord-51978.herokuapp.com/authors/'
 class AuthorListCreateView(ListCreateAPIView):
     queryset=Author.objects.all()
     serializer_class=AuthorSerializer
-    # permission_classes=[IsAuthenticated] #ignore for now
+    permission_classes=[IsAuthenticated]
+
+    def get_authenticators(self):
+        if self.request.method == 'GET':
+            authentication_classes = [BasicAuthentication]
+        else:
+            authentication_classes = [JWTAuthentication]
+        return [auth() for auth in authentication_classes]
 
     def perform_create(self, serializer): # overwrite
         user=self.request.user
@@ -31,7 +38,7 @@ class AuthorListCreateView(ListCreateAPIView):
         
         Return a list of all the authors. Pagination is supported.
         """
-        self.authentication_classes = [BasicAuthentication]
+        #self.authentication_classes = [BasicAuthentication]
         if 'page' in request.GET:
             p = PageNumberPagination()
             p.page_query_param = 'page'
@@ -53,12 +60,20 @@ class AuthorDetailView(APIView):
 
     queryset=Author.objects.all()
     serializer_class=AuthorSerializer
-    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+    permission_classes=[IsAuthenticated]
+
+    def get_authenticators(self):
+        if self.request.method == 'GET':
+            authentication_classes = [BasicAuthentication]
+        else:
+            authentication_classes = [JWTAuthentication]
+        return [auth() for auth in authentication_classes]
 
     def get(self, request, *args, **kwargs):
         """
         Return an individual author
         """
+        #self.authentication_classes = [BasicAuthentication]
         author_id=HOST+self.kwargs['author_id']
         try:
             instance = Author.objects.get(id=author_id)
@@ -71,6 +86,7 @@ class AuthorDetailView(APIView):
         """
         Update an individual author details
         """
+        #self.authentication_classes = [JWTAuthentication]
         author_id=HOST+self.kwargs['author_id']
         try:
             instance = Author.objects.get(id=author_id)
@@ -88,7 +104,8 @@ class FollowerList(ListAPIView):
     """
 
     serializer_class=AuthorSerializer
-    # permission_classes=[IsAuthenticated] #ignore for now
+    permission_classes=[IsAuthenticated]
+    authentication_classes = [BasicAuthentication]
 
     def get_queryset(self):
         author_id=HOST+self.kwargs['author_id']
@@ -96,7 +113,6 @@ class FollowerList(ListAPIView):
         return author.followers.all()
     
     def list(self, request, *args, **kwargs):
-        
         queryset = self.get_queryset()
         serializer = AuthorSerializer(queryset, many=True)
         response = {"type": "followers", "items": serializer.data}
@@ -112,12 +128,20 @@ class FollowerDetailView(RetrieveUpdateDestroyAPIView):
 
     queryset=Author.objects.all()
     serializer_class=AuthorSerializer
-    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+    permission_classes=[IsAuthenticated]
+    
+    def get_authenticators(self):
+        if self.request.method == 'GET':
+            authentication_classes = [BasicAuthentication]
+        else:
+            authentication_classes = [JWTAuthentication]
+        return [auth() for auth in authentication_classes]
 
     def retrieve(self, request, *args, **kwargs):
         """
         check if FOREIGN_AUTHOR_ID is a follower of AUTHOR_ID
         """
+        #self.authentication_classes = [BasicAuthentication]
         author_id=HOST+self.kwargs['author_id']
         author = Author.objects.get(id=author_id)
         friend_id = self.kwargs['friend_id']
@@ -131,6 +155,7 @@ class FollowerDetailView(RetrieveUpdateDestroyAPIView):
         """
         Add a follower to current author
         """
+        #self.authentication_classes = [JWTAuthentication]
         author_id=HOST+self.kwargs['author_id']
         friend_id=self.kwargs['friend_id']
         try:
@@ -145,6 +170,7 @@ class FollowerDetailView(RetrieveUpdateDestroyAPIView):
         """
         Remove a follower from current author
         """
+        #self.authentication_classes = [JWTAuthentication]
         author_id=HOST+self.kwargs['author_id']
         author = Author.objects.get(id=author_id)
         exists = author.followers.filter(id=self.kwargs['friend_id']).exists()

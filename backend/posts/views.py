@@ -27,7 +27,14 @@ class PostList(ListCreateAPIView):
     """
     
     serializer_class=PostSerializer
-    # permission_classes=[IsAuthenticated] #ignore for now
+    permission_classes=[IsAuthenticated] 
+
+    def get_authenticators(self):
+        if self.request.method == 'GET':
+            authentication_classes = [BasicAuthentication]
+        else:
+            authentication_classes = [JWTAuthentication]
+        return [auth() for auth in authentication_classes]
 
     def get_queryset(self):
         author_id=HOST+self.kwargs['author_id']
@@ -38,6 +45,7 @@ class PostList(ListCreateAPIView):
         """
         Create a new post for the currently authenticated user.
         """
+        #self.authentication_classes = [JWTAuthentication]
         author_id=HOST+self.kwargs['author_id']
         post_id = author_id + "/posts/" + str(uuid.uuid4())
         instance = Author.objects.get(id=author_id)
@@ -51,7 +59,7 @@ class PostList(ListCreateAPIView):
         This view should return a list of all the posts
         for the currently authenticated user.
         """
-        self.authentication_classes = [BasicAuthentication]
+        #self.authentication_classes = [BasicAuthentication]
         if 'page' in request.GET:
             p = PageNumberPagination()
             p.page_query_param = 'page'
@@ -76,12 +84,20 @@ class PostDetailView(APIView):
     DELETE: Delete a single post of the currently authenticated user.
     """
 
-    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+    permission_classes=[IsAuthenticated]
+
+    def get_authenticators(self):
+        if self.request.method == 'GET':
+            authentication_classes = [BasicAuthentication]
+        else:
+            authentication_classes = [JWTAuthentication]
+        return [auth() for auth in authentication_classes]
 
     def get(self, request, *args, **kwargs):
         """
         This view should return a single post of the currently authenticated user.
         """
+        #self.authentication_classes = [BasicAuthentication]
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         instance = Post.objects.get(id=post_id)
         serializer = PostSerializer(instance)
@@ -91,6 +107,7 @@ class PostDetailView(APIView):
         """
         Update a single post of the currently authenticated user.
         """
+        #self.authentication_classes = [JWTAuthentication]
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         instance = Post.objects.get(id=post_id)
         serializer = PostSerializer(instance, data=request.data)
@@ -100,7 +117,9 @@ class PostDetailView(APIView):
 
     def delete(self, request, *args, **kwargs):
         """
-        Ddelete a single post of the currently authenticated user."""
+        Delete a single post of the currently authenticated user.
+        """
+        #self.authentication_classes = [JWTAuthentication]
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         instance = Post.objects.get(id=post_id)
         instance.delete()
@@ -110,6 +129,7 @@ class PostDetailView(APIView):
         """
         Create a single post of the currently authenticated user with given post id.
         """
+        #self.authentication_classes = [JWTAuthentication]
         author_id=HOST+self.kwargs['author_id']
         instance = Author.objects.get(id=author_id)
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
@@ -118,6 +138,9 @@ class PostDetailView(APIView):
     
     
 class GetImageView(APIView):
+
+    permission_classes=[IsAuthenticated]
+    authentication_classes = [BasicAuthentication]
 
     def get(self, request, *args, **kwargs):
         """
@@ -133,7 +156,8 @@ class GetImageView(APIView):
 
 class PostLikes(APIView):
     
-    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+    permission_classes=[IsAuthenticated]
+    authentication_classes = [BasicAuthentication]
 
     def get(self, request, *args, **kwargs):
         """
@@ -147,7 +171,8 @@ class PostLikes(APIView):
     
 class CommentLikes(APIView):
 
-    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+    permission_classes=[IsAuthenticated]
+    authentication_classes = [BasicAuthentication]
 
     def get(self, request, *args, **kwargs):
         """
@@ -161,7 +186,8 @@ class CommentLikes(APIView):
     
 class AuthorLiked(APIView):
 
-    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+    permission_classes=[IsAuthenticated]
+    authentication_classes = [BasicAuthentication]
 
     def get(self, request, *args, **kwargs):
         """
@@ -179,17 +205,25 @@ class CommentsView(ListCreateAPIView):
     POST: Create a comment on a post of the currently authenticated user.
     """
 
-    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+    permission_classes=[IsAuthenticated]
 
     paginate_by = 5
 
     serializer_class = CommentSerializer
+
+    def get_authenticators(self):
+        if self.request.method == 'GET':
+            authentication_classes = [BasicAuthentication]
+        else:
+            authentication_classes = [JWTAuthentication]
+        return [auth() for auth in authentication_classes]
 
     def get_queryset(self):
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         return Comment.objects.filter(post=post_id)
     
     def create(self, request, *args, **kwargs):
+        #self.authentication_classes = [JWTAuthentication]
         post_id = HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         comment_id = post_id + '/comments/' + str(uuid.uuid4())
         try:
@@ -202,6 +236,7 @@ class CommentsView(ListCreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     def list(self, request, *args, **kwargs):
+        #self.authentication_classes = [BasicAuthentication]
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         if 'page' in request.GET:
             p = PageNumberPagination()
