@@ -58,21 +58,21 @@ export default function postdetail() {
       contentType: "text/markdown",
       published: new Date().toISOString()
     }
-    axios({
-      url: `${post.id}/comments`,
-      method: 'post',
-      data,
-      headers: {
-        Authorization: `Bearer ${getJWTToken()}`,
-      }
-    }).then(
-      res => {
-        console.log(res);
-        setIsPopupOpen(false);
-        console.log('successful comment')
-      },
-      err => console.log('failed comment', err)
-    )
+    // axios({
+    //   url: `${post.id}/comments`,
+    //   method: 'post',
+    //   data,
+    //   headers: {
+    //     Authorization: `Bearer ${getJWTToken()}`,
+    //   }
+    // }).then(
+    //   res => {
+    //     console.log(res);
+    //     setIsPopupOpen(false);
+    //     console.log('successful comment')
+    //   },
+    //   err => console.log('failed comment', err)
+    // )
 
     const commentData = {
       id: `${post.id}/comments/${uuidv4()}`,
@@ -92,8 +92,8 @@ export default function postdetail() {
       }
     })
       .then(
-        res => console.log('successfully post a comment'),
-        err => console.log('fail to post a comment: ', err)
+        res => {setIsPopupOpen(false);console.log('successfully post a comment to inbox')},
+        err => console.log('fail to post a comment to inbox: ', err)
       )
   }
 

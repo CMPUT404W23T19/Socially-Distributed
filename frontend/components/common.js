@@ -1,6 +1,6 @@
 export const getTime = (isoString) => {
   const date = new Date(isoString);
-  const edmontonOffset = -6 * 60; // Edmonton is UTC-6 (without daylight saving time)
+  const edmontonOffset = -6 * 60;
   const edmontonTime = new Date(date.getTime() + edmontonOffset * 60 * 1000);
   const year = edmontonTime.getFullYear();
   const month = edmontonTime.getMonth() + 1;
@@ -8,7 +8,7 @@ export const getTime = (isoString) => {
   const hour = edmontonTime.getHours();
   const minute = edmontonTime.getMinutes();
   const second = edmontonTime.getSeconds();
-  const edmontonTimeString = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`;
+  const edmontonTimeString = `${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')} ${year}`;
   return edmontonTimeString
 }
 

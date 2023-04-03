@@ -1,29 +1,42 @@
 import React, { useEffect, useState } from 'react'
 import TopNavigation from '../TopNavigation'
-import SideNav from '../../components/SideNav'
 import { getCookieUserId } from '../../components/utils/cookieStorage'
-import { reqDeletePost, reqGetUserPosts } from '../../api/Api'
-import { getTime, getPostIdFromUrl, getUserIdFromUrl } from '../../components/common'
+import { reqDeletePost, reqGetUserPosts, reqGetComments } from '../../api/Api'
+import { getTime, getPostIdFromUrl, getUserIdFromUrl, getPostIdFromCommentUrl } from '../../components/common'
 import { useRouter } from 'next/router'
+import Markdown from 'markdown-to-jsx'
+import { DeleteOutline, ExpandMore, ExpandLess } from '@material-ui/icons'
 export default function Public() {
   const router = useRouter();
   const [userId, setUserId] = useState('')
   const [myPostList, setMyPostList] = useState([])
   const [isCollapsed, setIsCollapsed] = useState(true);
-
+  const [allComments, setAllComments] = useState([])
   useEffect(() => {
     async function fetchData() {
       setUserId(getCookieUserId);
       if (userId !== '') {
         try {
           const res = await reqGetUserPosts(userId);
-          if (res.status === 200) {
+          if (res.status >= 200 && res.status < 300) {
             let posts = res.data.items;
-            posts = posts.filter(post => post.visibility === 'PUBLIC')
             posts.sort((a, b) => {
               return new Date(b.published) - new Date(a.published)
             })
             setMyPostList(posts)
+            const promises = posts.map(post => {
+              return reqGetComments(getUserIdFromUrl(post.author.id), getPostIdFromUrl(post.id))
+            })
+            console.log('here');
+            Promise.all(promises)
+              .then(res => {
+                console.log(222);
+                let comments = res.flatMap(res => res.data.items);
+                comments.sort((a, b) => {
+                  return new Date(b.published) - new Date(a.published)
+                })
+                setAllComments(comments)
+              })
           }
         } catch (error) {
           console.log(error);
@@ -31,19 +44,15 @@ export default function Public() {
       }
     }
     fetchData();
-  }, [userId])
-
-  const toggleComments = () => {
-    setIsCollapsed(!isCollapsed);
-  };
+  }, [userId, allComments])
 
   const handleDeletePost = async (authorId, postId) => {
     const result = confirm('Are you sure to delete this post?')
     if (result) {
       let res = await reqDeletePost(authorId, postId);
-      if (res.status>=200 && res.status<=300) {
+      if (res.status >= 200 && res.status <= 300) {
         console.log('successful deletion');
-        setMyPostList(myPostList.filter( post => post.id !== `https://floating-fjord-51978.herokuapp.com/authors/${authorId}/posts/${postId}`))
+        setMyPostList(myPostList.filter(post => post.id !== `https://floating-fjord-51978.herokuapp.com/authors/${authorId}/posts/${postId}`))
       } else {
         console.log(res);
       }
@@ -51,45 +60,50 @@ export default function Public() {
   }
 
   return (
-    <div>
+    <div className='bg-gray-100'>
       <TopNavigation />
-      <SideNav />
-      <div className='mt-20 ml-40'>
-        {console.log(myPostList)}
-        <h2 className='font-bold text-lg mb-3'>My Public Posts</h2>
+      <div className='pt-20 w-2/3 mx-auto'>
         {myPostList.map(post => (
-          <div key={post.id} className="bg-white rounded-lg shadow-lg p-5 my-5">
-            <div >
+          <div key={post.id} className="bg-white rounded shadow-md p-5 my-5">
+            <div>
               <div className='flex justify-between'>
                 <div className="flex items-center mb-3">
-                  <img src={post.author.profileImage ? post.author.profileImage:"../defaultUser.png"} alt="" className="w-8 h-8 rounded-full mr-2" />
-                  <h2 className="text-lg font-bold">{post.author.displayName}</h2>
+                  <img src={post.author.profileImage ? post.author.profileImage : "../defaultUser.png"} alt="" className="w-8 h-8 rounded-full mr-2" />
+                  <h2 className="text-lg font-semibold">{post.author.displayName}</h2>
                 </div>
-                <div>
-                  <span>{getTime(post.published)}</span>
+                <div className='text-right'>
+                  <p className='text-gray-600 text-sm'>{getTime(post.published)}</p>
+                  <p className='text-gray-600 text-xs'>{post.visibility}</p>
+
                 </div>
               </div>
-              <p className="text-base mb-3 font-semibold">{post.title}</p>
+              <p className="text-base mb-3 font-semibold pb-1 border-b border-gray-200 text-gray-600">{post.title}</p>
             </div>
-            <p className="text-base mb-3 px-5 w-full">{post.content}</p>
-              <div className='flex flex-row'>
-                <button className="bg-gray-200 rounded-lg px-2 py-1 mr-3 hover:bg-gray-300" onClick={() => handleDeletePost(getUserIdFromUrl(post.author.id), getPostIdFromUrl(post.id))}>Delete</button>
-                <button className="bg-gray-200 rounded-lg px-2 py-1 hover:bg-gray-300" onClick={toggleComments}>{isCollapsed ? "Show Comments" : "Hide Comments"}</button>
+            <p className="text-xs mb-3">{post.contentType === "text/plain" ? post.content : <Markdown>{post.content}</Markdown>}</p>
+            <div className='flex flex-row justify-between items-center mb-2'>
+              <button className='cursor-pointer pr-4 text-xs text-gray-700'
+                onClick={() => handleDeletePost(getUserIdFromUrl(post.author.id), getPostIdFromUrl(post.id))}>
+                {post.visibility === "PUBLIC" && <div className='flex flex-row items-center'>
+                  <DeleteOutline fontSize='small' />
+                  <p>DELETE</p>
+                </div>}
+              </button>
+              <button onClick={() => setIsCollapsed(!isCollapsed)}>{isCollapsed ? <ExpandMore className='text-gray-700' /> : <ExpandLess className='text-gray-700' />}</button>
+            </div>
+            {allComments.length > 0 && !isCollapsed && (
+              <div className="mt-3">
+                {allComments.filter(comment => getPostIdFromCommentUrl(comment.id) === getPostIdFromUrl(post.id)).map(comment => (
+                  <div key={comment.id} className='flex flex-row justify-between text-xs my-1 rounded-sm bg-gray-100 p-1'>
+                    <p><span className='font-semibold'>{comment.author.displayName}: </span>{comment.comment}</p>
+                    <p>{getTime(comment.published)}</p>
+                  </div>
+                )
+                )}
               </div>
-            {/* {comments.filter(comment => comment.postId === post.id && !isCollapsed).length > 0 && (
-                <div className="mt-5">
-                  <h3 className="text-lg font-bold mb-3">Comments</h3>
-                  {comments.filter(comment => comment.postId === post.id).map(comment => (
-                    <div key={comment.id} className="bg-gray-200 rounded-lg p-3 my-3">
-                      <div className="flex items-center mb-2">
-                        <img src={`https://i.pravatar.cc/50?u=${comment.email}`} alt="" className="w-8 h-8 rounded-full mr-2" />
-                        <h4 className="text-base font-bold">{comment.name}</h4>
-                      </div>
-                      <p className="text-base">{comment.body}</p>
-                    </div>
-                  ))}
-                </div>
-              )} */}
+            )}
+            {!allComments.filter(comment => getPostIdFromCommentUrl(comment.id) === getPostIdFromUrl(post.id)).length && !isCollapsed && (
+              <div className='text-xs'>No comments yet.</div>
+            )}
           </div>
         ))}
       </div>

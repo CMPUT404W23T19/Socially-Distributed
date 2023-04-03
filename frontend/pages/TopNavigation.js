@@ -33,80 +33,81 @@ const TopNavigation = () => {
     e.preventDefault();
     let userUrl = searchTerm
     // Todo: need to identify node and use their username and password
-    const res = await axios({
-      url: `${userUrl}`,
-      method: "get",
-      auth:{
-        username:'admin',
-        password:'admin'
-      }
-    })
-    const lastSlashIndex = userUrl.lastIndexOf("/");
-    const host = userUrl.substring(0, lastSlashIndex + 1);
-    const domain = userUrl.match(/^https?:\/\/[^/]+/i)[0];
-    const author_id = userUrl.substring(lastSlashIndex + 1);
-    if (res.status >= 200 && res.status <= 300) {
-      let res2 = ""
-      if (domain === "https://floating-fjord-51978.herokuapp.com") {
-        res2 = await axios({
-          url: `${host}${author_id}/inbox`,
-          method: 'post',
-          data: {
-            type: "follow",
-            summary: `${localUser.displayName} want to follow ${res.data.displayName}`,
-            actor: localUser,
-            object: res.data
-          },
-          auth:{
-            username:'admin',
-            password:'admin'
-          }
-        })
-      } else if (domain === "https://distributed-social-net.herokuapp.com") {
-        res2 = await axios({
-          url: `${host}${author_id}/inbox/`,
-          method: 'post',
-          data: {
-            type: "Follow",
-            summary: `${localUser.displayName} want to follow ${res.data.displayName}`,
-            actor: {
-              id:localUser.id,
-              type:localUser.type,
-              displayName:localUser.displayName,
-              host:localUser.host,
-              github:localUser.github,
-              url:localUser.url
+    if (localUser.id !== userUrl) {
+      const res = await axios({
+        url: `${userUrl}`,
+        method: "get",
+        auth: {
+          username: 'admin',
+          password: 'admin'
+        }
+      })
+      const lastSlashIndex = userUrl.lastIndexOf("/");
+      const host = userUrl.substring(0, lastSlashIndex + 1);
+      const domain = userUrl.match(/^https?:\/\/[^/]+/i)[0];
+      const author_id = userUrl.substring(lastSlashIndex + 1);
+      if (res.status >= 200 && res.status <= 300) {
+        let res2 = ""
+        if (domain === "https://floating-fjord-51978.herokuapp.com") {
+          res2 = await axios({
+            url: `${host}${author_id}/inbox`,
+            method: 'post',
+            data: {
+              type: "follow",
+              summary: `${localUser.displayName} want to follow ${res.data.displayName}`,
+              actor: localUser,
+              object: res.data
             },
-            object: {
-              id:res.data.id,
-              type:res.data.type,
-              displayName:res.data.displayName,
-              host:res.data.host,
-              github:res.data.github,
-              url:res.data.url
+            auth: {
+              username: 'admin',
+              password: 'admin'
             }
-          },
-          auth: {
-            username:'admin',
-            password:"admin"
-          }
-        })
-      }
-      if (res2.status >= 200 && res2.status <= 300) {
-        console.log('friend request sent');
-        setIsSuccessPopupOpen(true)
-        setSearchTerm('')
+          })
+        } else if (domain === "https://distributed-social-net.herokuapp.com") {
+          res2 = await axios({
+            url: `${host}${author_id}/inbox/`,
+            method: 'post',
+            data: {
+              type: "Follow",
+              summary: `${localUser.displayName} want to follow ${res.data.displayName}`,
+              actor: {
+                id: localUser.id,
+                type: localUser.type,
+                displayName: localUser.displayName,
+                host: localUser.host,
+                github: localUser.github,
+                url: localUser.url
+              },
+              object: {
+                id: res.data.id,
+                type: res.data.type,
+                displayName: res.data.displayName,
+                host: res.data.host,
+                github: res.data.github,
+                url: res.data.url
+              }
+            },
+            auth: {
+              username: 'admin',
+              password: "admin"
+            }
+          })
+        }
+        if (res2.status >= 200 && res2.status <= 300) {
+          console.log('friend request sent');
+          setIsSuccessPopupOpen(true)
+          setSearchTerm('')
+        } else {
+          console.log('friend: request failed to send');
+          console.log('error:', res2.message);
+        }
       } else {
-        console.log('friend: request failed to send');
-        console.log('error:', res2.message);
+        setIsPopupOpen(true)
       }
     } else {
-      setIsPopupOpen(true)
+      setSearchTerm('')
+      alert("You can't add yourself! Please enter another id.")
     }
-  };
-
-  const handleToggleNotification = () => {
-    setShowNotification(!showNotification);
   };
 
   const handleLogout = () => {
@@ -159,6 +160,9 @@ const TopNavigation = () => {
             </Link>
             <Link href="/post">
               <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">Explore</a>
+            </Link>
+            <Link href="/post/me">
+              <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">My Posts</a>
             </Link>
             <Link href="/createPost">
               <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">New Post</a>

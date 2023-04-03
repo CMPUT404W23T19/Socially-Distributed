@@ -9,6 +9,7 @@ import Styles from './styles.module.css'
 import axios from 'axios'
 import { Close } from '@material-ui/icons'
 import Link from 'next/link'
+import Markdown from 'markdown-to-jsx'
 
 export default function inbox() {
   const [userId, setUserId] = useState('')
@@ -164,7 +165,7 @@ export default function inbox() {
                 "comments": request.comments,
                 "published": request.published,
                 "visibility": request.published,
-                "unlisted": false
+                "unlisted": request.unlisted
               }
               return (
                 <Link href={{ pathname: "/postdetail", query: nrequest }} key={index} className='cursor-pointer'>
@@ -181,7 +182,7 @@ export default function inbox() {
                         <div><span>{getTime(request.published)}</span></div>
                       </div>
                       <p className="text-base mb-3 font-semibold">{request.title}</p>
-                      <p>{request.content}</p>
+                      <p>{request.contentType === "text/plain" ? request.content : <Markdown>{request.content}</Markdown>}</p>
                     </div>
                   </div>
                 </Link>

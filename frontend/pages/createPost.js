@@ -9,6 +9,7 @@ import axios from 'axios';
 export default function CreatePost() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [contentType, setContentType] = useState('');
   const [visibility, setVisibility] = useState('');
   const [userId, setUserId] = useState('');
   const [error, setError] = useState(null);
@@ -16,6 +17,7 @@ export default function CreatePost() {
   const [user, setUser] = useState(null)
   const [isPrvate, setIsPrivate] = useState(false)
   const [privateAuthor, setPrivateAuthor] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
   const router = useRouter();
 
   useEffect(() => {
@@ -49,15 +51,25 @@ export default function CreatePost() {
   const handlePriavteMsg = useCallback(event => {
     setPrivateAuthor(event.target.value)
   })
+
+  const handleImageChange = useCallback(event => {
+    setImageUrl(event.target.value)
+  })
+
+  const handleContentTypeChange = useCallback(event => {
+    setContentType(event.target.value);
+    console.log(event.target.value);
+  })
+
   const sendToInbox = (authors, postData) => {
     const promises = authors.map(author => {
       return axios({
         url: `${author.url}/inbox`,
         method: "post",
         data: postData,
-        auth:{
-          username:'admin',
-          password:'admin'
+        auth: {
+          username: 'admin',
+          password: 'admin'
         }
       })
     })
@@ -76,8 +88,8 @@ export default function CreatePost() {
       return
     }
 
-    if (!content) {
-      setError('Please write some contents')
+    if (!content && !imageUrl) {
+      setError('Please write some contents or post an image')
       return
     }
 
@@ -94,17 +106,18 @@ export default function CreatePost() {
     const published = new Date().toISOString();
     const data = {
       title,
-      source: "",
-      origin: "",
-      description: "",
-      contentType: " text/markdown",
+      source: user.url,
+      origin: user.url,
+      description:content,
+      contentType,
       content,
       author: user,
-      categories: 'categories',
+      categories: '',
       published,
       visibility,
-      unlisted: true
+      unlisted: false
     }
+
     try {
       const res = await reqCreatePost(data, userId)
       if (res.status === 201) {
@@ -150,6 +163,9 @@ export default function CreatePost() {
             <h1 className="mb-8 text-3xl text-center font-bold">Create Post</h1>
 
             <div className="mb-6">
+              <p className="block mb-2 font-bold text-lg text-gray-800">
+                Title
+              </p>
               <FormField type="text" name="title" placeholder="Title" action={handleTitleChange} />
             </div>
 
@@ -157,6 +173,20 @@ export default function CreatePost() {
               <label htmlFor="body" className="block mb-2 font-bold text-lg text-gray-800">
                 Body
               </label>
+              <div className='flex flex-row text-sm mb-3'>
+                <div className='flex items-center mr-5'>
+                  <input className='mr-2'
+                    type="radio" id='text' name="contentType" value="text/plain" checked={contentType === 'text/plain'} onChange={handleContentTypeChange}
+                  />
+                  <label htmlFor="text">Text/Plain</label>
+                </div>
+                <div className='flex items-center'>
+                  <input className='mr-2'
+                    type="radio" id='markdown' name="contentType" value="text/markdown" checked={contentType === 'text/markdown'} onChange={handleContentTypeChange}
+                  />
+                  <label htmlFor="markdown">MarkDown</label>
+                </div>
+              </div>
               <textarea
                 className="w-full h-64 px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:shadow-outline"
                 name="body"
@@ -196,16 +226,19 @@ export default function CreatePost() {
                 </div>
               </div>
               {isPrvate &&
-                  <div>
-                    <input onChange={handlePriavteMsg} placeholder="Please enter the author's id you'd message to" className='w-full outline-none mt-5 py-2 px-2 border rounded-md border-gray-200' />
-                  </div>}
+                <div>
+                  <input onChange={handlePriavteMsg} placeholder="Please enter the author's id you'd message to" className='w-full outline-none mt-5 py-2 px-2 border rounded-md border-gray-200' />
+                </div>}
             </div>
 
             <div className="mb-6">
               <label htmlFor="image" className="block mb-2 font-bold text-lg text-gray-800">
                 Image
               </label>
-              <input type="file" name="image" id="image" className="border rounded-lg p-2" />
+              <div>
+                <input type="text" name="image" id="image" placeholder='Enter image url' onChange={handleImageChange} className="border rounded-lg p-2" />
+              </div>
+              <img className='max-w-xs max-h-64 border-b border-gray-100' src={imageUrl ? imageUrl : ''} />
             </div>
 
             <div className="w-full text-center">
