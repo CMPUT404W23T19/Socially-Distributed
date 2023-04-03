@@ -142,7 +142,8 @@ class InboxView(APIView):
                 except Comment.DoesNotExist:
                     return Response(status=status.HTTP_404_NOT_FOUND)
             try:
-                like = Like.objects.create(author=request.data['author'], object=request.data['object'], summary=request.data['summary'])
+                author = Author.objects.get(id=request.data['author']['id'])
+                like = Like.objects.create(author=author, object=request.data['object'], summary=request.data['summary'])
             except:
                 return Response(status=status.HTTP_400_BAD_REQUEST) # probably duplicate
             inbox.likes.add(like)
