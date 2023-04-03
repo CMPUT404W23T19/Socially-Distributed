@@ -170,7 +170,7 @@ class InboxView(APIView):
                     published = request.data['published']
                 except:
                     published = datetime.now()
-                comment = Comment.objects.create(id=request.data['id'], author=author, comment=request.data['comment'], contentType=request.data['contentType'], published=request.data['published'], post=post)
+                comment = Comment.objects.create(id=request.data['id'], author=author, comment=request.data['comment'], contentType=request.data['contentType'], published=published, post=post)
             inbox.comments.add(comment)
             return Response(status=status.HTTP_200_OK)
 
