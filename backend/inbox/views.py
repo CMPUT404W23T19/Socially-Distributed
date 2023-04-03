@@ -144,6 +144,12 @@ class InboxView(APIView):
                     return Response(status=status.HTTP_404_NOT_FOUND)
             try:
                 author = Author.objects.get(id=request.data['author']['id'])
+            except Author.DoesNotExist:
+                try:
+                    author = Author.objects.create(id=request.data['author']['id'], host=request.data['author']['host'], displayName=request.data['author']['displayName'], url=request.data['author']['url'], github=request.data['author']['github'], profileImage=request.data['author']['profileImage'])
+                except:
+                    return Response(status=status.HTTP_400_BAD_REQUEST)
+            try:
                 like = Like.objects.create(author=author, object=request.data['object'], summary=request.data['summary'])
             except:
                 return Response(status=status.HTTP_400_BAD_REQUEST) # probably duplicate
@@ -165,7 +171,10 @@ class InboxView(APIView):
                 try:
                     author = Author.objects.get(id=request.data['author']['id'])
                 except Author.DoesNotExist:
-                    return Response(status=status.HTTP_400_BAD_REQUEST)
+                    try:
+                        author = Author.objects.create(id=request.data['author']['id'], host=request.data['author']['host'], displayName=request.data['author']['displayName'], url=request.data['author']['url'], github=request.data['author']['github'], profileImage=request.data['author']['profileImage'])
+                    except:
+                        return Response(status=status.HTTP_400_BAD_REQUEST)
                 try:
                     published = request.data['published']
                 except:
