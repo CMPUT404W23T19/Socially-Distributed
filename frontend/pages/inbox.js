@@ -182,7 +182,9 @@ export default function inbox() {
                         <div><span>{getTime(request.published)}</span></div>
                       </div>
                       <p className="text-base mb-3 font-semibold">{request.title}</p>
+                      {(request.contentType === "image/jpeg;base64" || request.contentType === "image/png:base64" || request.contentType === "application/base64") ? <img src={request.content}></img>:
                       <p>{request.contentType === "text/plain" ? request.content : <Markdown>{request.content}</Markdown>}</p>
+                      }
                     </div>
                   </div>
                 </Link>

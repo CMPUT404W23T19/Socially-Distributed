@@ -44,7 +44,7 @@ export default function Public() {
       }
     }
     fetchData();
-  }, [userId, allComments])
+  }, [userId])
 
   const handleDeletePost = async (authorId, postId) => {
     const result = confirm('Are you sure to delete this post?')
@@ -79,7 +79,9 @@ export default function Public() {
               </div>
               <p className="text-base mb-3 font-semibold pb-1 border-b border-gray-200 text-gray-600">{post.title}</p>
             </div>
-            <p className="text-xs mb-3">{post.contentType === "text/plain" ? post.content : <Markdown>{post.content}</Markdown>}</p>
+            {(post.contentType === "image/jpeg;base64" || post.contentType === "image/png;base64" || post.contentType === "application/base64") ? <img src={post.content}></img> :
+              <p>{post.contentType === "text/plain" ? post.content : <Markdown>{post.content}</Markdown>}</p>
+            }
             <div className='flex flex-row justify-between items-center mb-2'>
               <button className='cursor-pointer pr-4 text-xs text-gray-700'
                 onClick={() => handleDeletePost(getUserIdFromUrl(post.author.id), getPostIdFromUrl(post.id))}>

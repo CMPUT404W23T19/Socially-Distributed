@@ -37,8 +37,27 @@ export default function postdetail() {
     }
   }, [post])
 
-  const handleLike = (postId) => {
+  const handleLike = (post) => {
     // handle like logic here
+    const likeData = {
+      type: "like",
+      author: localUser,
+      summary:`${localUser.displayName} liked your post: ${post.title}`,
+      object:`${post.id}`
+    }
+    axios({
+      url: `${postAuthor.id}/inbox`,
+      method: 'post',
+      data: likeData,
+      auth: {
+        username: 'admin',
+        password: 'admin'
+      }
+    })
+      .then(
+        res => {setIsPopupOpen(false);console.log('successfully post a comment to inbox')},
+        err => console.log('fail to post a comment to inbox: ', err)
+      )
 
   };
 
@@ -134,7 +153,9 @@ export default function postdetail() {
               <p className="text-base mb-3 font-semibold">{post.title}</p>
             </div>
           </div>
-          <p className="text-base mb-3 px-5">{post.content}</p>
+          {(post.contentType === "image/jpeg;base64" || post.contentType === "image/png;base64" || post.contentType === "application/base64") ? <img src={post.content}></img> :
+              <p>{post.contentType === "text/plain" ? post.content : <Markdown>{post.content}</Markdown>}</p>
+            }
           <div className="flex justify-between">
             <div className="flex items-center">
               <FavoriteBorder fontSize='large' className='cursor-pointer pr-4 text-gray-300' onClick={() => handleLike(post)} />

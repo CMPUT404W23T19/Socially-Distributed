@@ -64,6 +64,7 @@ const TopNavigation = () => {
             }
           })
         } else if (domain === "https://distributed-social-net.herokuapp.com") {
+          console.log(111);
           res2 = await axios({
             url: `${host}${author_id}/inbox/`,
             method: 'post',

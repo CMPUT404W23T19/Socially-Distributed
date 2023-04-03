@@ -101,7 +101,7 @@ const Feed = () => {
       id: `${currentPost.id}/comments/${uuidv4()}`
     }
     const authorId = getUserIdFromUrl(currentPost.author.id);
-    console.log(authorId);
+    
     const postId = getPostIdFromUrl(currentPost.id);
     // reqPostComments(data, authorId, postId)
     //   .then(
@@ -166,7 +166,9 @@ const Feed = () => {
                 </div>
               </Link>
             </div>
-            <p className="text-xs mb-3">{post.contentType === "text/plain" ? post.content : <Markdown>{post.content}</Markdown>}</p>
+            {(post.contentType === "image/jpeg;base64" || post.contentType === "image/png;base64" || post.contentType === "application/base64") ? <img src={post.content}></img> :
+              <p>{post.contentType === "text/plain" ? post.content : <Markdown>{post.content}</Markdown>}</p>
+            }
             <div className="flex justify-between">
               <div className="flex items-center">
                 <FavoriteBorder fontSize='large' className='cursor-pointer pr-4 text-gray-300' onClick={() => handleLike(post)} />

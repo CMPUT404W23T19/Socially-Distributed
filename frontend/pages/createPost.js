@@ -18,6 +18,7 @@ export default function CreatePost() {
   const [isPrvate, setIsPrivate] = useState(false)
   const [privateAuthor, setPrivateAuthor] = useState('')
   const [imageUrl, setImageUrl] = useState('')
+  const [imageType, setImageType] = useState('')
   const router = useRouter();
 
   useEffect(() => {
@@ -53,25 +54,47 @@ export default function CreatePost() {
   })
 
   const handleImageChange = useCallback(event => {
-    setImageUrl(event.target.value)
+    const file = event.target.files[0]
+    if (file.type === "image/jpeg" || file.type === "image/png") {
+      setImageType(file.type + ";base64")
+    } else {
+      setImageType(file.type + "/base64")
+    }
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      setImageUrl(reader.result)
+    };
   })
 
   const handleContentTypeChange = useCallback(event => {
     setContentType(event.target.value);
-    console.log(event.target.value);
   })
 
   const sendToInbox = (authors, postData) => {
     const promises = authors.map(author => {
-      return axios({
-        url: `${author.url}/inbox`,
-        method: "post",
-        data: postData,
-        auth: {
-          username: 'admin',
-          password: 'admin'
-        }
-      })
+      if (author.host === "https://floating-fjord-51978.herokuapp.com") {
+        return axios({
+          url: `${author.url}/inbox`,
+          method: "post",
+          data: postData,
+          auth: {
+            username: 'admin',
+            password: 'admin'
+          }
+        })
+      } else if (author.host === "https://distributed-social-net.herokuapp.com") {
+        return axios({
+          url: `${author.url}/inbox/`,
+          method: "post",
+          data: postData,
+          auth: {
+            username:"team19",
+            password:"team19"
+          }
+        })
+      }
+
     })
     Promise.all(promises)
       .then(res => {
@@ -102,13 +125,16 @@ export default function CreatePost() {
       setError('Title: too much words!')
       return
     }
+    if (!contentType) {
+      setContentType("text/plain")
+    }
 
     const published = new Date().toISOString();
-    const data = {
+    let data = {
       title,
       source: user.url,
       origin: user.url,
-      description:content,
+      description: content,
       contentType,
       content,
       author: user,
@@ -117,7 +143,22 @@ export default function CreatePost() {
       visibility,
       unlisted: false
     }
+    if (content && imageUrl) {
+      create(data)
+      data.contentType = imageType
+      data.content = imageUrl
+      create(data)
+    } else if (content) {
+      create(data)
+    } else if (imageUrl) {
+      data.contentType = imageType
+      data.content = imageUrl
+      create(data)
+    }
 
+  }
+
+  const create = async (data) => {
     try {
       const res = await reqCreatePost(data, userId)
       if (res.status === 201) {
@@ -193,8 +234,12 @@ export default function CreatePost() {
                 id="body"
                 onChange={handleContentChange}
                 placeholder="Write content here"
-                required
               ></textarea>
+              <div>
+                <p className="block mb-2 font-bold text-lg text-gray-800">Image</p>
+                <input type='file' onChange={handleImageChange} />
+                <img className='max-w-xs max-h-64' src={imageUrl ? imageUrl : ''} />
+              </div>
             </div>
 
             <div className="mb-6">
@@ -230,17 +275,6 @@ export default function CreatePost() {
                   <input onChange={handlePriavteMsg} placeholder="Please enter the author's id you'd message to" className='w-full outline-none mt-5 py-2 px-2 border rounded-md border-gray-200' />
                 </div>}
             </div>
-
-            <div className="mb-6">
-              <label htmlFor="image" className="block mb-2 font-bold text-lg text-gray-800">
-                Image
-              </label>
-              <div>
-                <input type="text" name="image" id="image" placeholder='Enter image url' onChange={handleImageChange} className="border rounded-lg p-2" />
-              </div>
-              <img className='max-w-xs max-h-64 border-b border-gray-100' src={imageUrl ? imageUrl : ''} />
-            </div>
-
             <div className="w-full text-center">
               {error && <div className='text-red-600 text-sm mb-3'>{error}</div>}
               <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">

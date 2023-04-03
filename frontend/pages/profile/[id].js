@@ -208,7 +208,9 @@ export default function UserProfile() {
                     </div>
                     <p className="text-base mb-3 font-semibold pb-1 border-b border-gray-200 text-gray-600">{post.title}</p>
                   </div>
-                  <p className="text-xs mb-3">{post.contentType === "text/plain" ? post.content : <Markdown>{post.content}</Markdown>}</p>
+                  {(post.contentType === "image/jpeg;base64" || post.contentType === "image/png;base64" || post.contentType === "application/base64") ? <img src={post.content}></img> :
+                    <p>{post.contentType === "text/plain" ? post.content : <Markdown>{post.content}</Markdown>}</p>
+                  }
                 </div>
               ))}
             </div>
