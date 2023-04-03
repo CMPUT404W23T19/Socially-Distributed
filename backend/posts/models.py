@@ -27,7 +27,7 @@ class Like(models.Model):
     type = 'like'
     summary = models.CharField(max_length=100)
     actor = models.ForeignKey(Author, on_delete=models.CASCADE)
-    object = models.ForeignKey(Post, on_delete=models.CASCADE)
+    object = models.CharField(max_length=200)
     
     def __str__(self):
         return self.summary
