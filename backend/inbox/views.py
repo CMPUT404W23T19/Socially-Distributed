@@ -12,6 +12,7 @@ import json
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.authentication import BasicAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from datetime import datetime
 
 # Create your views here.
 
@@ -154,6 +155,10 @@ class InboxView(APIView):
                     author = Author.objects.get(id=request.data['author']['id'])
                 except Author.DoesNotExist:
                     return Response(status=status.HTTP_400_BAD_REQUEST)
+                try:
+                    published = request.data['published']
+                except:
+                    published = datetime.now()
                 comment = Comment.objects.create(id=request.data['id'], author=author, comment=request.data['comment'], contentType=request.data['contentType'], published=request.data['published'], post=post)
             inbox.comments.add(comment)
             return Response(status=status.HTTP_200_OK)
