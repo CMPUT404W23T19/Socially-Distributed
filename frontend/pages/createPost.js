@@ -89,8 +89,8 @@ export default function CreatePost() {
           method: "post",
           data: postData,
           auth: {
-            username:"team19",
-            password:"team19"
+            username:"cmput404_team18",
+            password:"cmput404_team18"
           }
         })
       }

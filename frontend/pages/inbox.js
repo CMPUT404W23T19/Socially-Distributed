@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import TopNavigation from './TopNavigation'
 import { reqGetFollowersList, reqGetInbox, reqPostToInbox, reqClearInbox, reqUserProfile } from '../api/Api'
-import { getCookieUserId,getJWTToken } from '../components/utils/cookieStorage'
+import { getCookieUserId, getJWTToken } from '../components/utils/cookieStorage'
 import FriendRequest from '../components/common/FriendRequest'
 import { getUserIdFromUrl, getTime } from '../components/common'
 import { reqFollowOthers } from '../api/Api'
@@ -26,49 +26,56 @@ export default function inbox() {
       reqUserProfile(userId)
         .then(res => setUser(res.data), err => console.log(err))
       reqGetFollowersList(userId)
-      .then(res => {
-        const followers = res.data.items;
-        const followerIds = followers.map(follower => follower.id)
-        reqGetInbox(userId)
-        .then(
-          res => {
-            const receivedList = res.data.items
-            const requestsList = []
-            const posts = []
-            const comments = []
-            receivedList.forEach(element => {
-              if (element.type === 'follow') {
-                if (!followerIds.includes(element.actor.id)) {
-                  requestsList.push(element)
-                }
+        .then(res => {
+          const followers = res.data.items;
+          const followerIds = followers.map(follower => follower.id)
+          reqGetInbox(userId)
+            .then(
+              res => {
+                const receivedList = res.data.items
+                const requestsList = []
+                const posts = []
+                const comments = []
+                const likes = []
+                receivedList.forEach(element => {
+                  if (element.type === 'follow') {
+                    if (!followerIds.includes(element.actor.id)) {
+                      requestsList.push(element)
+                    }
+                  }
+                  else if (element.type === 'post') {
+                    posts.push(element)
+                  }
+                  else if (element.type === 'comment') {
+                    comments.push(element)
+                  } else if (element.type === 'like') {
+                    likes.push(element)
+                  }
+                });
+                posts.sort((a, b) => {
+                  return new Date(b.published) - new Date(a.published)
+                })
+                requestsList.sort((a, b) => {
+                  return new Date(b.published) - new Date(a.published)
+                })
+                comments.sort((a, b) => {
+                  return new Date(b.published) - new Date(a.published)
+                })
+                likes.sort((a, b) => {
+                  return new Date(b.published) - new Date(a.published)
+                })
+                setPostList(posts)
+                setFriendRequestsList(requestsList)
+                setCommentList(comments)
+                setLikeList(likes)
+              },
+              err => {
+                console.log(err);
+                alert(err)
               }
-              else if (element.type === 'post') {
-                posts.push(element)
-              }
-              else if (element.type === 'comment') {
-                comments.push(element)
-              }
-            });
-            posts.sort((a, b) => {
-              return new Date(b.published) - new Date(a.published)
-            })
-            requestsList.sort((a, b) => {
-              return new Date(b.published) - new Date(a.published)
-            })
-            comments.sort((a, b) => {
-              return new Date(b.published) - new Date(a.published)
-            })
-            setPostList(posts)
-            setFriendRequestsList(requestsList)
-            setCommentList(comments)
-          },
-          err => {
-            console.log(err);
-            alert(err)
-          }
-        )
-      }, err => console.log('cannot get followers list'))
-      
+            )
+        }, err => console.log('cannot get followers list'))
+
     }
   }, [userId, isCleared])
 
@@ -132,14 +139,13 @@ export default function inbox() {
             </div>
           </div>
         )}
-        <div className='pt-16 w-4/5 h-screen py-3 mx-auto border border-gray-100'>
+        <div className='pt-16 w-4/5 h-screen py-3 mx-auto'>
           <div className='text-right pb-3 mb-3'>
             <button className={Styles.clearButton} onClick={handleClear}>Clear</button>
           </div>
-          <div className='mb-5 border-b border-gray-200'>
-            <h2 className='mb-3 text-lg ml-3 font-semibold'>Friend Requests</h2>
+          <div className='mb-8 px-5'>
             {friendRequestsList.map((request, index) => (
-              <div key={index}>
+              <div key={index} className=' bg-gray-50 mb-2 rounded shadow'>
                 <FriendRequest
                   id={request.actor.id}
                   displayName={request.actor.displayName}
@@ -149,8 +155,8 @@ export default function inbox() {
               </div>
             ))}
           </div>
-          <div className='mb-5 border-b border-gray-200'>
-            <h2 className='mb-3 text-lg ml-3 font-semibold'>Posts</h2>
+          <div className='mb-8 px-5'>
+            {/* <h2 className='mb-3 text-lg ml-3 font-semibold'>Posts</h2> */}
             {postList.map((request, index) => {
               const nrequest = {
                 "type": request.type,
@@ -169,64 +175,61 @@ export default function inbox() {
               }
               return (
                 <Link href={{ pathname: "/postdetail", query: nrequest }} key={index} className='cursor-pointer'>
-                  <div>
-                    <div className='w-full px-8 py-2'>
-                      <div className='flex flex-row items-center justify-between'>
-                        <div className='flex flex-row items-center'>
-                          <img className='mr-4 w-12 h-12 rounded-full' src={request.author.profileImage ? request.author.profileImage : '../defaultUser.png'} />
-                          <div className='flex flex-col'>
-                            <span className='font-semibold mb-1'>{request.author.displayName}</span>
-                            <span className='font-normal text-xs'>id: {request.author.id}</span>
-                          </div>
+                  <div className='w-full px-8 py-2 my-3 bg-gray-50 rounded shadow'>
+                    <div className='flex flex-row items-center justify-between'>
+                      <div className='flex flex-row items-center'>
+                        <img className='mr-4 w-8 h-8 rounded-full' src={request.author.profileImage ? request.author.profileImage : '../defaultUser.png'} />
+                        <div className='flex flex-col'>
+                          <p className='font-semibold mb-1'>{request.author.displayName}<span className='font-normal text-xs'> sends you a post</span></p>
+                          {/* <span className='font-normal text-xs'>id: {request.author.id}</span> */}
                         </div>
-                        <div><span>{getTime(request.published)}</span></div>
                       </div>
-                      <p className="text-base mb-3 font-semibold">{request.title}</p>
-                      {(request.contentType === "image/jpeg;base64" || request.contentType === "image/png:base64" || request.contentType === "application/base64") ? <img src={request.content}></img>:
-                      <p>{request.contentType === "text/plain" ? request.content : <Markdown>{request.content}</Markdown>}</p>
-                      }
+                      <div><span>{getTime(request.published)}</span></div>
                     </div>
+                    <p className="text-base mb-2 pb-1 font-semibold border-b border-gray-200">{request.title}</p>
+                    {(request.contentType === "image/jpeg;base64" || request.contentType === "image/png:base64" || request.contentType === "application/base64") ? <img className='max-w-sm max-h-72' src={request.content}></img> :
+                      <p className='text-xs font-normal text-gray-800'>{request.contentType === "text/plain" ? request.content : <Markdown className='text-xs font-normal text-gray-800'>{request.content}</Markdown>}</p>
+                    }
                   </div>
                 </Link>
               )
             })}
           </div>
-          <div className='mb-5 border-b border-gray-200'>
-            <h2 className='mb-3 text-lg ml-3 font-semibold'>Comments</h2>
+          <div className='mb-8 px-5'>
+            {/* <h2 className='mb-3 text-lg ml-3 font-semibold'>Comments</h2> */}
             {commentList.map((comment, index) => (
               <div key={index}>
-                <div className='w-full px-8 py-2'>
+                <div className='w-full px-8 py-2 mb-3 bg-gray-50 rounded shadow'>
                   <div className='flex flex-row items-center justify-between'>
                     <div className='flex flex-row items-center'>
-                      <img className='mr-4 w-12 h-12 rounded-full' src={comment.author.profileImage ? comment.author.profileImage : '../defaultUser.png'} />
+                      <img className='mr-4 w-8 h-8 rounded-full' src={comment.author.profileImage ? comment.author.profileImage : '../defaultUser.png'} />
                       <div className='flex flex-col'>
-                        <span className='font-semibold mb-1'>{comment.author.displayName}</span>
+                        <p className='font-semibold mb-1'>{comment.author.displayName} <span className='font-normal text-xs'> comments on your post {postList.title}</span></p>
                         <span className='font-normal text-xs'>id: {comment.author.id}</span>
                       </div>
                     </div>
                     <div><span>{getTime(comment.published)}</span></div>
                   </div>
-                  <p className='mt-3'>{comment.comment}</p>
+                  <p className='mt-2'>{comment.comment}</p>
                 </div>
               </div>
             ))}
           </div>
-          <div className='mb-5 border-b border-gray-200'>
-            <h2 className='mb-3 text-lg ml-3 font-semibold'>Likes</h2>
+          <div className='mb-8 px-5'>
+            {/* <h2 className='mb-3 text-lg ml-3 font-semibold'>Likes</h2> */}
             {likeList.map((like, index) => (
               <div key={index}>
-                <div className='w-full px-8 py-2'>
+                <div className='w-full px-8 py-2 mb-3 bg-gray-50 rounded shadow'>
                   <div className='flex flex-row items-center justify-between'>
                     <div className='flex flex-row items-center'>
-                      <img className='mr-4 w-12 h-12 rounded-full' src={like.author.profileImage ? like.author.profileImage : '../defaultUser.png'} />
+                      <img className='mr-4 w-8 h-8 rounded-full' src={like.author.profileImage ? like.author.profileImage : '../defaultUser.png'} />
                       <div className='flex flex-col'>
-                        <span className='font-semibold mb-1'>{like.author.displayName}</span>
-                        <span className='font-normal text-xs'>id: {like.author.id}</span>
+                        <p className='font-semibold mb-1'>{like.summary}</p>
+                        {/* <span className='font-normal text-xs'>id: {like.author.id}</span> */}
                       </div>
                     </div>
                     <div><span>{getTime(like.published)}</span></div>
                   </div>
-                  <p className='mt-3'></p>
                 </div>
               </div>
             ))}

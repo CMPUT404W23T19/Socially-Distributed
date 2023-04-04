@@ -6,9 +6,9 @@ const FriendRequest = ({ id, displayName, profileImage, acceptAction, refuseActi
       {/* <Link href={`/profile/${userId}`}> */}
       <div className='flex flex-row items-center justify-between'>
         <div className='flex flex-row items-center'>
-          <img className='mr-4 w-12 h-12 rounded-full' src={profileImage ? profileImage : '../defaultUser.png'} />
+          <img className='mr-4 w-10 h-10 rounded-full' src={profileImage ? profileImage : '../defaultUser.png'} />
           <div className='flex flex-col'>
-            <span className='font-semibold mb-1'>{displayName}</span>
+            <p className='font-semibold mb-1'>{displayName} <span className='font-normal text-xs'>wants to follow you</span></p>
             <span className='font-normal text-xs'>id: {id}</span>
           </div>
         </div>

@@ -5,6 +5,7 @@ import React from 'react'
 import Link from "next/link"
 import { MoodBadTwoTone } from "@material-ui/icons"
 import TopNavigation from "./TopNavigation"
+import LoadingSpinner from "../components/common/LoadingSpinner"
 
 export default function githubActivity() {
   const [userId, setUserId] = useState('')
@@ -17,13 +18,13 @@ export default function githubActivity() {
       .then(res => {setUser(res.data);setUserId(res.data.id)}, err => console.log('githubActivity', err))
     if (user) {
       if (user.github) {
-        setisGithubSetted(true)
         const username = user.github.split('/').pop()
         fetch(`https://api.github.com/users/${username}/events`)
-          .then(res => res.json())
-          .then(data => {
-            setEvents(data);
-            setLoading(false);
+        .then(res => res.json())
+        .then(data => {
+          setEvents(data);
+          setLoading(false);
+          setisGithubSetted(true)
             // console.log(data);
           })
           .catch(error => {
@@ -38,7 +39,7 @@ export default function githubActivity() {
   return (
     <div>
       <TopNavigation />
-      {isLoading ? (<h1 className="text-3xl font-bold text-center mt-32">Loading...</h1>) : (isGithubSetted ? (
+      {isLoading ? (<LoadingSpinner></LoadingSpinner>) : (isGithubSetted ? (
         <div className="mt-28">
           <h1 className="text-center font-bold text-3xl mb-16">Recent Github events for <span className="text-blue-600">{user.github.split('/').pop()}</span></h1>
           <ul>

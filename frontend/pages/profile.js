@@ -85,6 +85,7 @@ function ProfilePage() {
                       <li className={followerStyle.follower}>
                         <img className='mr-4 w-12 h-12 rounded-full' src={follower.profileImage ? follower.profileImage : 'defaultUser.png'} />
                         <span>{follower.displayName}</span>
+                        <p>{follower.id}</p>
                       </li>
                     </Link>
                   ))}
