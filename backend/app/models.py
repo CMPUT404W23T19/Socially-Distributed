@@ -9,9 +9,9 @@ class Author(models.Model):
     displayName = models.CharField(max_length=100, blank=True, null=True)
     host = models.CharField(max_length=100)
     github = models.CharField(max_length=100, blank=True, null=True)
-    profileImage = models.CharField(max_length=100, blank=True, null=True)
-    url = models.CharField(max_length=100)
-    id = models.CharField(max_length=100, primary_key=True)
+    profileImage = models.CharField(max_length=500, blank=True, null=True)
+    url = models.CharField(max_length=200)
+    id = models.CharField(max_length=200, primary_key=True)
     followers = models.ManyToManyField('self', related_name='following', symmetrical=False, blank=True)
 
     def __str__(self):

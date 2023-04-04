@@ -149,10 +149,7 @@ class InboxView(APIView):
                     author = Author.objects.create(id=request.data['author']['id'], host=request.data['author']['host'], displayName=request.data['author']['displayName'], url=request.data['author']['url'], github=request.data['author']['github'], profileImage=request.data['author']['profileImage'])
                 except:
                     return Response(status=status.HTTP_400_BAD_REQUEST)
-            try:
-                like = Like.objects.create(author=author, object=request.data['object'], summary=request.data['summary'])
-            except:
-                return Response(status=status.HTTP_400_BAD_REQUEST) # probably duplicate
+            like = Like.objects.create(author=author, object=request.data['object'], summary=request.data['summary'])
             inbox.likes.add(like)
             return Response(status=status.HTTP_200_OK)
         

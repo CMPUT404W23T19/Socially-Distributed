@@ -9,10 +9,11 @@ HOST = "https://floating-fjord-51978.herokuapp.com"
 @receiver(post_save, sender=User)
 def create_author(sender, instance, created, **kwargs):
     if created: # if the user is created
-
+        padded_id = str(instance.id).zfill(12)
+        id_as_uuid = "00000000-0000-0000-0000-"+padded_id
         # create an author object
-        id_arg = HOST+"/authors/"+str(instance.id)
-        url_arg = HOST+"/authors/"+str(instance.id)
+        id_arg = HOST+"/authors/"+id_as_uuid
+        url_arg = HOST+"/authors/"+id_as_uuid
         host_arg = HOST
         author_instance = Author.objects.create(user=instance, id=id_arg, url=url_arg, displayName=instance.username, host=host_arg)
 
