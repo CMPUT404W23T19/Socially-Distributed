@@ -93,6 +93,16 @@ export default function CreatePost() {
             password:"cmput404_team18"
           }
         })
+      } else if (author.host === "https://cmput404-group-project.herokuapp.com") {
+        return axios({
+          url: `${author.url}inbox/`,
+          method: "post",
+          data: postData,
+          auth: {
+            username:"remote",
+            password:"remote"
+          }
+        })
       }
 
     })

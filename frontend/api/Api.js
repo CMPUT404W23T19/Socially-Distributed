@@ -202,3 +202,14 @@ export const reqGetComments = (authorId, postId) => {
     }
   })
 }
+
+export const reqGetPostsLikes = (authorId, postId) => {
+  return axios({
+    url:`${host}/authors/${authorId}/posts/${postId}/likes`,
+    method:'get',
+    auth: {
+      username:'admin',
+      password:'admin'
+    }
+  })
+}

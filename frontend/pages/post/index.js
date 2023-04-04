@@ -5,7 +5,7 @@ import { reqGetAuthorsList, reqGetComments, reqGetUserPosts, reqPostComments, re
 import Link from 'next/link';
 import { getPostIdFromCommentUrl, getPostIdFromUrl, getTime } from '../../components/common';
 import { getUserIdFromUrl } from '../../components/common';
-import { Close, Done, FavoriteBorder, AddComment, ExpandMore, ExpandLess } from '@material-ui/icons';
+import { Close, Done, Favorite, AddComment, ExpandMore, ExpandLess } from '@material-ui/icons';
 import { getCookieUserId, getJWTToken } from '../../components/utils/cookieStorage';
 import { v4 as uuidv4 } from 'uuid';
 import Markdown from 'markdown-to-jsx'
@@ -21,6 +21,7 @@ const Feed = () => {
   const [localUser, setLocalUser] = useState(null);
   const [userId, setUserId] = useState('')
   const [isLoading, setIsLoading] = useState(true);
+  const [isLiked, setIsLiked] = useState(false);
   useEffect(() => {
     reqUserProfile(getCookieUserId())
       .then(res => { setLocalUser(res.data); setUserId(res.data.id) }, err => console.log(err))
@@ -66,7 +67,7 @@ const Feed = () => {
   const handleLike = (post) => {
     // handle like logic here
     const data = {
-      type: 'Like',
+      type: 'like',
       summary: `${localUser.displayName} liked your post - ${post.title}`,
       author: localUser,
       object: post.id
@@ -75,11 +76,14 @@ const Feed = () => {
       url: `${post.author.url}/inbox`,
       method: "post",
       data,
-      headers: {
-        Authorization: `Bearer ${getJWTToken()}`,
-
+      auth: {
+        username:'admin',
+        password:'admin'
       }
-    }).then(res => console.log('successful like to inbox'), err => console.log('failed to post like to inbox', err))
+    }).then(res => {
+      setIsLiked(true)
+      console.log('successful like to inbox')
+    }, err => console.log('failed to post like to inbox', err))
     // reqPostToInbox(data, getUserIdFromUrl(post.author.id))
     // .then(res => console.log('successful like to inbox'), err => console.log('failed to post like to inbox',err))
   };
@@ -179,7 +183,7 @@ const Feed = () => {
                 }
                 <div className="flex justify-between">
                   <div className="flex items-center">
-                    <FavoriteBorder fontSize='large' className='cursor-pointer pr-4 text-gray-300' onClick={() => handleLike(post)} />
+                    {isLiked ? <Favorite className='cursor-pointer pr-2 text-red-600'></Favorite> :<Favorite className='cursor-pointer pr-2 text-gray-300' onClick={() => handleLike(post)} />}
                     <AddComment fontSize='small' className="cursor-pointer text-gray-300" onClick={() => handleComment(post)} />
                   </div>
                   <button onClick={() => setIsCollapsed(!isCollapsed)}>{isCollapsed ? <ExpandMore /> : <ExpandLess />}</button>

@@ -34,22 +34,22 @@ const TopNavigation = () => {
     let userUrl = searchTerm
     // Todo: need to identify node and use their username and password
     const lastSlashIndex = userUrl.lastIndexOf("/");
-      const host = userUrl.substring(0, lastSlashIndex + 1);
-      const domain = userUrl.match(/^https?:\/\/[^/]+/i)[0];
-      const author_id = userUrl.substring(lastSlashIndex + 1);
+    const host = userUrl.substring(0, lastSlashIndex + 1);
+    const domain = userUrl.match(/^https?:\/\/[^/]+/i)[0];
+    const author_id = userUrl.substring(lastSlashIndex + 1);
     if (localUser.id !== userUrl) {
       let res = ""
       if (domain === "https://floating-fjord-51978.herokuapp.com") {
-      res = await axios({
-        url: `${userUrl}`,
-        method: "get",
-        auth: {
-          username: 'admin',
-          password: 'admin'
-        }
-      })}
+        res = await axios({
+          url: `${userUrl}`,
+          method: "get",
+          auth: {
+            username: 'admin',
+            password: 'admin'
+          }
+        })
+      }
       else if (domain === "https://distributed-social-net.herokuapp.com") {
-        console.log(222);
         res = await axios({
           url: `${userUrl}`,
           method: "get",
@@ -58,8 +58,17 @@ const TopNavigation = () => {
             password: 'cmput404_team18'
           }
         })
+      } else if (domain === "https://cmput404-group-project.herokuapp.com") {
+        res = await axios({
+          url: `${userUrl}`,
+          method: "get",
+          auth: {
+            username: 'remote',
+            password: 'remote'
+          }
+        })
       }
-      
+
       if (res.status >= 200 && res.status <= 300) {
         let res2 = ""
         console.log(res);
@@ -79,8 +88,6 @@ const TopNavigation = () => {
             }
           })
         } else if (domain === "https://distributed-social-net.herokuapp.com") {
-          console.log(111);
-          console.log(res.data);
           res2 = await axios({
             url: `${host}${author_id}/inbox/`,
             method: 'post',
@@ -93,6 +100,21 @@ const TopNavigation = () => {
             auth: {
               username: 'cmput404_team18',
               password: "cmput404_team18"
+            }
+          })
+        } else if (domain === "https://cmput404-group-project.herokuapp.com") {
+          res2 = await axios({
+            url: `${host}${author_id}/inbox/`,
+            method: 'post',
+            data: {
+              type: "follow",
+              summary: `${localUser.displayName} want to follow ${res.data.displayName}`,
+              actor: localUser,
+              object: res.data
+            },
+            auth: {
+              username: 'remote',
+              password: "remote"
             }
           })
         }
