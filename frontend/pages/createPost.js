@@ -144,9 +144,9 @@ export default function CreatePost() {
       unlisted: false
     }
     if (content && imageUrl) {
-      create(data)
-      data.contentType = imageType
-      data.content = imageUrl
+      // content += `!["post image"](${imageUrl})`
+      data.content = data.content + `!["post image"](${imageUrl})`
+      data.contentType = "text/markdown"
       create(data)
     } else if (content) {
       create(data)
