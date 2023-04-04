@@ -83,9 +83,11 @@ function ProfilePage() {
                   {followersList.map((follower) => (
                     <Link key={follower.id} href="/profile/[id]" as={`/profile/${getUserIdFromUrl(follower.id)}`}>
                       <li className={followerStyle.follower}>
-                        <img className='mr-4 w-12 h-12 rounded-full' src={follower.profileImage ? follower.profileImage : 'defaultUser.png'} />
-                        <span>{follower.displayName}</span>
-                        <p>{follower.id}</p>
+                        <img className='mr-4 w-10 h-10 rounded-full' src={follower.profileImage ? follower.profileImage : 'defaultUser.png'} />
+                        <div className='flex flex-col'>
+                          <p>{follower.displayName}</p>
+                          <p className='text-xs'>id: {follower.id}</p>
+                        </div>
                       </li>
                     </Link>
                   ))}

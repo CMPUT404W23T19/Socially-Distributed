@@ -107,7 +107,7 @@ const TopNavigation = () => {
             url: `${host}${author_id}/inbox/`,
             method: 'post',
             data: {
-              type: "follow",
+              type: "Follow",
               summary: `${localUser.displayName} want to follow ${res.data.displayName}`,
               actor: localUser,
               object: res.data
@@ -185,6 +185,9 @@ const TopNavigation = () => {
             </Link>
             <Link href="/post">
               <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">Explore</a>
+            </Link>
+            <Link href="/remote">
+              <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">Remote</a>
             </Link>
             <Link href="/post/me">
               <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">My Posts</a>
