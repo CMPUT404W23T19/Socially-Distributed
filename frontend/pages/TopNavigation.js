@@ -183,7 +183,7 @@ const TopNavigation = () => {
             <Link href="/profile">
               <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">Profile</a>
             </Link>
-            <Link href="/post">
+            <Link href="/post/public">
               <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">Explore</a>
             </Link>
             <Link href="/remote">
