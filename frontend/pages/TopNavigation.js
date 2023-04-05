@@ -37,6 +37,7 @@ const TopNavigation = () => {
     const host = userUrl.substring(0, lastSlashIndex + 1);
     const domain = userUrl.match(/^https?:\/\/[^/]+/i)[0];
     const author_id = userUrl.substring(lastSlashIndex + 1);
+    console.log(localUser);
     if (localUser.id !== userUrl) {
       let res = ""
       if (domain === "https://floating-fjord-51978.herokuapp.com") {
@@ -103,6 +104,13 @@ const TopNavigation = () => {
             }
           })
         } else if (domain === "https://cmput404-group-project.herokuapp.com") {
+          let user = localUser
+          let lastIndexofSlash = localUser.id.lastIndexOf('/')
+          const host = userUrl.substring(0, lastIndexofSlash + 1);
+          let author_id = userUrl.substring(lastIndexofSlash + 1);
+          author_id = "00000000-0000-0000-0000-" + author_id.padStart(12, '0')
+          user.id = author_id
+          
           res2 = await axios({
             url: `${host}${author_id}/inbox/`,
             method: 'post',
