@@ -16,7 +16,6 @@ function ProfilePage() {
   const [imageUrl, setImageUrl] = useState('')
   const [postsList, setPostsList] = useState([])
   const [followersList, setFollowersList] = useState([])
-  const [followingsList, setFollowingsList] = useState([])
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [isDarkBackground, setIsDarkBackground] = useState(false)
   const [userUrl, setUserUrl] = useState('')
@@ -29,11 +28,11 @@ function ProfilePage() {
       reqUserProfile(userId)
         .then(
           res => {
-            setUsername(res.data.display_name)
+            setUsername(res.data.displayName)
             setGithub(res.data.github)
-            setImageUrl(res.data.profile_image)
+            setImageUrl(res.data.profileImage)
             setUserUrl(res.data.id)
-            console.log(res.data.profile_image);
+            console.log(res.data.profileImage);
           }
         ).catch(
           e => {
@@ -84,8 +83,11 @@ function ProfilePage() {
                   {followersList.map((follower) => (
                     <Link key={follower.id} href="/profile/[id]" as={`/profile/${getUserIdFromUrl(follower.id)}`}>
                       <li className={followerStyle.follower}>
-                        <img className='mr-4 w-12 h-12 rounded-full' src={follower.profile_image ? follower.profile_image : 'defaultUser.png'} />
-                        <span>{follower.display_name}</span>
+                        <img className='mr-4 w-10 h-10 rounded-full' src={follower.profileImage ? follower.profileImage : 'defaultUser.png'} />
+                        <div className='flex flex-col'>
+                          <p>{follower.displayName}</p>
+                          <p className='text-xs'>id: {follower.id}</p>
+                        </div>
                       </li>
                     </Link>
                   ))}
@@ -111,20 +113,19 @@ function ProfilePage() {
                 <ul className='py-3 list-none'>
                   <li className='inline mr-5'><Link href='/post/me'><p className='font-semibold inline cursor-pointer'>{postsList.length}&nbsp;posts</p></Link></li>
                   <li className='inline mr-5'><button onClick={togglePopup}><span className='font-semibold'>{followersList.length}&nbsp;</span>followers</button></li>
-                  <li className='inline mr-5'><button><span className='font-semibold'>{followingsList.length}&nbsp;</span>followings</button></li>
                 </ul>
               </div>
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-2xl font-semibold leading-none tracking-tighter mb-5">Username</h2>
+              <h2 className="text-2xl font-semibold leading-none text-gray-500 tracking-tighter mb-5">Display Name</h2>
               <p className="text-content ml-8 h-10 font-bold">{username == '' ? 'Not exist' : username}</p>
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-2xl font-semibold leading-none tracking-tighter mb-5">UserId</h2>
+              <h2 className="text-2xl font-semibold leading-none text-gray-500 tracking-tighter mb-5">User Id</h2>
               <p className="text-content ml-8 h-10 font-bold">{userUrl == '' ? 'Not exist' : userUrl}</p>
             </div>
             <div className="items-center justify-between mb-8">
-              <h2 className="text-2xl font-semibold leading-none tracking-tighter mb-5">Github</h2>
+              <h2 className="text-2xl font-semibold leading-none text-gray-500 tracking-tighter mb-5">Github Url</h2>
               <a><p className="text-content ml-8 h-10 font-bold">{github == '' ? 'Not exist' : github}</p></a>
             </div>
           </div>

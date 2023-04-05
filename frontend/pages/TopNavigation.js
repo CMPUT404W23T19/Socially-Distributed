@@ -32,39 +32,115 @@ const TopNavigation = () => {
   const handleSearch = async (e) => {
     e.preventDefault();
     let userUrl = searchTerm
-    const res = await axios({
-      url: `${userUrl}`,
-      method: "get"
-    })
+    // Todo: need to identify node and use their username and password
     const lastSlashIndex = userUrl.lastIndexOf("/");
     const host = userUrl.substring(0, lastSlashIndex + 1);
+    const domain = userUrl.match(/^https?:\/\/[^/]+/i)[0];
     const author_id = userUrl.substring(lastSlashIndex + 1);
-    if (res.status >= 200 && res.status <= 300) {
-      const res2 = await axios({
-        url: `${host}${author_id}/inbox`,
-        method: 'post',
-        data: {
-          type: "follow",
-          summary: `${localId} want to follow ${userUrl}`,
-          actor: localUser,
-          object: res.data
+    console.log(localUser);
+    if (localUser.id !== userUrl) {
+      let res = ""
+      if (domain === "https://floating-fjord-51978.herokuapp.com") {
+        res = await axios({
+          url: `${userUrl}`,
+          method: "get",
+          auth: {
+            username: 'admin',
+            password: 'admin'
+          }
+        })
+      }
+      else if (domain === "https://distributed-social-net.herokuapp.com") {
+        res = await axios({
+          url: `${userUrl}`,
+          method: "get",
+          auth: {
+            username: 'cmput404_team18',
+            password: 'cmput404_team18'
+          }
+        })
+      } else if (domain === "https://cmput404-group-project.herokuapp.com") {
+        res = await axios({
+          url: `${userUrl}`,
+          method: "get",
+          auth: {
+            username: 'remote',
+            password: 'remote'
+          }
+        })
+      }
+
+      if (res.status >= 200 && res.status <= 300) {
+        let res2 = ""
+        console.log(res);
+        if (domain === "https://floating-fjord-51978.herokuapp.com") {
+          res2 = await axios({
+            url: `${host}${author_id}/inbox`,
+            method: 'post',
+            data: {
+              type: "follow",
+              summary: `${localUser.displayName} want to follow ${res.data.displayName}`,
+              actor: localUser,
+              object: res.data
+            },
+            auth: {
+              username: 'admin',
+              password: 'admin'
+            }
+          })
+        } else if (domain === "https://distributed-social-net.herokuapp.com") {
+          res2 = await axios({
+            url: `${host}${author_id}/inbox/`,
+            method: 'post',
+            data: {
+              type: "Follow",
+              summary: `${localUser.displayName} want to follow ${res.data.displayName}`,
+              actor: localUser,
+              object: res.data
+            },
+            auth: {
+              username: 'cmput404_team18',
+              password: "cmput404_team18"
+            }
+          })
+        } else if (domain === "https://cmput404-group-project.herokuapp.com") {
+          let user = localUser
+          let lastIndexofSlash = localUser.id.lastIndexOf('/')
+          const host = userUrl.substring(0, lastIndexofSlash + 1);
+          let author_id = userUrl.substring(lastIndexofSlash + 1);
+          author_id = "00000000-0000-0000-0000-" + author_id.padStart(12, '0')
+          user.id = author_id
+          
+          res2 = await axios({
+            url: `${host}${author_id}/inbox/`,
+            method: 'post',
+            data: {
+              type: "Follow",
+              summary: `${localUser.displayName} want to follow ${res.data.displayName}`,
+              actor: localUser,
+              object: res.data
+            },
+            auth: {
+              username: 'remote',
+              password: "remote"
+            }
+          })
         }
-      })
-      if (res2.status >= 200 && res2.status <= 300) {
-        console.log('friend request sent');
-        setIsSuccessPopupOpen(true)
-        setSearchTerm('')
+        if (res2.status >= 200 && res2.status <= 300) {
+          console.log('friend request sent');
+          setIsSuccessPopupOpen(true)
+          setSearchTerm('')
+        } else {
+          console.log('friend: request failed to send');
+          console.log('error:', res2.message);
+        }
       } else {
-        console.log('friend: request failed to send');
-        console.log('error:',res2.message);
+        setIsPopupOpen(true)
       }
     } else {
-      setIsPopupOpen(true)
+      setSearchTerm('')
+      alert("You can't add yourself! Please enter another id.")
     }
-  };
-
-  const handleToggleNotification = () => {
-    setShowNotification(!showNotification);
   };
 
   const handleLogout = () => {
@@ -107,23 +183,32 @@ const TopNavigation = () => {
         </div>
       )}
       <nav className="fixed top-0 left-0 right-0 z-20 bg-gray-800 px-4 py-3">
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center flex-wrap">
           <div>
             <Link href="/inbox">
-              <a className="text-white hover:text-gray-400 font-semibold text-lg">Inbox</a>
+              <a className="text-white hover:text-gray-400 font-semibold text-lg mr-10">Inbox</a>
             </Link>
             <Link href="/profile">
-              <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10 ml-10">Profile</a>
+              <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">Profile</a>
             </Link>
-            <Link href="/post">
-              <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10">Posts</a>
+            <Link href="/post/public">
+              <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">Explore</a>
+            </Link>
+            <Link href="/remote">
+              <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">Remote</a>
+            </Link>
+            <Link href="/post/me">
+              <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">My Posts</a>
             </Link>
             <Link href="/createPost">
-              <a className="block text-white hover:text-gray-400 lg:inline-block mt-4 lg:mt-0 mr-10">Create a post</a>
+              <a className="text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10">New Post</a>
+            </Link>
+            <Link href="/githubActivity">
+              <a className='text-white hover:text-gray-400 mt-4 lg:mt-0 mr-10'>Github Activity</a>
             </Link>
           </div>
           <div className="flex">
-            <div className="relative mr-4">
+            <div className="relative mr-2">
               <form onSubmit={(e) => handleSearch(e)}>
                 <input
                   type="text"
@@ -134,13 +219,13 @@ const TopNavigation = () => {
                 />
                 <button
                   type="submit"
-                  className="absolute right-0 top-0 mt-3 mr-3"
+                  className="absolute right-0 top-0 mt-3 mr-2"
                 >
                   {/* search */}
                 </button>
               </form>
             </div>
-            <button
+            {/* <button
               onClick={handleToggleNotification}
               className="relative text-white hover:text-gray-400"
             >
@@ -154,8 +239,8 @@ const TopNavigation = () => {
                   </div>
                 </div>
               )}
-            </button>
-            <button onClick={handleLogout} className="relative text-white hover:text-gray-400 ml-5 pl-5 border-l-2 border-white">Logout</button>
+            </button> */}
+            <button onClick={handleLogout} className="relative text-white hover:text-gray-400 ml-3 mr-3 pl-5 border-l-2 border-white">Logout</button>
           </div>
         </div>
       </nav>

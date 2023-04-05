@@ -1,11 +1,15 @@
 export const getTime = (isoString) => {
   const date = new Date(isoString);
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  return `${month}/${day}/${year} ${hours}:${minutes}`
+  const edmontonOffset = -6 * 60;
+  const edmontonTime = new Date(date.getTime() + edmontonOffset * 60 * 1000);
+  const year = edmontonTime.getFullYear();
+  const month = edmontonTime.getMonth() + 1;
+  const day = edmontonTime.getDate();
+  const hour = edmontonTime.getHours();
+  const minute = edmontonTime.getMinutes();
+  const second = edmontonTime.getSeconds();
+  const edmontonTimeString = `${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')} ${year}`;
+  return edmontonTimeString
 }
 
 

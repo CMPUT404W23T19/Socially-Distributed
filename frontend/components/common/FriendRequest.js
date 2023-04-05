@@ -1,17 +1,15 @@
 import React from 'react'
 import { Done, Close } from '@material-ui/icons';
-import { Link } from 'next/link'
-import { getUserIdFromUrl } from '../common';
 const FriendRequest = ({ id, displayName, profileImage, acceptAction, refuseAction }) => {
   return (
-    <div className='w-full border-b border-gray-200 pl-3 py-2'>
+    <div className='w-full pl-8 py-2'>
       {/* <Link href={`/profile/${userId}`}> */}
       <div className='flex flex-row items-center justify-between'>
         <div className='flex flex-row items-center'>
-          <img className='mr-4 w-12 h-12 rounded-full' src={profileImage ? profileImage : '../defaultUser.png'} />
+          <img className='mr-4 w-10 h-10 rounded-full' src={profileImage ? profileImage : '../defaultUser.png'} />
           <div className='flex flex-col'>
-            <span className='font-semibold mb-1'>{displayName}</span>
-            <span className='font-normal text-xs'>id: {getUserIdFromUrl(id)}</span>
+            <p className='font-semibold mb-1'>{displayName} <span className='font-normal text-xs'>wants to follow you</span></p>
+            <span className='font-normal text-xs'>id: {id}</span>
           </div>
         </div>
         <div className='flex flex-row items-center'>

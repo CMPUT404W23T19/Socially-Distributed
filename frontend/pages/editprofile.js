@@ -8,31 +8,30 @@ export default function EditProfileForm() {
   const [userId, setUserId] = useState('')
   const [username, setUsername] = useState('')
   const [github, setGithub] = useState('')
-  const [imageFile, setImageFile] = useState(null)
   const [imageUrl, setImageUrl] = useState('')
-  const [followerData, setfollowerData] = useState([])
-
+  const [userProfile, setUserProfile] = useState(null)
   const router = useRouter()
 
   useEffect(() => {
     setUserId(getCookieUserId)
     if (userId) {
       reqUserProfile(userId)
-      .then(
-        res => {
-          setUsername(res.data.display_name)
-          if (res.data.github) {
-            setGithub(res.data.github)
+        .then(
+          res => {
+            setUserProfile(res.data)
+            setUsername(res.data.displayName)
+            if (res.data.github) {
+              setGithub(res.data.github)
+            }
+            setImageUrl(res.data.profileImage)
+            // cannot set image
           }
-          setImageUrl(res.data.profile_image)
-          // cannot set image
-        }
-      ).catch(
-        e => {
-          console.log(e);
-          alert(e)
-        }
-      )
+        ).catch(
+          e => {
+            console.log(e);
+            alert(e)
+          }
+        )
     }
   }, [userId])
 
@@ -43,33 +42,18 @@ export default function EditProfileForm() {
     setGithub(event.target.value)
   }, [])
   const handleImageChange = useCallback((event) => {
-    // setImageFile(event.target.files[0])
-    setImageFile(event.target.files[0])
-    let reader = new FileReader();
-    reader.readAsDataURL(event.target.files[0]);
-    reader.onload = function () {
-      setImageUrl(reader.result)
-    }
-  })
-  
-  
+    setImageUrl(event.target.value)
+  }, [])
+
   /**
    * handles submit edit profile
   */
- const handleEditProfile = async (e) => {
-   e.preventDefault();
-   const updatedProfile = {
-     display_name: username,
-     github,
-    }
-    if (imageFile) {
-      let reader = new FileReader();
-      reader.readAsDataURL(imageFile);
-      reader.onload = function () {
-        updatedProfile.profile_image = reader.result
-        console.log(reader.result);
-      }
-    }
+  const handleEditProfile = async (e) => {
+    e.preventDefault();
+    let updatedProfile = userProfile;
+    updatedProfile.profileImage = imageUrl
+    updatedProfile.github = github
+    updatedProfile.displayName = username
     console.log(updatedProfile);
     const res = await reqEditUserProfile(userId, updatedProfile);
     if (res.status === 200) {
@@ -92,24 +76,27 @@ export default function EditProfileForm() {
             {/* <div className='h-24 w-full text-center'> */}
             <img className='userPhoto w-24 h-24 mx-auto rounded-full' src={imageUrl ? imageUrl : 'defaultUser.png'} />
             {/* </div> */}
-            <input
-              type='file'
-              className='w-auto p-2 my-5 mx-auto block'
-              accept="image/*"
-              onChange={handleImageChange}
-            />
-
+            <p>Image</p>
             <input
               type='text'
               className='border w-full border-grey-light p-2 rounded-xl my-5 block'
-              placeholder='Username'
+              placeholder='Image Url'
+              value={imageUrl}
+              onChange={handleImageChange}
+            />
+            <p>Display Name</p>
+            <input
+              type='text'
+              className='border w-full border-grey-light p-2 rounded-xl my-5 block'
+              placeholder='Display Name'
               value={username}
               onChange={handleUsernameChange}
             />
+            <p>Github</p>
             <input
               type='text'
               className='border w-full border-grey-light p-2 rounded-xl mb-5 block'
-              placeholder='Github account'
+              placeholder='https://github/username'
               value={github}
               onChange={handleGithubChange}
             />

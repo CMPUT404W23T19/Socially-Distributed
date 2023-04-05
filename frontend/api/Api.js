@@ -2,7 +2,7 @@ import axios from "axios";
 import { getJWTToken } from "../components/utils/cookieStorage";
 
 const host = 'https://floating-fjord-51978.herokuapp.com'
-// const host = 'http://localhost:8000'
+
 export const reqSignUp = (data) => {
   return axios({
     url: `${host}/auth/users/`,
@@ -32,7 +32,11 @@ export const reqUserId = () => {
 export const reqUserProfile = (userId) => {
   return axios({
     url: `${host}/authors/${userId}`,
-    method: 'get'
+    method: 'get',
+    auth:{
+      username:'admin',
+      password:'admin'
+    }
   })
 }
 
@@ -40,7 +44,10 @@ export const reqEditUserProfile = (userId, data) => {
   return axios({
     url: `${host}/authors/${userId}/`,
     method: 'post',
-    data
+    data,
+    headers: {
+      Authorization: `Bearer ${getJWTToken()}`,
+    }
   })
 }
 
@@ -48,7 +55,10 @@ export const reqCreatePost = (data, userId) => {
   return axios({
     url: `${host}/authors/${userId}/posts/`,
     method: 'post',
-    data
+    data,
+    headers: {
+      Authorization: `Bearer ${getJWTToken()}`,
+    }
   })
 }
 
@@ -56,10 +66,10 @@ export const reqGetUserPosts = (userId) => {
   return axios({
     url: `${host}/authors/${userId}/posts/`,
     method: 'get',
-    params: {// just for testing, pagination hasn't implemented
-      page: 1,
-      size: 10,
-    }
+    auth:{
+      username:'admin',
+      password:'admin'
+    },
   })
 }
 
@@ -67,31 +77,41 @@ export const reqGetAuthorsList = () => {
   return axios({
     url: `${host}/authors/`,
     method: 'get',
-    params: {// just for testing, pagination hasn't implemented
-      page: 1,
-      size: 50
-    }
+    auth:{
+      username:'admin',
+      password:'admin'
+    },
   })
 }
 
 export const reqDeletePost = (authorId, postId) => {
   return axios({
     url: `${host}/authors/${authorId}/posts/${postId}`,
-    method: 'delete'
+    method: 'delete',
+    headers: {
+      Authorization: `Bearer ${getJWTToken()}`,
+    }
   })
 }
 
 export const reqModifyPost = (authorId, postId) => {
   return axios({
     url: `${host}/authors/${authorId}/posts/${postId}`,
-    method: 'put'
+    method: 'put',
+    headers: {
+      Authorization: `Bearer ${getJWTToken()}`,
+    }
   })
 }
 
 export const reqGetFollowersList = (authorId) => {
   return axios({
     url: `${host}/authors/${authorId}/followers`,
-    method: 'get'
+    method: 'get',
+    auth:{
+      username:'admin',
+      password:'admin'
+    }
   })
 }
 
@@ -106,14 +126,20 @@ export const reqFollowOthers = (data, authorId, friendId) => {
   return axios({
     url: `${host}/authors/${authorId}/followers/${friendId}`,
     method: 'put',
-    data
+    data,
+    headers: {
+      Authorization: `Bearer ${getJWTToken()}`,
+    }
   })
 }
 
 export const reqUnfollow = (authorId, friendId) => {
   return axios({
     url: `${host}/authors/${authorId}/followers/${friendId}`,
-    method: 'delete'
+    method: 'delete',
+    headers: {
+      Authorization: `Bearer ${getJWTToken()}`,
+    }
   })
 }
 
@@ -121,7 +147,11 @@ export const reqPostToInbox = (data, authorId) => {
   return axios({
     url: `${host}/authors/${authorId}/inbox`,
     method: "post",
-    data
+    data,
+    auth:{
+      username:"admin",
+      password:"admin"
+    }
   })
 }
 
@@ -129,13 +159,24 @@ export const reqGetInbox = (authorId) => {
   return axios({
     url: `${host}/authors/${authorId}/inbox`,
     method: "get",
+    // auth:{
+    //   username:'admin',
+    //   password:'admin'
+    // },
+    headers: {
+      Authorization: `Bearer ${getJWTToken()}`,
+    }
+  
   })
 }
 
 export const reqClearInbox = (authorId) => {
   return axios({
     url: `${host}/authors/${authorId}/inbox`,
-    method: 'delete'
+    method: 'delete',
+    headers: {
+      Authorization: `Bearer ${getJWTToken()}`,
+    }
   })
 }
 
@@ -143,7 +184,11 @@ export const reqPostComments = (data, authorId, postId) => {
   return axios({
     url: `${host}/authors/${authorId}/posts/${postId}/comments`,
     method: 'post',
-    data
+    data,
+    auth:{
+      username:'admin',
+      password:'admin'
+    }
   })
 }
 
@@ -151,9 +196,20 @@ export const reqGetComments = (authorId, postId) => {
   return axios({
     url:`${host}/authors/${authorId}/posts/${postId}/comments`,
     method:'get',
-    params:{    // ##################### again, just test to get comments, pagination not implemented yet
-      page:1,
-      size:5
+    auth:{
+      username:'admin',
+      password:'admin'
+    }
+  })
+}
+
+export const reqGetPostsLikes = (authorId, postId) => {
+  return axios({
+    url:`${host}/authors/${authorId}/posts/${postId}/likes`,
+    method:'get',
+    auth: {
+      username:'admin',
+      password:'admin'
     }
   })
 }
