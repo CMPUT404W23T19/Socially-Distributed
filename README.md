@@ -3,7 +3,6 @@ CMPUT 404 [Social Distribution Project](https://github.com/abramhindle/CMPUT404-
 ## Team
 
 - Marc-Andre Haley
-- Haoyu Zhang
 - Smit Patel
 - Reham Albakouni
 - Qingya Ye
