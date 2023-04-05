@@ -2,14 +2,18 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import TopNavigation from '../TopNavigation';
 import { getTime } from '../../components/common';
-import { AddComment, ExpandLess, ExpandMore, Favorite, Done, Close } from '@material-ui/icons';
+import { AddComment, ExpandLess, ExpandMore, Favorite, Done, Close, Share } from '@material-ui/icons';
 import Markdown from 'markdown-to-jsx'
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getCookieUserId } from '../../components/utils/cookieStorage';
-import { reqUserProfile } from '../../api/Api';
+import { reqGetFollowersList, reqPostToInbox, reqUserProfile } from '../../api/Api';
 import { v4 as uuidv4 } from 'uuid';
 import { reqGetAuthorsList, reqGetUserPosts } from '../../api/Api';
 import { getUserIdFromUrl } from '../../components/common';
+import followerStyle from '../styles.module.css'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 function Posts() {
   const [posts, setPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
@@ -20,6 +24,10 @@ function Posts() {
   const [localUser, setLocalUser] = useState(null)
   const [authorComment, setComments] = useState('')
   const [clickedPostId, setClickedPostId] = useState('')
+  const [postForShare, setPostForShare] = useState(null)
+  const [isSharing, setIsSharing] = useState(false)
+  const [followers, setFollowers] = useState([])
+
   useEffect(() => {
     async function fetchPosts() {
       reqUserProfile(getCookieUserId()).then(
@@ -35,7 +43,7 @@ function Posts() {
             if (response.status >= 200 && response.status < 300) {
               let posts = response.data.items
               posts = posts.filter(post => post.visibility === "PUBLIC")
-              posts.sort((a,b) => new Date(b.published) - new Date(a.published))
+              posts.sort((a, b) => new Date(b.published) - new Date(a.published))
               return posts.map((post) => ({ ...post, user }));
             } else {
               console.log('====================================');
@@ -135,9 +143,68 @@ function Posts() {
       setClickedPostId(post.id)
     })
   }
+
+  const handleShare = (post) => {
+    setPostForShare(post)
+    setIsSharing(true)
+    reqGetFollowersList(getUserIdFromUrl(post.author.id))
+      .then(res => {
+        setFollowers(res.data.items);
+      }, err => console.log(err))
+  }
+
+  const sharePost = (follower) => {
+    if (follower.id.includes("https://floating-fjord-51978.herokuapp.com/")) {
+      reqPostToInbox(postForShare, getUserIdFromUrl(follower.id))
+        .then(res => {
+          setIsSharing(false);
+          toast.success("Shared!", { position: toast.POSITION.CENTER })
+        })
+    } else if (follower.id.includes("https://distributed-social-net.herokuapp.com")) {
+      axios({
+        url: `${follower.id}/inbox/`,
+        method: 'post',
+        data: postForShare,
+        auth: {
+          username: 'cmput404_team18',
+          password: "cmput404_team18"
+        }
+      }).then(res => {
+        setIsSharing(false);
+        toast.success("Shared!", { position: toast.POSITION.CENTER })
+      })
+    }
+  }
+
   return (
     <div>
       <TopNavigation></TopNavigation>
+      <ToastContainer position={toast.POSITION.CENTER} />
+      {isSharing && (
+        <div className="fixed w-screen h-screen opacity-80 bg-black z-30" onClick={() => setIsSharing(false)}></div>
+      )}
+      {isSharing && (
+        <div
+          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/2 z-50 rounded-md bg-white"
+        >
+          <div className='flex justify-between border-b border-gray-200 m-5'>
+            <h2 className="text-base font-semibold mb-2">Followers</h2>
+            <span className='cursor-pointer' onClick={() => setIsSharing(false)}><Close /></span>
+          </div>
+          <ul className='ml-5 w-11/12 h-3/4 overflow-y-scroll'>
+            {followers.map((follower) => (
+              <div key={follower.id} onClick={() => sharePost(follower)}>
+                <li className={followerStyle.follower}>
+                  <div className='flex flex-row'>
+                    <img className='mr-4 w-10 h-10 rounded-full' src={follower.profileImage ? follower.profileImage : 'defaultUser.png'} />
+                    <p>{follower.displayName}</p>
+                  </div>
+                </li>
+              </div>
+            ))}
+          </ul>
+        </div>
+      )}
       {isPopup && (
         <div>
           <div className="fixed w-screen h-screen opacity-80 bg-black z-30" onClick={() => setIsPopup(false)}></div>
@@ -175,14 +242,15 @@ function Posts() {
                 <div>
                   <div className='flex flex-row items-center mt-3'>
                     {clickedPostId === post.id ?
-                      <div className='flex flex-row items-center'>
-                        <Favorite fontSize='small' className='cursor-pointer mr-2 text-red-600' onClick={() => handleLike(post)} />
+                      <div className='flex flex-row items-center mr-1'>
+                        <Favorite fontSize='small' className='cursor-pointer mr-1 text-red-600' onClick={() => handleLike(post)} />
                         <p className='text-xs  mr-2 text-gray-500'>{post.likelength + 1}</p>
                       </div>
-                      : <div className='flex flex-row items-center'>
-                        <Favorite fontSize='small' className='cursor-pointer mr-2 text-gray-300' onClick={() => handleLike(post)} />
+                      : <div className='flex flex-row items-center mr-1'>
+                        <Favorite fontSize='small' className='cursor-pointer mr-1 text-gray-300' onClick={() => handleLike(post)} />
                         <p className='text-xs  mr-2 text-gray-500'>{post.likelength}</p></div>}
                     <AddComment fontSize='small' className="cursor-pointer mr-2 text-gray-300" onClick={() => handleComment(post)} />
+                    <Share fontSize='small' className="cursor-pointer mr-2 text-gray-300" onClick={() => handleShare(post)}></Share>
                     <ExpandLess className='text-right cursor-pointer text-gray-300' onClick={() => handleCollapseComments(post.id)}></ExpandLess>
                   </div>
                   {selectedPost && selectedPost.comments.length > 0 && selectedPost.comments[0].id.includes(post.id) && (
@@ -199,14 +267,15 @@ function Posts() {
               ) : (
                 <div className='flex flex-row items-center mt-3'>
                   {clickedPostId === post.id ?
-                      <div className='flex flex-row items-center'> 
-                        <Favorite fontSize='small' className='cursor-pointer mr-2 text-red-600' onClick={() => handleLike(post)} />
-                        <p className='text-xs  mr-2 text-gray-500'>{post.likelength + 1}</p>
-                      </div>
-                      : <div className='flex flex-row items-center'>
-                        <Favorite fontSize='small' className='cursor-pointer mr-2 text-gray-300' onClick={() => handleLike(post)} />
-                        <p className='text-xs  mr-2 text-gray-500'>{post.likelength}</p></div>}
+                    <div className='flex flex-row items-center mr-1'>
+                      <Favorite fontSize='small' className='cursor-pointer mr-1 text-red-600' onClick={() => handleLike(post)} />
+                      <p className='text-xs  mr-2 text-gray-500'>{post.likelength + 1}</p>
+                    </div>
+                    : <div className='flex flex-row items-center mr-1'>
+                      <Favorite fontSize='small' className='cursor-pointer mr-1 text-gray-300' onClick={() => handleLike(post)} />
+                      <p className='text-xs  mr-2 text-gray-500'>{post.likelength}</p></div>}
                   <AddComment fontSize='small' className="cursor-pointer mr-2 text-gray-300" onClick={() => handleComment(post)} />
+                  <Share fontSize='small' className="cursor-pointer mr-2 text-gray-300" onClick={() => handleShare(post)}></Share>
                   <ExpandMore className=' cursor-pointer text-gray-300' onClick={() => handleExpandComments(post)}></ExpandMore>
                 </div>
               )}
