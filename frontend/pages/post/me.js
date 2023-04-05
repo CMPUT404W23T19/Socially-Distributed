@@ -105,17 +105,15 @@ export default function Public() {
     e.preventDefault();
     let data = {
       title,
-      contentType,
       content,
-      source:currentPost.source,
-      origin:currentPost.origin,
-      description: currentPost.description,
-      author: currentPost.author,
-      categories: currentPost.categories,
-      visibility: currentPost.visibility,
-      unlisted: false,
-      published: new Date().toISOString()
+      contentType,
+      published:new Date().toISOString()
     }
+    // data.title = title
+    // data.content = content
+    // data.contentType = contentType
+    // data.published = new Date().toISOString()
+   
     if (content && imageUrl) {
       // content += `!["post image"](${imageUrl})`
       data.content = data.content + `!["post image"](${imageUrl})`
@@ -133,7 +131,7 @@ export default function Public() {
   const updatePost = async (data) => {
     const res = await axios({
       url: `${currentPost.id}`,
-      method: 'put',
+      method: 'post',
       data,
       headers: {
         Authorization: `Bearer ${getJWTToken()}`,
@@ -141,6 +139,14 @@ export default function Public() {
     })
     if (res.status >= 200 && res.status < 300) {
       setIsEditing(false)
+      let updatedPosts = myPostList.filter(post => post.id !== currentPost.id)
+      Object.keys(currentPost).forEach(key => {
+        if (!data.hasOwnProperty(key)) {
+          data[key] = currentPost[key];
+        }
+      });
+      updatedPosts.unshift(data)
+      setMyPostList(updatedPosts)
     } else {
       console.log('====================================');
       console.log(res);
