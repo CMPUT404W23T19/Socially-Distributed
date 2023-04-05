@@ -8,6 +8,9 @@ import { Done, Close,FavoriteBorder,AddComment } from '@material-ui/icons';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { getJWTToken } from '../components/utils/cookieStorage';
+import Markdown from 'markdown-to-jsx'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function postdetail() {
   const router = useRouter()
@@ -111,7 +114,10 @@ export default function postdetail() {
       }
     })
       .then(
-        res => {setIsPopupOpen(false);console.log('successfully post a comment to inbox')},
+        res => {
+          setIsPopupOpen(false);
+          toast.success("Sent!", { position: toast.POSITION.CENTER })
+          console.log('successfully post a comment to inbox')},
         err => console.log('fail to post a comment to inbox: ', err)
       )
   }
@@ -123,6 +129,7 @@ export default function postdetail() {
   return (
     <div className="container">
       <TopNavigation />
+      <ToastContainer position={toast.POSITION.CENTER} />
       {isPopupOpen && (
         <div>
           <div className="fixed w-screen h-screen opacity-80 bg-black z-30" onClick={() => togglePopup()}></div>

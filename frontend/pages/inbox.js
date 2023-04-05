@@ -228,7 +228,6 @@ export default function inbox() {
                         {/* <span className='font-normal text-xs'>id: {like.author.id}</span> */}
                       </div>
                     </div>
-                    <div><span>{getTime(like.published)}</span></div>
                   </div>
                 </div>
               </div>
