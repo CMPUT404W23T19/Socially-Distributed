@@ -110,7 +110,7 @@ class PostDetailView(APIView):
         #self.authentication_classes = [JWTAuthentication]
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         instance = Post.objects.get(id=post_id)
-        serializer = PostSerializer(instance, data=request.data)
+        serializer = PostSerializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
