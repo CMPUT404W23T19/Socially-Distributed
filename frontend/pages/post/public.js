@@ -238,6 +238,9 @@ function Posts() {
               {(post.contentType === "image/jpeg;base64" || post.contentType === "image/png;base64" || post.contentType === "application/base64") ? <img src={post.content}></img> :
                 <p>{post.contentType === "text/plain" ? post.content : <Markdown>{post.content}</Markdown>}</p>
               }
+              {post.categories !== "" && <div className='flex flex-row my-2'>
+                {JSON.parse(post.categories.replace(/'/g, "\"")).map(category => (<span className='mr-2 text-xs bg-gray-100 rounded-lg px-3'>{category}</span>))}
+              </div>}
               {expandedPosts.includes(post.id) ? (
                 <div>
                   <div className='flex flex-row items-center mt-3'>

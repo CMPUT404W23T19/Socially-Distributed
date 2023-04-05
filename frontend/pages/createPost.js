@@ -6,6 +6,7 @@ import { getCookieUserId } from '../components/utils/cookieStorage.js';
 import { useRouter } from 'next/router.js';
 import { getJWTToken } from '../components/utils/cookieStorage.js';
 import axios from 'axios';
+import { Close } from '@material-ui/icons';
 export default function CreatePost() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -19,6 +20,8 @@ export default function CreatePost() {
   const [privateAuthor, setPrivateAuthor] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [imageType, setImageType] = useState('')
+  const [categories, setCategories] = useState([])
+  const [category, setCategory] = useState('')
   const router = useRouter();
 
   useEffect(() => {
@@ -89,8 +92,8 @@ export default function CreatePost() {
           method: "post",
           data: postData,
           auth: {
-            username:"cmput404_team18",
-            password:"cmput404_team18"
+            username: "cmput404_team18",
+            password: "cmput404_team18"
           }
         })
       } else if (author.host === "https://cmput404-group-project.herokuapp.com") {
@@ -99,8 +102,8 @@ export default function CreatePost() {
           method: "post",
           data: postData,
           auth: {
-            username:"remote",
-            password:"remote"
+            username: "remote",
+            password: "remote"
           }
         })
       }
@@ -144,15 +147,16 @@ export default function CreatePost() {
       title,
       source: user.url,
       origin: user.url,
-      description: content,
+      description: "",
       contentType,
       content,
       author: user,
-      categories: '',
+      categories,
       published,
       visibility,
       unlisted: false
     }
+    console.log(categories);
     if (content && imageUrl) {
       // content += `!["post image"](${imageUrl})`
       data.content = data.content + `!["post image"](${imageUrl})`
@@ -205,6 +209,23 @@ export default function CreatePost() {
       console.log(error);
     }
   }
+
+  const addCategory = useCallback(event => {
+    let categoryList = categories
+    categoryList.push(event.target.value)
+    setCategories(categoryList)
+    setCategory('')
+
+  })
+
+  const removeCategory = (category) => {
+    console.log(category);
+    let categoryList = categories
+    categoryList = categoryList.filter(cate => cate != category)
+    console.log(categoryList);
+    setCategories(categoryList)
+  }
+
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col items-center">
       <TopNavigation />
@@ -284,6 +305,19 @@ export default function CreatePost() {
                 <div>
                   <input onChange={handlePriavteMsg} placeholder="Please enter the author's id you'd message to" className='w-full outline-none mt-5 py-2 px-2 border rounded-md border-gray-200' />
                 </div>}
+            </div>
+
+            <div className='mb-6'>
+              <p className="block mb-2 font-bold text-lg text-gray-800">Categories</p>
+              <input className='py-1 px-2' type='text' placeholder='category' value={category} onChange={(e) => setCategory(e.target.value)} onBlur={addCategory} />
+              <div className='mt-4'>
+                {categories.length > 0 && categories.map(category => (
+                  <span key={category} className='rounded-lg bg-gray-50 px-2 mr-3 '>
+                    {category}
+                    <Close fontSize='medium' className='pl-3 cursor-pointer' onClick={() => removeCategory(category)}></Close>
+                  </span>
+                ))}
+              </div>
             </div>
             <div className="w-full text-center">
               {error && <div className='text-red-600 text-sm mb-3'>{error}</div>}
