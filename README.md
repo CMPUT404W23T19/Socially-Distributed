@@ -3,10 +3,9 @@ CMPUT 404 [Social Distribution Project](https://github.com/abramhindle/CMPUT404-
 ## Team
 
 - Marc-Andre Haley
-- Haoyu Zhang
 - Smit Patel
 - Reham Albakouni
-- 
+- Qingya Ye
 # Description
 I log into _SociallyDistributed_. I see my **stream** which is filled with **posts** that have arrived in my **inbox**. I browse them and I click **like** on anything by my **friend** Steph who is on another **node**.
 
