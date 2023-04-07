@@ -10,16 +10,26 @@ from posts.models import Post, Comment, Like
 from common.logging.logging_service import Logger
 import json
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.authentication import BasicAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from datetime import datetime
 
 # Create your views here.
 
 ### NEED TO ADD ERROR HANDLING FOR WHEN AUTHOR DOES NOT EXIST. FOR ALL VIEWS ###
 
-HOST = 'http://127.0.0.1:8000/authors/'
+HOST = 'http://localhost:8000/authors/'
 
 class InboxView(APIView):
 
-    # permission_classes=[IsAuthenticated] #ignore for now
+    #permission_classes=[IsAuthenticated]
+
+    def get_authenticators(self):
+        if self.request.method == 'POST':
+            authentication_classes = [BasicAuthentication]
+        else:
+            authentication_classes = [JWTAuthentication]
+        return [auth() for auth in authentication_classes]
 
     def get_queryset(self):
         author_id=HOST+self.kwargs['author_id']
@@ -30,14 +40,21 @@ class InboxView(APIView):
         """
         Get inbox for a given author
         """
+        #self.authentication_classes = [JWTAuthentication]
         author_id=HOST+self.kwargs['author_id']
-        p = PageNumberPagination()
-        p.page_query_param = 'page'
-        p.page_size_query_param = 'size'
-        queryset = self.get_queryset()
-        serializer = InboxSerializer(queryset)
-        page = p.get_page_number(request, p)
-        size = p.get_page_size(request)
+        if 'page' in request.GET:
+            p = PageNumberPagination()
+            p.page_query_param = 'page'
+            p.page_size_query_param = 'size'
+            queryset = self.get_queryset()
+            serializer = InboxSerializer(queryset)
+            page = p.get_page_number(request, p)
+            size = p.get_page_size(request)
+        else:
+            queryset = self.get_queryset()
+            serializer = InboxSerializer(queryset)
+            page = None
+            size = None
         # get posts and requests and put them in one list
         items = []
         try:
@@ -65,13 +82,17 @@ class InboxView(APIView):
             items.append(comment)
         for like in likes:
             items.append(like)
-        response = {"type": "inbox", "author":author_id, "items": items}
+        response = {"type": "inbox", "author":author_id, "items": items, "size": size, "page": page}
         return Response(response, status=status.HTTP_200_OK)
     
     def post(self, request, *args, **kwargs):
         """
-        Add a post or request to the inbox
+        Add a "post", "follow", "like" or "comment" to the inbox.
+        All fields of the object must be present.
         """
+
+        #self.authentication_classes = [BasicAuthentication]
+
         inbox = self.get_queryset()
         type = request.data['type']
 
@@ -122,9 +143,13 @@ class InboxView(APIView):
                 except Comment.DoesNotExist:
                     return Response(status=status.HTTP_404_NOT_FOUND)
             try:
-                like = Like.objects.create(author=request.data['author'], object=request.data['object'], summary=request.data['summary'])
-            except:
-                return Response(status=status.HTTP_400_BAD_REQUEST) # probably duplicate
+                author = Author.objects.get(id=request.data['author']['id'])
+            except Author.DoesNotExist:
+                try:
+                    author = Author.objects.create(id=request.data['author']['id'], host=request.data['author']['host'], displayName=request.data['author']['displayName'], url=request.data['author']['url'], github=request.data['author']['github'], profileImage=request.data['author']['profileImage'])
+                except:
+                    return Response(status=status.HTTP_400_BAD_REQUEST)
+            like = Like.objects.create(author=author, object=request.data['object'], summary=request.data['summary'])
             inbox.likes.add(like)
             return Response(status=status.HTTP_200_OK)
         
@@ -140,7 +165,18 @@ class InboxView(APIView):
                     post = Post.objects.get(id=post_id)
                 except Post.DoesNotExist:
                     return Response(status=status.HTTP_400_BAD_REQUEST)
-                comment = Comment.objects.create(id=request.data['id'], author=request.data['author'], comment=request.data['comment'], contentType=request.data['contentType'], published=request.data['published'], post=post)
+                try:
+                    author = Author.objects.get(id=request.data['author']['id'])
+                except Author.DoesNotExist:
+                    try:
+                        author = Author.objects.create(id=request.data['author']['id'], host=request.data['author']['host'], displayName=request.data['author']['displayName'], url=request.data['author']['url'], github=request.data['author']['github'], profileImage=request.data['author']['profileImage'])
+                    except:
+                        return Response(status=status.HTTP_400_BAD_REQUEST)
+                try:
+                    published = request.data['published']
+                except:
+                    published = datetime.now()
+                comment = Comment.objects.create(id=request.data['id'], author=author, comment=request.data['comment'], contentType=request.data['contentType'], published=published, post=post)
             inbox.comments.add(comment)
             return Response(status=status.HTTP_200_OK)
 

@@ -34,12 +34,20 @@ TESTING = bool(os.environ.get("DJANGO_TESTING", default=False))
 
 ALLOWED_HOSTS = ['*']
 
+from django.core.management.commands.runserver import Command as runserver
+
+# runserver.default_port = os.environ.get('PORT') 
+# runserver.default_addr = '0.0.0.0'
+
 # add your new traefik or URL host here
 CORS_ORIGIN_WHITELIST = [
     'http://next-django-template.test',
     'http://localhost:8000',
     'http://localhost:3000',
-    'http://127.0.0.1:3000'
+    'http://127.0.0.1:3000',
+    'https://cmput404-group-project.herokuapp.com',
+    'https://social-team-18.netlify.app', 
+
 ]
 
 # Database
@@ -150,21 +158,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-if TESTING:
-    REST_FRAMEWORK = {
-        'DEFAULT_AUTHENTICATION_CLASSES': (
-            'rest_framework.authentication.TokenAuthentication',
-            'rest_framework.authentication.SessionAuthentication',
-        ),
-        'PAGE_SIZE': 10
-    }
-else:
-    REST_FRAMEWORK = {
-        'DEFAULT_AUTHENTICATION_CLASSES': (
-            'rest_framework_simplejwt.authentication.JWTAuthentication',
-            
-        ),
-    }
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/

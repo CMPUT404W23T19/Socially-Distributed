@@ -18,4 +18,4 @@ class LikeSerializer(serializers.ModelSerializer):
     author = AuthorSerializer()
     class Meta:
         model = Like
-        fields = ('type', 'summary', 'actor', 'object',)
+        fields = ('type', 'summary', 'author', 'object',)

@@ -13,16 +13,28 @@ from rest_framework.views import APIView
 from datetime import datetime
 import uuid, base64
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.authentication import BasicAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # Create your views here.
 
-HOST = 'http://127.0.0.1:8000/authors/'
+HOST = 'http://localhost:8000/authors/'
 
 class PostList(ListCreateAPIView):
-   
+    """
+    GET: List all posts for the currently authenticated user.
+    POST: Create a new post for the currently authenticated user.
+    """
     
     serializer_class=PostSerializer
-    # permission_classes=[IsAuthenticated] #ignore for now
+    #permission_classes=[IsAuthenticated] 
+
+    def get_authenticators(self):
+        if self.request.method == 'GET':
+            authentication_classes = [BasicAuthentication]
+        else:
+            authentication_classes = [JWTAuthentication]
+        return [auth() for auth in authentication_classes]
 
     def get_queryset(self):
         author_id=HOST+self.kwargs['author_id']
@@ -33,47 +45,59 @@ class PostList(ListCreateAPIView):
         """
         Create a new post for the currently authenticated user.
         """
+        #self.authentication_classes = [JWTAuthentication]
         author_id=HOST+self.kwargs['author_id']
         post_id = author_id + "/posts/" + str(uuid.uuid4())
         instance = Author.objects.get(id=author_id)
         published = datetime.now().isoformat()
         post = Post.objects.create(id=post_id, author=instance, title=request.data['title'], source=request.data['source'], origin=request.data['origin'], description=request.data['description'], contentType=request.data['contentType'], content=request.data['content'], categories=request.data['categories'], count=0, published=published, visibility=request.data['visibility'], unlisted=request.data['unlisted'])
-        return Response(status=status.HTTP_201_CREATED)
+        serializer = PostSerializer(post)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     def list(self, request, *args, **kwargs):
         """
         This view should return a list of all the posts
         for the currently authenticated user.
         """
-        p = PageNumberPagination()
-        p.page_query_param = 'page'
-        p.page_size_query_param = 'size'
-        queryset = self.get_queryset()
-        posts = p.paginate_queryset(queryset, request)
-        serializer = PostSerializer(posts, many=True)
-        page = p.get_page_number(request, p)
-        size = p.get_page_size(request)
-        response = {"type": "posts", "items": serializer.data, "page": page, "size": size}
+        #self.authentication_classes = [BasicAuthentication]
+        if 'page' in request.GET:
+            p = PageNumberPagination()
+            p.page_query_param = 'page'
+            p.page_size_query_param = 'size'
+            queryset = self.get_queryset()
+            posts = p.paginate_queryset(queryset, request)
+            page = int(p.get_page_number(request, p))
+            size = p.get_page_size(request)
+            serializer = PostSerializer(posts, many=True)
+            response = {"type": "posts", 'page': page, 'size': size, "items": serializer.data}
+        else:
+            queryset = self.get_queryset()
+            serializer = PostSerializer(queryset, many=True)
+            response = {"type": "posts", "items": serializer.data}
         return Response(response, status=status.HTTP_200_OK)
 
 class PostDetailView(APIView):
     """
-    Display an individual :model: `posts.Post`,
-    or update an existing :model: `posts.Post`,
-    or partial_update an existing :model: `posts.Post`.
-    or delete an existing :model: `posts.Post`.
-
-    Authentication required to update or delete.
-    Non-authenticated users can only view(get).
-
+    GET: Get a single post of the currently authenticated user.
+    POST: Update a single post of the currently authenticated user.
+    PUT: Create a single post of the currently authenticated user with given post id.
+    DELETE: Delete a single post of the currently authenticated user.
     """
 
-    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+    #permission_classes=[IsAuthenticated]
+
+    def get_authenticators(self):
+        if self.request.method == 'GET':
+            authentication_classes = [BasicAuthentication]
+        else:
+            authentication_classes = [JWTAuthentication]
+        return [auth() for auth in authentication_classes]
 
     def get(self, request, *args, **kwargs):
         """
         This view should return a single post of the currently authenticated user.
         """
+        #self.authentication_classes = [BasicAuthentication]
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         instance = Post.objects.get(id=post_id)
         serializer = PostSerializer(instance)
@@ -83,16 +107,19 @@ class PostDetailView(APIView):
         """
         Update a single post of the currently authenticated user.
         """
+        #self.authentication_classes = [JWTAuthentication]
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         instance = Post.objects.get(id=post_id)
-        serializer = PostSerializer(instance, data=request.data)
+        serializer = PostSerializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
         """
-        Ddelete a single post of the currently authenticated user."""
+        Delete a single post of the currently authenticated user.
+        """
+        #self.authentication_classes = [JWTAuthentication]
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         instance = Post.objects.get(id=post_id)
         instance.delete()
@@ -102,6 +129,7 @@ class PostDetailView(APIView):
         """
         Create a single post of the currently authenticated user with given post id.
         """
+        #self.authentication_classes = [JWTAuthentication]
         author_id=HOST+self.kwargs['author_id']
         instance = Author.objects.get(id=author_id)
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
@@ -110,6 +138,9 @@ class PostDetailView(APIView):
     
     
 class GetImageView(APIView):
+
+    #permission_classes=[IsAuthenticated]
+    authentication_classes = [BasicAuthentication]
 
     def get(self, request, *args, **kwargs):
         """
@@ -124,11 +155,14 @@ class GetImageView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class PostLikes(APIView):
-
-    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+    
+    #permission_classes=[IsAuthenticated]
+    authentication_classes = [BasicAuthentication]
 
     def get(self, request, *args, **kwargs):
-       
+        """
+        get a list of authors who liked the post
+        """
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         likes = Like.objects.filter(object=post_id)
         serializer = LikeSerializer(likes, many=True)
@@ -137,10 +171,13 @@ class PostLikes(APIView):
     
 class CommentLikes(APIView):
 
-    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+    #permission_classes=[IsAuthenticated]
+    authentication_classes = [BasicAuthentication]
 
     def get(self, request, *args, **kwargs):
-       
+        """
+        get a list of authors who liked the comment
+        """
         comment_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']+ '/comments/' + self.kwargs['comment_id']
         likes = Like.objects.filter(object=comment_id)
         serializer = LikeSerializer(likes, many=True)
@@ -149,9 +186,13 @@ class CommentLikes(APIView):
     
 class AuthorLiked(APIView):
 
-    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+    #permission_classes=[IsAuthenticated]
+    authentication_classes = [BasicAuthentication]
 
     def get(self, request, *args, **kwargs):
+        """
+        get a list of posts and comments liked by the author
+        """
         author_id=HOST+self.kwargs['author_id']
         likes = Like.objects.filter(author=author_id)
         serializer = LikeSerializer(likes, many=True)
@@ -159,18 +200,30 @@ class AuthorLiked(APIView):
         return Response(response, status=status.HTTP_200_OK)
 
 class CommentsView(ListCreateAPIView):
+    """
+    GET: Get all comments of a post of the currently authenticated user.
+    POST: Create a comment on a post of the currently authenticated user.
+    """
 
-    # permission_classes=[IsOwnerProfileOrReadOnly,IsAuthenticated]
+    #permission_classes=[IsAuthenticated]
 
     paginate_by = 5
 
     serializer_class = CommentSerializer
+
+    def get_authenticators(self):
+        if self.request.method == 'GET':
+            authentication_classes = [BasicAuthentication]
+        else:
+            authentication_classes = [JWTAuthentication]
+        return [auth() for auth in authentication_classes]
 
     def get_queryset(self):
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         return Comment.objects.filter(post=post_id)
     
     def create(self, request, *args, **kwargs):
+        #self.authentication_classes = [JWTAuthentication]
         post_id = HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
         comment_id = post_id + '/comments/' + str(uuid.uuid4())
         try:
@@ -179,21 +232,28 @@ class CommentsView(ListCreateAPIView):
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         comment = Comment.objects.create(id=comment_id, post=post, author=author, comment=request.data['comment'], contentType=request.data['contentType'], published=datetime.now().isoformat())
-        return Response(status=status.HTTP_201_CREATED)
+        serializer = CommentSerializer(comment)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     def list(self, request, *args, **kwargs):
-        p = PageNumberPagination()
-        p.page_query_param = 'page'
-        p.page_size_query_param = 'size'
-        queryset = self.get_queryset()
-        if not queryset: # if queryset is empty
-            return Response({"type": "comments", "items": [],})
-        comments = p.paginate_queryset(queryset, request)
-        page = p.get_page_number(request, p)
-        size = p.get_page_size(request)
-        serializer = self.get_serializer(comments, many=True)
+        #self.authentication_classes = [BasicAuthentication]
         post_id=HOST+self.kwargs['author_id']+'/posts/'+self.kwargs['post_id']
-        response = {"type": "comments", "items": serializer.data, "page": page, "size": size, "post": post_id}
+        if 'page' in request.GET:
+            p = PageNumberPagination()
+            p.page_query_param = 'page'
+            p.page_size_query_param = 'size'
+            queryset = self.get_queryset()
+            if not queryset: # if queryset is empty
+                return Response({"type": "comments", "items": [],})
+            comments = p.paginate_queryset(queryset, request)
+            page = p.get_page_number(request, p)
+            size = p.get_page_size(request)
+            serializer = self.get_serializer(comments, many=True)
+            response = {"type": "comments", "items": serializer.data, "page": page, "size": size, "post": post_id}
+        else:
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            response = {"type": "comments", "items": serializer.data, "post": post_id}
         return Response(response)
         
 
