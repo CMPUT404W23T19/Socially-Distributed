@@ -96,7 +96,7 @@ export default function CreatePost() {
             password: "cmput404_team18"
           }
         })
-      } else if (author.host === "https://cmput404-group-project.herokuapp.com") {
+      } else if (author.host === "cmput404-group-project.herokuapp.com") {
         return axios({
           url: `${author.url}inbox/`,
           method: "post",
@@ -180,6 +180,9 @@ export default function CreatePost() {
           "type": "post",
           ...res.data
         }
+        console.log('====================================');
+        console.log("postdata", postData);
+        console.log('====================================');
         if (visibility === 'FRIEND') {
           sendToInbox(followers, postData)
         } else if (visibility === 'PUBLIC') {

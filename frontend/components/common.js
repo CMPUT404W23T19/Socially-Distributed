@@ -14,9 +14,9 @@ export const getTime = (isoString) => {
 
 
 export const getUserIdFromUrl = (url) => {
-  const regex = /\/(\d+)\/?$/
-  const match = url.match(regex)
-  return match ? parseInt(match[1]) : null
+  const uuidPattern = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+  const match = url.match(uuidPattern);
+  return match ? match[0] : null
 }
 
 export const getPostIdFromUrl = (url) => {
