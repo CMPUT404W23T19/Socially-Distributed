@@ -18,7 +18,8 @@ class InboxTestCase(APITestCase):
         self.token=response.data['access']
         self.api_authentication()
         response = self.client.get('/auth/users/me/')  # get id of newly made user
-        self.id = str(response.data['id'])
+        padded_id = str(response.data['id']).zfill(12)
+        self.id = "00000000-0000-0000-0000-"+padded_id
         self.author=self.client.get(reverse('author',kwargs={'author_id':self.id})) # get author
         self.author=self.author.data
         # Logger().info(self.author)
@@ -30,6 +31,7 @@ class InboxTestCase(APITestCase):
         response=self.client.get(reverse('inbox',kwargs={'author_id':self.id}))
         self.assertEqual(response.status_code,status.HTTP_200_OK)
     
+    # send post to inbox
     def test_post_to_inbox(self):
         post_data={'title':'test post','source':'me','origin':'me','description':'this is a test post','content':'this is a test post','contentType':'text/plain','categories':'test','visibility':'PUBLIC','unlisted':False, 'author':json.dumps(self.author)}
         response=self.client.post(reverse('posts', kwargs={'author_id':self.id}),data=post_data)
@@ -37,4 +39,39 @@ class InboxTestCase(APITestCase):
         self.post = response.data['items'][0]
         self.post=dict(self.post)
         response = self.client.post(reverse('inbox', kwargs={'author_id':self.id}), data=self.post, format='json')
+        self.assertEqual(response.status_code,status.HTTP_200_OK)
+
+    # send comment to inbox
+    def test_post_comment_to_inbox(self):
+        post_data={'title':'test post','source':'me','origin':'me','description':'this is a test post','content':'this is a test post','contentType':'text/plain','categories':'test','visibility':'PUBLIC','unlisted':False, 'author':json.dumps(self.author)}
+        response=self.client.post(reverse('posts', kwargs={'author_id':self.id}),data=post_data)
+        response=self.client.get(reverse('posts', kwargs={'author_id':self.id}))
+        self.post = response.data['items'][0]
+        comment_data={'type':'comment','comment':'this is a test comment','contentType':'text/plain','author':self.author,'id':(str(self.post['id'])+'/comments/1')}
+        response=self.client.post(reverse('inbox', kwargs={'author_id':self.id}),data=comment_data, format='json')
+        self.assertEqual(response.status_code,status.HTTP_200_OK)
+
+    # send like to inbox
+    def test_post_like_to_inbox(self):
+        post_data={'title':'test post','source':'me','origin':'me','description':'this is a test post','content':'this is a test post','contentType':'text/plain','categories':'test','visibility':'PUBLIC','unlisted':False, 'author':json.dumps(self.author)}
+        response=self.client.post(reverse('posts', kwargs={'author_id':self.id}),data=post_data)
+        response=self.client.get(reverse('posts', kwargs={'author_id':self.id}))
+        self.post = response.data['items'][0]
+        like_data={'type':'like','author':self.author,'object':str(self.post['id']),'summary':'mario likes this post'}
+        response=self.client.post(reverse('inbox', kwargs={'author_id':self.id}),data=like_data, format='json')
+        self.assertEqual(response.status_code,status.HTTP_200_OK)
+
+    # send friend request to inbox
+    def test_post_friend_request_to_inbox(self):
+        actor = {
+        "type":"author",
+        "id":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+        "url":"http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+        "host":"http://127.0.0.1:5454/",
+        "displayName":"Greg Johnson",
+        "github": "http://github.com/gjohnson",
+        "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+        }
+        friend_request_data={'type':'follow','object':self.author,'actor':actor,'summary':'mario wants to be friends with you'}
+        response=self.client.post(reverse('inbox', kwargs={'author_id':self.id}),data=friend_request_data, format='json')
         self.assertEqual(response.status_code,status.HTTP_200_OK)

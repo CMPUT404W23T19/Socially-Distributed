@@ -17,7 +17,8 @@ class AuthorTestCase(APITestCase):
         self.token=response.data['access']
         self.api_authentication()
         response = self.client.get('/auth/users/me/')  # get id of newly made user
-        self.id = str(response.data['id'])
+        padded_id = str(response.data['id']).zfill(12)
+        self.id = "00000000-0000-0000-0000-"+padded_id
 
     def api_authentication(self):
         self.client.credentials(HTTP_AUTHORIZATION='Token '+self.token)

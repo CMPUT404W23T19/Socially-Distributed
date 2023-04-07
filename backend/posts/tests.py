@@ -18,7 +18,8 @@ class PostTestCase(APITestCase):
         self.token=response.data['access']
         self.api_authentication()
         response = self.client.get('/auth/users/me/')  # get id of newly made user
-        self.id = str(response.data['id'])
+        padded_id = str(response.data['id']).zfill(12)
+        self.id = "00000000-0000-0000-0000-"+padded_id
         self.author=self.client.get(reverse('author',kwargs={'author_id':self.id})) # get author
         self.author=self.author.data
         # Logger().info(self.author)
@@ -50,4 +51,21 @@ class PostTestCase(APITestCase):
         self.post_id = str(response.data['items'][0]['id'])
         response=self.client.delete(self.post_id)
         self.assertEqual(response.status_code,status.HTTP_204_NO_CONTENT)
+    
+    def test_update_post(self):
+        post_data={'title':'test post','source':'me','origin':'me','description':'this is a test post','content':'this is a test post','contentType':'text/plain','categories':'test','visibility':'PUBLIC','unlisted':False, 'author':json.dumps(self.author)}
+        response=self.client.post(reverse('posts', kwargs={'author_id':self.id}),data=post_data)
+        response=self.client.get(reverse('posts', kwargs={'author_id':self.id}))
+        self.post_id = (str(response.data['items'][0]['id'])).split('/')[-1]
+        updated_post_data={'title':'updated test post','source':'me','origin':'me','description':'this is a test post','content':'this is a test post','contentType':'text/plain','categories':'test','visibility':'PUBLIC','unlisted':False, 'author':json.dumps(self.author)}
+        response=self.client.post(reverse('post', kwargs={'author_id':self.id, 'post_id':self.post_id}),data=updated_post_data)
+        self.assertEqual(response.status_code,status.HTTP_200_OK)
+
+    def test_get_post_comments(self):
+        post_data={'title':'test post','source':'me','origin':'me','description':'this is a test post','content':'this is a test post','contentType':'text/plain','categories':'test','visibility':'PUBLIC','unlisted':False, 'author':json.dumps(self.author)}
+        response=self.client.post(reverse('posts', kwargs={'author_id':self.id}),data=post_data)
+        response=self.client.get(reverse('posts', kwargs={'author_id':self.id}))
+        self.post_id = (str(response.data['items'][0]['id'])).split('/')[-1]
+        response=self.client.get(reverse('comments', kwargs={'author_id':self.id, 'post_id':self.post_id}))
+        self.assertEqual(response.status_code,status.HTTP_200_OK)
 
