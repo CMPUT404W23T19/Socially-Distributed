@@ -15,12 +15,12 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # Create your views here.
 
-HOST='https://floating-fjord-51978.herokuapp.com/authors/'
+HOST='http://localhost:8000/authors/'
 
 class AuthorListCreateView(ListCreateAPIView):
     queryset=Author.objects.all()
     serializer_class=AuthorSerializer
-    permission_classes=[IsAuthenticated]
+    #permission_classes=[IsAuthenticated]
 
     def get_authenticators(self):
         if self.request.method == 'GET':
@@ -60,7 +60,7 @@ class AuthorDetailView(APIView):
 
     queryset=Author.objects.all()
     serializer_class=AuthorSerializer
-    permission_classes=[IsAuthenticated]
+    #permission_classes=[IsAuthenticated]
 
     def get_authenticators(self):
         if self.request.method == 'GET':
@@ -104,7 +104,7 @@ class FollowerList(ListAPIView):
     """
 
     serializer_class=AuthorSerializer
-    permission_classes=[IsAuthenticated]
+    #permission_classes=[IsAuthenticated]
     authentication_classes = [BasicAuthentication]
 
     def get_queryset(self):
@@ -128,7 +128,7 @@ class FollowerDetailView(RetrieveUpdateDestroyAPIView):
 
     queryset=Author.objects.all()
     serializer_class=AuthorSerializer
-    permission_classes=[IsAuthenticated]
+    #permission_classes=[IsAuthenticated]
     
     def get_authenticators(self):
         if self.request.method == 'GET':

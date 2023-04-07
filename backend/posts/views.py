@@ -18,7 +18,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # Create your views here.
 
-HOST = 'https://floating-fjord-51978.herokuapp.com/authors/'
+HOST = 'http://localhost:8000/authors/'
 
 class PostList(ListCreateAPIView):
     """
@@ -27,7 +27,7 @@ class PostList(ListCreateAPIView):
     """
     
     serializer_class=PostSerializer
-    permission_classes=[IsAuthenticated] 
+    #permission_classes=[IsAuthenticated] 
 
     def get_authenticators(self):
         if self.request.method == 'GET':
@@ -84,7 +84,7 @@ class PostDetailView(APIView):
     DELETE: Delete a single post of the currently authenticated user.
     """
 
-    permission_classes=[IsAuthenticated]
+    #permission_classes=[IsAuthenticated]
 
     def get_authenticators(self):
         if self.request.method == 'GET':
@@ -139,7 +139,7 @@ class PostDetailView(APIView):
     
 class GetImageView(APIView):
 
-    permission_classes=[IsAuthenticated]
+    #permission_classes=[IsAuthenticated]
     authentication_classes = [BasicAuthentication]
 
     def get(self, request, *args, **kwargs):
@@ -156,7 +156,7 @@ class GetImageView(APIView):
 
 class PostLikes(APIView):
     
-    permission_classes=[IsAuthenticated]
+    #permission_classes=[IsAuthenticated]
     authentication_classes = [BasicAuthentication]
 
     def get(self, request, *args, **kwargs):
@@ -171,7 +171,7 @@ class PostLikes(APIView):
     
 class CommentLikes(APIView):
 
-    permission_classes=[IsAuthenticated]
+    #permission_classes=[IsAuthenticated]
     authentication_classes = [BasicAuthentication]
 
     def get(self, request, *args, **kwargs):
@@ -186,7 +186,7 @@ class CommentLikes(APIView):
     
 class AuthorLiked(APIView):
 
-    permission_classes=[IsAuthenticated]
+    #permission_classes=[IsAuthenticated]
     authentication_classes = [BasicAuthentication]
 
     def get(self, request, *args, **kwargs):
@@ -205,7 +205,7 @@ class CommentsView(ListCreateAPIView):
     POST: Create a comment on a post of the currently authenticated user.
     """
 
-    permission_classes=[IsAuthenticated]
+    #permission_classes=[IsAuthenticated]
 
     paginate_by = 5
 

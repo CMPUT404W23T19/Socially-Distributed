@@ -36,8 +36,8 @@ ALLOWED_HOSTS = ['*']
 
 from django.core.management.commands.runserver import Command as runserver
 
-runserver.default_port = os.environ.get('PORT') 
-runserver.default_addr = '0.0.0.0'
+# runserver.default_port = os.environ.get('PORT') 
+# runserver.default_addr = '0.0.0.0'
 
 # add your new traefik or URL host here
 CORS_ORIGIN_WHITELIST = [
@@ -55,11 +55,8 @@ CORS_ORIGIN_WHITELIST = [
 
 # get db from the other docker container running psql
 DATABASES = {
-    "default": config("HEROKU_POSTGRESQL_YELLOW_URL", cast=db_url),
+    "default": config("DATABASE_URL", cast=db_url),
 }
-
-
-
 
 SERVER_EMAIL = "hello@example.com"
 

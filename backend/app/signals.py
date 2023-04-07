@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from .models import Author
 from inbox.models import Inbox
 
-HOST = "https://floating-fjord-51978.herokuapp.com"
+HOST = 'http://localhost:8000'
 
 @receiver(post_save, sender=User)
 def create_author(sender, instance, created, **kwargs):

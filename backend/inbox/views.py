@@ -18,11 +18,11 @@ from datetime import datetime
 
 ### NEED TO ADD ERROR HANDLING FOR WHEN AUTHOR DOES NOT EXIST. FOR ALL VIEWS ###
 
-HOST = 'https://floating-fjord-51978.herokuapp.com/authors/'
+HOST = 'http://localhost:8000/authors/'
 
 class InboxView(APIView):
 
-    permission_classes=[IsAuthenticated]
+    #permission_classes=[IsAuthenticated]
 
     def get_authenticators(self):
         if self.request.method == 'POST':

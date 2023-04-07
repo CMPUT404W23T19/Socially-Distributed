@@ -7,12 +7,10 @@ ENV PYTHONUNBUFFERED 1
 # Create app directory
 WORKDIR /src
 
-COPY requirements.txt /src
+COPY backend/requirements.txt /src
 
 RUN pip3 install -r requirements.txt
 
-COPY . /src
+COPY ./backend /src
 
-CMD ["python", "manage.py", "runserver"]
-
-EXPOSE 80
+EXPOSE 8000
