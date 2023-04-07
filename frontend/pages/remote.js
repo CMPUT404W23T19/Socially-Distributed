@@ -20,7 +20,7 @@ function Posts() {
   const [authorComment, setComments] = useState('')
   const [clickedPostId, setClickedPostId] = useState('')
   const foreign_host1 = "https://distributed-social-net.herokuapp.com"
-  const foreign_host2 = "https://cmput404-group-project.herokuapp.com/"
+  const foreign_host2 = "https://cmput404-group-project.herokuapp.com"
 
   useEffect(() => {
     async function fetchPosts() {
@@ -38,7 +38,7 @@ function Posts() {
       if (response.status >= 200 && response.status < 300) {
         let users = response.data.items;
         users = users.filter(author => author.host.includes("https://distributed-social-net.herokuapp.com/service/authors/"))
-        const posts = await Promise.all(
+        const posts_ = await Promise.all(
           users.map(async (user) => {
             const response = await axios({
               url: `${user.id}/posts`,
@@ -51,15 +51,19 @@ function Posts() {
             if (response.status >= 200 && response.status < 300) {
               let posts = response.data.items
               posts = posts.filter(post => post.visibility === "PUBLIC")
+              if (posts >= 50) {
+                posts = posts.slice(0,50)
+              }
               return posts.map((post) => ({ ...post, user }));
             } else {
               console.log('====================================');
-              console.log("fail to fetch posts", response);
+              console.log("fail to fetch posts from group 18", response);
               console.log('====================================');
             }
           })
         );
-        const postsWithLikes = await Promise.all(posts.flat().map(async (post) => {
+        
+        let postsWithLikes = await Promise.all(posts_.flat().map(async (post) => {
           const likesResponse = await axios({
             url: `${post.id}/likes`,
             method: 'get',
@@ -69,17 +73,62 @@ function Posts() {
             }
           });
           const likesData = likesResponse.data ? likesResponse.data.items : []
-          setIsLoading(false)
           return { ...post, likelength: likesData.length };
         }));
-
-        setPosts(postsWithLikes);
+        const response2 = await axios({
+          url:`${foreign_host2}/service/authors/`,
+          method:'get',
+          auth: {
+            username:'remote',
+            password:'remote'
+          }
+        })
+        if (response2.status >= 200 && response2.status < 300) {
+          let users = response2.data.items
+          users = users.filter(author => author.host.includes("cmput404-group-project.herokuapp.com"))
+          const posts_ = await Promise.all(
+            users.map(async (user) => {
+              const response = await axios({
+                url: `${user.id}posts/`,
+                method: 'get',
+                auth: {
+                  username: 'remote',
+                  password: 'remote'
+                }
+              });
+              if (response.status >= 200 && response.status < 300) {
+                let posts = response.data
+                posts = posts.filter(post => post.visibility === "PUBLIC")
+                if (posts.length >= 50) {
+                  posts = posts.slice(0,50)
+                }
+                return posts.map((post) => ({ ...post, user }));
+              } else {
+                console.log("fail to fetch posts from group 22", response);
+              }
+            })
+          );
+          let postsWithLikes2 = await Promise.all(posts_.flat().map(async (post) => {
+            const likesResponse = await axios({
+              url: `${post.id}likes/`,
+              method: 'get',
+              auth: {
+                username: 'remote',
+                password: 'remote'
+              }
+            });
+            const likesLength = likesResponse.data ? likesResponse.data.count : []
+            setIsLoading(false)
+            return { ...post, likelength: likesLength };
+          }));
+          postsWithLikes.push(...postsWithLikes2)
+          setPosts(postsWithLikes);
+        }
+        // setPosts(currentposts);
         // setPosts(posts.flat());
 
       } else {
-        console.log('====================================');
-        console.log("fail to fetch authors", response);
-        console.log('====================================');
+        console.log("fail to fetch authors from group 22", response);
       }
     }
     fetchPosts();

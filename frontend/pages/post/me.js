@@ -38,10 +38,8 @@ export default function Public() {
             const promises = posts.map(post => {
               return reqGetComments(getUserIdFromUrl(post.author.id), getPostIdFromUrl(post.id))
             })
-            console.log('here');
             Promise.all(promises)
               .then(res => {
-                console.log(222);
                 let comments = res.flatMap(res => res.data.items);
                 comments.sort((a, b) => {
                   return new Date(b.published) - new Date(a.published)
@@ -225,7 +223,7 @@ export default function Public() {
               <p>{post.contentType === "text/plain" ? post.content : <Markdown>{post.content}</Markdown>}</p>
             }
             {post.categories !== "" && <div className='flex flex-row my-2'>
-                {JSON.parse(post.categories.replace(/'/g, "\"")).map(category => (<span className='mr-2 text-xs bg-gray-100 rounded-lg px-3'>{category}</span>))}
+                {JSON.parse(post.categories.replace(/'/g, "\"")).map(category => (<span key={category} className='mr-2 text-xs bg-gray-100 rounded-lg px-3'>{category}</span>))}
               </div>}
             <div className='flex flex-row justify-between items-center mb-2'>
 

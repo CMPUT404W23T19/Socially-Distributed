@@ -14,7 +14,7 @@ export const setAccessToken = (token) => {
 }
 
 export const getCookieUserId = () => {
-  return cookie.load('userId')
+  return "00000000-0000-0000-0000-" + cookie.load('userId').padStart(12, '0')
 }
 
 export const setCookieUserId = (id) => {
